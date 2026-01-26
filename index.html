@@ -1109,20 +1109,7 @@
                 }
             });
             
-            // Add Collection Badges (based on how many NFT badges earned)
-            const earnedCollectionBadges = [];
-            const missingCollectionBadges = [];
-            COLLECTION_BADGE_THRESHOLDS.forEach(threshold => {
-                const badgeName = `collection_${threshold}`;
-                if (nftBadgeCount >= threshold) {
-                    walletBadges[badgeName] = ['meta'];
-                    earnedCollectionBadges.push(badgeName);
-                } else {
-                    missingCollectionBadges.push(badgeName);
-                }
-            });
-            
-            // Add VIBESTR Tier Badges (based on token holdings)
+            // Add VIBESTR Tier Badges (based on token holdings) - BEFORE collection badges
             const earnedVibestrBadges = [];
             const missingVibestrBadges = [];
             VIBESTR_TIERS.forEach(tier => {
@@ -1131,6 +1118,22 @@
                     earnedVibestrBadges.push(tier.name);
                 } else {
                     missingVibestrBadges.push(tier.name);
+                }
+            });
+            
+            // Count total badges BEFORE collection badges (NFT + combo + VIBESTR)
+            const badgeCountForCollection = Object.keys(walletBadges).length;
+            
+            // Add Collection Badges (based on total badges earned: NFT + combo + VIBESTR)
+            const earnedCollectionBadges = [];
+            const missingCollectionBadges = [];
+            COLLECTION_BADGE_THRESHOLDS.forEach(threshold => {
+                const badgeName = `collection_${threshold}`;
+                if (badgeCountForCollection >= threshold) {
+                    walletBadges[badgeName] = ['meta'];
+                    earnedCollectionBadges.push(badgeName);
+                } else {
+                    missingCollectionBadges.push(badgeName);
                 }
             });
             
