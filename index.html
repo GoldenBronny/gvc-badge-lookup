@@ -1005,28 +1005,57 @@
             const VIBESTR_CONTRACT = '0xd0cc2b0efb168bfe1f94a948d8df70fa10257196';
             let totalBalance = 0;
             
+            // ERC20 balanceOf function signature: balanceOf(address) = 0x70a08231
+            const balanceOfSelector = '0x70a08231';
+            
             for (const address of addresses) {
                 try {
-                    // Use Alchemy for token balance
-                    const url = 'https://eth-mainnet.g.alchemy.com/v2/demo';
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            method: 'alchemy_getTokenBalances',
-                            params: [address, [VIBESTR_CONTRACT]],
-                            id: 1
-                        })
-                    });
-                    const data = await response.json();
+                    // Pad address to 32 bytes (remove 0x, pad to 64 chars)
+                    const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
+                    const data = balanceOfSelector + paddedAddress;
                     
-                    if (data.result && data.result.tokenBalances && data.result.tokenBalances[0]) {
-                        const hexBalance = data.result.tokenBalances[0].tokenBalance;
-                        // VIBESTR has 18 decimals
-                        const balance = parseInt(hexBalance, 16) / 1e18;
-                        totalBalance += balance;
-                        console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
+                    // Try multiple public RPCs for reliability
+                    const rpcUrls = [
+                        'https://eth.llamarpc.com',
+                        'https://rpc.ankr.com/eth',
+                        'https://cloudflare-eth.com',
+                        'https://eth-mainnet.public.blastapi.io'
+                    ];
+                    
+                    let success = false;
+                    for (const rpcUrl of rpcUrls) {
+                        if (success) break;
+                        try {
+                            const response = await fetch(rpcUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    jsonrpc: '2.0',
+                                    method: 'eth_call',
+                                    params: [{
+                                        to: VIBESTR_CONTRACT,
+                                        data: data
+                                    }, 'latest'],
+                                    id: 1
+                                })
+                            });
+                            const result = await response.json();
+                            
+                            if (result.result && result.result !== '0x') {
+                                // Parse the hex balance (18 decimals)
+                                const hexBalance = result.result;
+                                const balance = parseInt(hexBalance, 16) / 1e18;
+                                totalBalance += balance;
+                                console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
+                                success = true;
+                            }
+                        } catch (e) {
+                            console.log(`RPC ${rpcUrl} failed, trying next...`);
+                        }
+                    }
+                    
+                    if (!success) {
+                        console.log(`Could not fetch VIBESTR balance for ${address}`);
                     }
                 } catch (e) {
                     console.log('VIBESTR balance fetch failed:', e);
