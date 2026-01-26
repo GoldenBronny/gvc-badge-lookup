@@ -1575,6 +1575,18 @@
                                 extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
                             }
                         }
+                        
+                        // Show missing for Elite Rainbow Ranger
+                        if (badge === 'elite_rainbow_ranger') {
+                            const hasRainbow = ownedTypesGlobal.some(t => t === 'Rainbow');
+                            const hasPlasticArmorHelmet = walletNFTs.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)));
+                            let missing = [];
+                            if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow Type</a>`);
+                            if (!hasPlasticArmorHelmet) missing.push(`<a href="https://opensea.io/collection/good-vibes-club?search[stringTraits][0][name]=Body&search[stringTraits][0][values][0]=Plastic%20Armor%20Black" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Armor/Helmet</a>`);
+                            if (missing.length > 0) {
+                                extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
+                            }
+                        }
                     } else {
                         requirement = comboInfo.requirement;
                     }
