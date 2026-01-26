@@ -643,7 +643,7 @@
             'varsity_vibes': 'Varsity Vibes',
             'vibefoot_fan_club': 'Vibetoot Fan Club',
             'vibetown_social_club': 'Vibetown Social Club',
-            'visooor_enjoyooor': 'Visooor Enjoyooor',
+            'visooor_enjoyooor': 'Hue Got This',
             'zoom_in_vibe_out': 'Zoom In, Vibe Out',
             // Combo badges
             'gradient_hatrick': 'Gradient Hatrick',
@@ -829,7 +829,14 @@
             'surfer': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Surfer+Purple%22,%22Surfer+Red%22]}]',
             'sweettooth': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Beard+Sweettooth%22]}]',
             'toy_bricks': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Toy+Bricks%22]}]',
-            'vibefoot_fan_club': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22TShirt+Vibefoot+Fan+Club%22]}]'
+            'vibefoot_fan_club': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22TShirt+Vibefoot+Fan+Club%22]}]',
+            'vibetown_social_club': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Retro+Windbreaker+Pink%22,%22Hooded+Jacket+Pink%22,%22Hoodie+White%22,%22Overalls+Shirt+Pink+Purple%22]}]',
+            'visooor_enjoyooor': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Rainbow+Visor%22]}]',
+            'showtime': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Gold+Chains+Tattoos%22,%22Hoodie+Up+Gold%22,%22Plastic+Armor+Gold%22,%22Overalls+Gold%22,%22Puffy+Vest+Gold%22,%22Leather+Jacket+Gold%22,%22Fur+Jacket+Gold%22,%22Driving+Jacket+Gold%22,%22Hoodie+Gold%22,%22Suit+Gold%22,%22Puffy+Jacket+Gold%22,%22Turtleneck+Gold%22,%22Retro+Windbreaker+Gold%22,%22Tank+Top+Gold%22,%22Hooded+Jacket+Gold%22,%22Turtleneck+Red+Gold%22,%22Letterman+Jacket+Gold+Chrome%22]}]',
+            'sir_vibes_a_lot': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Knight+Helm+Red%22,%22Knight+Helm+White%22,%22Knight+Helm+Black%22]}]',
+            'tanks_a_lot': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Diver+Mask+Black+Chrome%22]}]',
+            'varsity_vibes': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Letterman+Jacket+Light+Blue%22,%22Letterman+Jacket+Gold+Chrome%22,%22Letterman+Jacket+Dark+Blue%22,%22Letterman+Jacket+Cosmic%22,%22Letterman+Jacket+Lime%22,%22Letterman+Jacket+Yellow%22,%22Letterman+Jacket+Glass%22,%22Letterman+Jacket+Mint%22,%22Letterman+Jacket+Pink%22,%22Letterman+Jacket+Purple%22,%22Letterman+Jacket+Red%22,%22Letterman+Jacket+Black%22]}]',
+            'zoom_in_vibe_out': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Monocle%22]}]'
         };
         
         function getBadgeOpenSeaLink(badge) {
@@ -1739,6 +1746,12 @@
                 // We'll add the links after the title instead
                 const rangerLinks = `<a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Plastic+Helmet+White%22,%22Plastic+Helmet+Yellow%22,%22Plastic+Helmet+Glass%22,%22Plastic+Helmet+Light+Blue%22,%22Plastic+Helmet+Pink%22,%22Plastic+Helmet+Purple%22,%22Plastic+Helmet+Black%22,%22Plastic+Helmet+Blue%22,%22Plastic+Helmet+Gold%22,%22Plastic+Helmet+Mint%22,%22Plastic+Helmet+Lime%22,%22Plastic+Helmet+Red%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Plastic Helmet →</a> <a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Plastic+Armor+Light+Blue%22,%22Plastic+Armor+Yellow%22,%22Plastic+Armor+Blue%22,%22Plastic+Armor+Lime%22,%22Plastic+Armor+Glass%22,%22Plastic+Armor+Mint%22,%22Plastic+Armor+Red%22,%22Plastic+Armor+Pink%22,%22Plastic+Armor+Gold%22,%22Plastic+Armor+Purple%22,%22Plastic+Armor+Black%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Plastic Armor →</a>`;
                 title.innerHTML = formatBadgeName(badge) + rangerLinks;
+            } else if (badge === 'super_rare') {
+                // Special case: super_rare has two link options
+                openSeaLink.href = '#';
+                openSeaLink.style.display = 'none';
+                const superRareLinks = `<a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Ballcap+Forward+Black+SuperRare%22,%22Bucket+Hat+Black+SuperRare%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Hair →</a> <a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Hoodie+Black+SuperRare%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Body →</a>`;
+                title.innerHTML = formatBadgeName(badge) + superRareLinks;
             } else if (badgeLink) {
                 title.textContent = formatBadgeName(badge);
                 openSeaLink.href = badgeLink;
