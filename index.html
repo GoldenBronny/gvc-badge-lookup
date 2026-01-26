@@ -1081,10 +1081,11 @@
         };
         
         // OpenSea search URLs for each type color
-        const OPENSEA_SEARCH_BASE = 'https://opensea.io/collection/good-vibes-club?search[stringTraits][0][name]=Type&search[stringTraits][0][values][0]=';
+        const OPENSEA_SEARCH_BASE = 'https://opensea.io/collection/good-vibes-club?traits=';
         
         function getOpenSeaLink(typeColor) {
-            return OPENSEA_SEARCH_BASE + encodeURIComponent(typeColor);
+            const traitParam = JSON.stringify([{"traitType": "Type", "values": [typeColor]}]);
+            return OPENSEA_SEARCH_BASE + encodeURIComponent(traitParam);
         }
         
         // Get missing colors for a type prefix
