@@ -26,15 +26,53 @@
         
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-dark);
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0f1020 100%);
             color: var(--text-primary);
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Floating NFT decorations */
+        .floating-nft {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            border-radius: 16px;
+            opacity: 0.6;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 0;
+            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        .floating-nft:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        
+        .floating-nft img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+        
+        .nft-left-1 { top: 15%; left: 2%; transform: rotate(-8deg); }
+        .nft-left-2 { top: 55%; left: 3%; transform: rotate(5deg); }
+        .nft-right-1 { top: 20%; right: 2%; transform: rotate(8deg); }
+        .nft-right-2 { top: 60%; right: 3%; transform: rotate(-5deg); }
+        
+        @media (max-width: 1400px) {
+            .floating-nft { display: none; }
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 24px;
+            position: relative;
+            z-index: 1;
         }
         
         /* Header */
@@ -461,7 +499,7 @@
         /* Footer */
         .footer {
             text-align: center;
-            padding: 48px 0;
+            padding: 48px 0 24px;
             color: var(--text-secondary);
             font-size: 13px;
         }
@@ -469,6 +507,32 @@
         .footer a {
             color: var(--accent-cyan);
             text-decoration: none;
+        }
+        
+        .footer-credit {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .footer-credit a {
+            color: var(--accent-purple);
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        
+        .footer-credit a:hover {
+            color: var(--accent-cyan);
+        }
+        
+        .footer-credit .x-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
         }
         
         /* Responsive */
@@ -548,7 +612,28 @@
         
         <footer class="footer">
             <p>Built for the <a href="https://opensea.io/collection/good-vibes-club" target="_blank">Good Vibes Club</a> community 🤙</p>
+            <div class="footer-credit">
+                <span>Vibe Coded by</span>
+                <a href="https://x.com/GoldenBronny" target="_blank">
+                    <svg class="x-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    GoldenBronny
+                </a>
+            </div>
         </footer>
+    </div>
+    
+    <!-- Floating NFT Decorations -->
+    <div class="floating-nft nft-left-1">
+        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/143349dabbea4adb108d88ea458ae4/b8143349dabbea4adb108d88ea458ae4.jpeg" alt="GVC #4182">
+    </div>
+    <div class="floating-nft nft-left-2">
+        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/bbf83d63359c01c672a3ff7ee5b9d6/b1bbf83d63359c01c672a3ff7ee5b9d6.jpeg" alt="GVC #3128">
+    </div>
+    <div class="floating-nft nft-right-1">
+        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/7e5cce86e8d33f0ed69a1e115446d3/5c7e5cce86e8d33f0ed69a1e115446d3.jpeg" alt="GVC #5313">
+    </div>
+    <div class="floating-nft nft-right-2">
+        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/f0571694cd42aa1b0568b042c1df21/64f0571694cd42aa1b0568b042c1df21.jpeg" alt="GVC #4194">
     </div>
     
     <!-- NFT Preview Modal -->
