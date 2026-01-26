@@ -656,7 +656,6 @@
             'multi_type_master': 'Multi-Type Master',
             'yin_n_yang': "Yin N' Yang",
             'mountain_goat': 'Mountain GOAT',
-            'rainbow_warrior': 'Rainbow Warrior',
             // Special badges
             'vibe_bounty_hunter': 'VIBE Bounty Hunter'
         };
@@ -674,7 +673,6 @@
             'gold_member': '#ffd700',
             'great_stacheby': '#ff9500',
             'doge': '#ffd700',
-            'great_stacheby': '#ffd700',
             'showtime': '#ffa500',
             // Grayscale
             'grayscale_seeker': '#888888',
@@ -762,7 +760,6 @@
             'multi_type_master': 'linear-gradient(90deg, #ff69b4, #4ecdc4, #00ffff)',
             'yin_n_yang': 'linear-gradient(90deg, #888888, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff)',
             'mountain_goat': '#87CEEB',
-            'rainbow_warrior': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             // Special badges
             'vibe_bounty_hunter': '#a855f7'
         };
@@ -1178,7 +1175,7 @@
                 progress: (types, tokenIds) => ({ current: countMountainGoatTraits(tokenIds), needed: 2 })
             },
             { 
-                name: 'rainbow_warrior', 
+                name: 'elite_rainbow_ranger', 
                 requirement: 'Rainbow Type + Plastic Armor/Helmet', 
                 check: (types, tokenIds) => hasRainbowWarrior(types, tokenIds),
                 progress: (types, tokenIds) => getRainbowWarriorProgress(types, tokenIds)
@@ -1290,7 +1287,7 @@
         }
         
         // Total badge count constant (for completion calculation)
-        const TOTAL_BADGES = 90;
+        const TOTAL_BADGES = 89;
         
         function processResults(tokenIds, vibestrBalance = 0) {
             // Get badges for these tokens
