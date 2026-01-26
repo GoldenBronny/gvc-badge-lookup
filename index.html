@@ -1070,6 +1070,27 @@
             { name: 'vibestr_cosmic', threshold: 10000000, color: 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)' }
         ];
         
+        // Type colors for High Five badges - the 5 (or 6) colors needed for each type
+        const TYPE_COLORS = {
+            'Gradient': ['Gradient Yellow Orange', 'Gradient Yellow Yellow', 'Gradient Pink Pink', 'Gradient Pink Magenta Red', 'Gradient Magenta Purple Blue', 'Gradient Cyan Blue Purple', 'Gradient Dark Blue Light Blue', 'Gradient Blue Purple Pink', 'Gradient Lime Yellow', 'Gradient Lime Seafoam', 'Gradient Red Purple'],
+            'Plastic': ['Plastic Pink', 'Plastic Mint', 'Plastic Red', 'Plastic Yellow', 'Plastic Blue', 'Plastic Purple'],
+            'Robot': ['Robot Red Candy Apple', 'Robot Lilac', 'Robot Ice', 'Robot Cobalt', 'Robot Pink']
+        };
+        
+        // OpenSea search URLs for each type color
+        const OPENSEA_SEARCH_BASE = 'https://opensea.io/collection/good-vibes-club?search[stringTraits][0][name]=Type&search[stringTraits][0][values][0]=';
+        
+        function getOpenSeaLink(typeColor) {
+            return OPENSEA_SEARCH_BASE + encodeURIComponent(typeColor);
+        }
+        
+        // Get missing colors for a type prefix
+        function getMissingColors(ownedTypes, typePrefix) {
+            const allColors = TYPE_COLORS[typePrefix] || [];
+            const ownedColors = [...new Set(ownedTypes.filter(t => t && t.startsWith(typePrefix)))];
+            return allColors.filter(color => !ownedColors.includes(color));
+        }
+        
         // Combo badges - based on owning NFTs with specific type combinations
         const COMBO_BADGES = [
             { 
@@ -1491,6 +1512,44 @@
                                 <div class="combo-progress-fill" style="width: ${pct}%"></div>
                             </div>
                         `;
+                        
+                        // Show missing colors for High Five and Hatrick badges
+                        if (badge.includes('high_five') || badge.includes('hatrick')) {
+                            let typePrefix = '';
+                            if (badge.startsWith('gradient')) typePrefix = 'Gradient';
+                            else if (badge.startsWith('plastic')) typePrefix = 'Plastic';
+                            else if (badge.startsWith('robot')) typePrefix = 'Robot';
+                            
+                            if (typePrefix) {
+                                const ownedTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+                                const missingColors = getMissingColors(ownedTypes, typePrefix);
+                                
+                                if (missingColors.length > 0 && missingColors.length <= 5) {
+                                    const colorLinks = missingColors.map(color => 
+                                        `<a href="${getOpenSeaLink(color)}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">${color.replace(typePrefix + ' ', '')}</a>`
+                                    ).join(', ');
+                                    extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${colorLinks}</div>`;
+                                }
+                            }
+                        }
+                        
+                        // Show missing for Chris' Favorite (Grayscale)
+                        if (badge === 'chris_favorite' && progress.current === 1) {
+                            extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Need 1 more: <a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a></div>`;
+                        }
+                        
+                        // Show missing for Yin N' Yang
+                        if (badge === 'yin_n_yang') {
+                            const ownedTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+                            const hasGrayscale = ownedTypes.some(t => t === 'Grayscale');
+                            const hasRainbow = ownedTypes.some(t => t === 'Rainbow');
+                            let missing = [];
+                            if (!hasGrayscale) missing.push(`<a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a>`);
+                            if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow</a>`);
+                            if (missing.length > 0) {
+                                extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
+                            }
+                        }
                     } else {
                         requirement = comboInfo.requirement;
                     }
