@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GVC Badge Lookup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-hover: #1a1a25;
+            --border: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #888899;
+            --accent-cyan: #00d4ff;
+            --accent-green: #00ff88;
+            --accent-pink: #ff44aa;
+            --accent-purple: #a855f7;
+            --accent-orange: #ff9500;
+            --accent-gold: #ffd700;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 48px 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Search Section */
+        .search-section {
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .search-box button {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+        }
+        
+        .search-hint {
+            text-align: center;
+            margin-top: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        /* Results Section */
+        .results {
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .stat-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .stat-card.cyan .value { color: var(--accent-cyan); }
+        .stat-card.green .value { color: var(--accent-green); }
+        .stat-card.pink .value { color: var(--accent-pink); }
+        .stat-card.gold .value { color: var(--accent-gold); }
+        
+        /* Completion Bar */
+        .completion-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .completion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .completion-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .completion-header span {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Badge Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            background: var(--bg-hover);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        
+        .tab.missing {
+            border-color: var(--accent-pink);
+        }
+        
+        .tab.missing.active {
+            color: var(--accent-pink);
+            border-color: var(--accent-pink);
+        }
+        
+        /* Badge Grid */
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        
+        .badge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .badge-item:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(4px);
+        }
+        
+        .badge-item.missing {
+            opacity: 0.7;
+        }
+        
+        .badge-item.missing:hover {
+            border-color: var(--accent-pink);
+        }
+        
+        .badge-name {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .badge-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .badge-item.missing .badge-count {
+            color: var(--accent-pink);
+        }
+        
+        /* NFT Preview Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h2 {
+            font-size: 18px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .nft-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .nft-card:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-cyan);
+        }
+        
+        .nft-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .nft-card .nft-id {
+            padding: 8px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-secondary);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Error State */
+        .error {
+            text-align: center;
+            padding: 48px;
+            color: var(--accent-pink);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 48px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8rem; }
+            .search-box { flex-direction: column; }
+            .search-box button { width: 100%; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🤙 GVC Badge Lookup</h1>
+            <p>Check your badge collection and find what you're missing</p>
+        </header>
+        
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="walletInput" placeholder="Enter wallet address, ENS, or token IDs...">
+                <button onclick="lookupWallet()">Look Up</button>
+            </div>
+            <p class="search-hint">Try: 0x... address, name.eth, or comma-separated IDs like 1, 42, 100</p>
+        </section>
+        
+        <section class="results" id="results">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Looking up badges...</p>
+            </div>
+            
+            <div class="error" id="error" style="display: none;">
+                <p>Could not find NFTs for this wallet. Try entering token IDs directly.</p>
+            </div>
+            
+            <div id="resultsContent" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card cyan">
+                        <div class="value" id="nftCount">0</div>
+                        <div class="label">GVC NFTs</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="value" id="ownedBadges">0</div>
+                        <div class="label">Badges Owned</div>
+                    </div>
+                    <div class="stat-card pink">
+                        <div class="value" id="missingBadges">0</div>
+                        <div class="label">Missing</div>
+                    </div>
+                    <div class="stat-card gold">
+                        <div class="value" id="rarestBadge" style="font-size: 1rem;">-</div>
+                        <div class="label">Rarest Badge</div>
+                    </div>
+                </div>
+                
+                <div class="completion-section">
+                    <div class="completion-header">
+                        <h3>Badge Completion</h3>
+                        <span id="completionPct">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('owned')">Owned (<span id="ownedTabCount">0</span>)</button>
+                    <button class="tab missing" onclick="showTab('missing')">Missing (<span id="missingTabCount">0</span>)</button>
+                </div>
+                
+                <div class="badge-grid" id="ownedGrid"></div>
+                <div class="badge-grid" id="missingGrid" style="display: none;"></div>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>Built for the <a href="https://opensea.io/collection/good-vibes-club" target="_blank">Good Vibes Club</a> community 🤙</p>
+        </footer>
+    </div>
+    
+    <!-- NFT Preview Modal -->
+    <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle">Badge Name</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="nft-grid" id="modalNFTs"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Badge data will be loaded from GVC's API
+        let badgeData = {};
+        let nftData = {};
+        let imageData = {};
+        let walletNFTs = [];
+        let walletBadges = {};
+        let missingBadgesList = [];
+        
+        // Badge colors for display
+        const BADGE_COLORS = {
+            'rainbow_citizen': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'rainbow_visor': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'rainbow_bubble_goggles': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'elite_rainbow_ranger': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'gold_member': '#ffd700',
+            'grayscale_seeker': '#888888',
+            'one_of_one': '#ff00ff',
+            'super_rare': '#ff4500',
+            'cosmic': '#9933ff',
+            'robot_lover': '#00ffff',
+            'plastic_lover': '#ff69b4',
+            'gradient_lover': 'linear-gradient(90deg, #ff6b6b, #4ecdc4)',
+            'any_gvc': '#00d4ff',
+            'ranger': '#228b22',
+            'pothead': '#32cd32',
+            'doge': '#c4a000',
+            'pepe': '#00aa00',
+            'gamer': '#9400d3',
+            'checkmate': '#000000',
+            'poker_face': '#006400',
+            'captain': '#000080',
+            'suited_up': '#1a1a2e',
+            'ladies_night': '#ff1493',
+            'party_in_the_back': '#8b4513',
+            'funky_fresh': '#ff6347',
+            'showtime': '#ffa500',
+            'homerun': '#dc143c'
+        };
+        
+        function getBadgeColor(badge) {
+            return BADGE_COLORS[badge] || '#00d4ff';
+        }
+        
+        function formatBadgeName(badge) {
+            return badge.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+        
+        // Load badge data from GVC API
+        async function loadBadgeData() {
+            try {
+                const response = await fetch('https://www.goodvibesclub.io/assets/badge_token_map.json');
+                const data = await response.json();
+                
+                console.log('Raw badge data:', data);
+                
+                // Badge data is in badgeToTokens property
+                if (data.badgeToTokens) {
+                    badgeData = data.badgeToTokens;
+                } else {
+                    badgeData = data;
+                }
+                
+                // Also store tokenToBadges for faster lookup
+                if (data.tokenToBadges) {
+                    window.tokenToBadges = data.tokenToBadges;
+                }
+                
+                console.log(`Loaded ${Object.keys(badgeData).length} badge types`);
+            } catch (error) {
+                console.error('Failed to load badge data:', error);
+            }
+        }
+        
+        // Load image URLs
+        async function loadImageData() {
+            try {
+                const response = await fetch('gvc-images.json');
+                imageData = await response.json();
+                console.log(`Loaded ${Object.keys(imageData).length} image URLs`);
+            } catch (error) {
+                console.error('Failed to load image data:', error);
+            }
+        }
+        
+        // Initialize on page load
+        loadBadgeData();
+        loadImageData();
+        
+        async function lookupWallet() {
+            const input = document.getElementById('walletInput').value.trim();
+            if (!input) return;
+            
+            const results = document.getElementById('results');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const content = document.getElementById('resultsContent');
+            
+            results.classList.add('active');
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.style.display = 'none';
+            
+            try {
+                let tokenIds = [];
+                
+                // Check if input is token IDs
+                if (/^[\d,\s]+$/.test(input)) {
+                    tokenIds = input.split(',').map(id => id.trim()).filter(id => id);
+                } else {
+                    // Try to resolve wallet/ENS
+                    tokenIds = await fetchWalletNFTs(input);
+                }
+                
+                if (tokenIds.length === 0) {
+                    throw new Error('No NFTs found');
+                }
+                
+                processResults(tokenIds);
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }
+        
+        async function fetchWalletNFTs(addressOrENS) {
+            let address = addressOrENS;
+            
+            // Resolve ENS if needed
+            if (addressOrENS.includes('.')) {
+                try {
+                    const ensResponse = await fetch(`https://api.ensideas.com/ens/resolve/${addressOrENS}`);
+                    const ensData = await ensResponse.json();
+                    if (ensData.address) {
+                        address = ensData.address;
+                    }
+                } catch (e) {
+                    console.log('ENS resolution failed, trying as address');
+                }
+            }
+            
+            const GVC_CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            // Try Reservoir API (CORS-friendly)
+            try {
+                const url = `https://api.reservoir.tools/users/${address}/tokens/v10?collection=${GVC_CONTRACT}&limit=200`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.tokens && data.tokens.length > 0) {
+                    console.log(`Found ${data.tokens.length} NFTs via Reservoir`);
+                    return data.tokens.map(t => t.token.tokenId);
+                }
+            } catch (e) {
+                console.log('Reservoir failed:', e);
+            }
+            
+            // Fallback: Try Alchemy
+            try {
+                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${address}&contractAddresses[]=${GVC_CONTRACT}&withMetadata=false`;
+                const response = await fetch(alchemyUrl);
+                const data = await response.json();
+                
+                if (data.ownedNfts && data.ownedNfts.length > 0) {
+                    console.log(`Found ${data.ownedNfts.length} NFTs via Alchemy`);
+                    return data.ownedNfts.map(nft => nft.tokenId);
+                }
+            } catch (e) {
+                console.log('Alchemy failed:', e);
+            }
+            
+            return [];
+        }
+        
+        function processResults(tokenIds) {
+            // Get badges for these tokens
+            walletBadges = {};
+            let totalBadgeCount = 0;
+            
+            // Use tokenToBadges if available (faster)
+            if (window.tokenToBadges) {
+                tokenIds.forEach(tokenId => {
+                    const badges = window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || [];
+                    badges.forEach(badge => {
+                        if (!walletBadges[badge]) {
+                            walletBadges[badge] = [];
+                        }
+                        walletBadges[badge].push(tokenId);
+                        totalBadgeCount++;
+                    });
+                });
+            } else {
+                // Fallback: check each badge's token list
+                tokenIds.forEach(tokenId => {
+                    Object.entries(badgeData).forEach(([badge, tokens]) => {
+                        let tokenList = Array.isArray(tokens) ? tokens : Object.values(tokens);
+                        const hasToken = tokenList.some(t => 
+                            String(t) === String(tokenId) || parseInt(t) === parseInt(tokenId)
+                        );
+                        
+                        if (hasToken) {
+                            if (!walletBadges[badge]) {
+                                walletBadges[badge] = [];
+                            }
+                            walletBadges[badge].push(tokenId);
+                            totalBadgeCount++;
+                        }
+                    });
+                });
+            }
+            
+            // Find missing badges
+            const allBadges = Object.keys(badgeData);
+            const ownedBadgeNames = Object.keys(walletBadges);
+            missingBadgesList = allBadges.filter(b => !ownedBadgeNames.includes(b));
+            
+            // Sort missing by rarity (fewer tokens = rarer)
+            missingBadgesList.sort((a, b) => {
+                const aTokens = badgeData[a];
+                const bTokens = badgeData[b];
+                const aLen = Array.isArray(aTokens) ? aTokens.length : Object.keys(aTokens).length;
+                const bLen = Array.isArray(bTokens) ? bTokens.length : Object.keys(bTokens).length;
+                return aLen - bLen;
+            });
+            
+            // Update stats
+            const completion = Math.round((ownedBadgeNames.length / allBadges.length) * 100);
+            
+            // Find rarest badge owned (fewest NFTs have it)
+            let rarestBadge = '-';
+            let rarestCount = Infinity;
+            ownedBadgeNames.forEach(badge => {
+                const tokens = badgeData[badge];
+                const count = Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
+                if (count < rarestCount) {
+                    rarestCount = count;
+                    rarestBadge = formatBadgeName(badge);
+                }
+            });
+            
+            document.getElementById('nftCount').textContent = tokenIds.length;
+            document.getElementById('ownedBadges').textContent = ownedBadgeNames.length;
+            document.getElementById('missingBadges').textContent = missingBadgesList.length;
+            document.getElementById('rarestBadge').textContent = rarestBadge;
+            document.getElementById('completionPct').textContent = `${completion}%`;
+            document.getElementById('progressFill').style.width = `${completion}%`;
+            document.getElementById('ownedTabCount').textContent = ownedBadgeNames.length;
+            document.getElementById('missingTabCount').textContent = missingBadgesList.length;
+            
+            // Render badge grids
+            renderOwnedBadges();
+            renderMissingBadges();
+            
+            // Store for modal use
+            walletNFTs = tokenIds;
+        }
+        
+        function renderOwnedBadges() {
+            const grid = document.getElementById('ownedGrid');
+            const sorted = Object.entries(walletBadges).sort((a, b) => b[1].length - a[1].length);
+            
+            grid.innerHTML = sorted.map(([badge, tokens]) => {
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes('gradient');
+                const style = isGradient 
+                    ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                    : `color: ${color};`;
+                
+                return `
+                    <div class="badge-item" onclick="showBadgeNFTs('${badge}', true)">
+                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                        <span class="badge-count">×${tokens.length}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderMissingBadges() {
+            const grid = document.getElementById('missingGrid');
+            
+            grid.innerHTML = missingBadgesList.map(badge => {
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes('gradient');
+                const style = isGradient 
+                    ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                    : `color: ${color};`;
+                const tokens = badgeData[badge];
+                const rarity = Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
+                
+                return `
+                    <div class="badge-item missing" onclick="showBadgeNFTs('${badge}', false)">
+                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                        <span class="badge-count">${rarity} NFTs have this</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showTab(tab) {
+            const ownedGrid = document.getElementById('ownedGrid');
+            const missingGrid = document.getElementById('missingGrid');
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'owned') {
+                ownedGrid.style.display = 'grid';
+                missingGrid.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                ownedGrid.style.display = 'none';
+                missingGrid.style.display = 'grid';
+                tabs[1].classList.add('active');
+            }
+        }
+        
+        function showBadgeNFTs(badge, isOwned) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const nftGrid = document.getElementById('modalNFTs');
+            
+            const badgeColor = getBadgeColor(badge);
+            title.textContent = formatBadgeName(badge);
+            
+            let tokenIds;
+            if (isOwned) {
+                tokenIds = walletBadges[badge];
+            } else {
+                const tokens = badgeData[badge];
+                const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
+                tokenIds = allTokens.slice(0, 50); // Limit to 50 for performance
+            }
+            
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            nftGrid.innerHTML = tokenIds.map(tokenId => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                
+                if (imgUrl) {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card">
+                            <img src="${imgUrl}" alt="#${tokenId}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display:none; padding: 20px; text-align: center;">
+                                <div style="font-size: 16px; font-weight: 600;">#${tokenId}</div>
+                            </div>
+                            <div class="nft-id">#${tokenId}</div>
+                        </a>
+                    `;
+                } else {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card" style="text-decoration: none;">
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 20px;">#${tokenId}</div>
+                            <div style="font-size: 11px; color: var(--accent-cyan);">View on OpenSea →</div>
+                        </a>
+                    `;
+                }
+            }).join('');
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modal')) {
+                document.getElementById('modal').classList.remove('active');
+            }
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('walletInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                lookupWallet();
+            }
+        });
+        
+        // Close modal on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
