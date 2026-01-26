@@ -573,8 +573,8 @@
         let walletBadges = {};
         let missingBadgesList = [];
         
-        // VIBE Bounty Hunter self-report state
-        let vibeBountyHunterClaimed = false;
+        // VIBE Bounty Hunter self-report state (0, 1, or 2)
+        let vibeBountyHunterCount = 0;
         
         // ===========================================
         // BADGE NAME MAPPINGS (API name -> Display name)
@@ -882,7 +882,7 @@
             
             // Reset resolved addresses and bounty hunter state
             resolvedAddresses = [];
-            vibeBountyHunterClaimed = false;
+            vibeBountyHunterCount = 0;
             
             try {
                 let tokenIds = [];
@@ -1005,60 +1005,52 @@
             const VIBESTR_CONTRACT = '0xd0cc2b0efb168bfe1f94a948d8df70fa10257196';
             let totalBalance = 0;
             
-            // ERC20 balanceOf function signature: balanceOf(address) = 0x70a08231
-            const balanceOfSelector = '0x70a08231';
-            
             for (const address of addresses) {
                 try {
-                    // Pad address to 32 bytes (remove 0x, pad to 64 chars)
-                    const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
-                    const data = balanceOfSelector + paddedAddress;
+                    // Use Etherscan API (free tier, no API key needed for basic calls)
+                    const etherscanUrl = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${VIBESTR_CONTRACT}&address=${address}&tag=latest`;
                     
-                    // Try multiple public RPCs for reliability
-                    const rpcUrls = [
-                        'https://eth.llamarpc.com',
-                        'https://rpc.ankr.com/eth',
-                        'https://cloudflare-eth.com',
-                        'https://eth-mainnet.public.blastapi.io'
-                    ];
+                    const response = await fetch(etherscanUrl);
+                    const data = await response.json();
                     
-                    let success = false;
-                    for (const rpcUrl of rpcUrls) {
-                        if (success) break;
-                        try {
-                            const response = await fetch(rpcUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    jsonrpc: '2.0',
-                                    method: 'eth_call',
-                                    params: [{
-                                        to: VIBESTR_CONTRACT,
-                                        data: data
-                                    }, 'latest'],
-                                    id: 1
-                                })
-                            });
-                            const result = await response.json();
-                            
-                            if (result.result && result.result !== '0x') {
-                                // Parse the hex balance (18 decimals)
-                                const hexBalance = result.result;
-                                const balance = parseInt(hexBalance, 16) / 1e18;
-                                totalBalance += balance;
-                                console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
-                                success = true;
-                            }
-                        } catch (e) {
-                            console.log(`RPC ${rpcUrl} failed, trying next...`);
-                        }
-                    }
-                    
-                    if (!success) {
-                        console.log(`Could not fetch VIBESTR balance for ${address}`);
+                    if (data.status === '1' && data.result) {
+                        // VIBESTR has 18 decimals
+                        const balance = parseInt(data.result) / 1e18;
+                        totalBalance += balance;
+                        console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
+                    } else {
+                        console.log(`Etherscan returned no balance for ${address}:`, data);
                     }
                 } catch (e) {
                     console.log('VIBESTR balance fetch failed:', e);
+                    
+                    // Fallback: try public RPC with eth_call
+                    try {
+                        const balanceOfSelector = '0x70a08231';
+                        const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
+                        const callData = balanceOfSelector + paddedAddress;
+                        
+                        const rpcUrl = 'https://eth.llamarpc.com';
+                        const rpcResponse = await fetch(rpcUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'eth_call',
+                                params: [{ to: VIBESTR_CONTRACT, data: callData }, 'latest'],
+                                id: 1
+                            })
+                        });
+                        const rpcData = await rpcResponse.json();
+                        
+                        if (rpcData.result && rpcData.result !== '0x') {
+                            const balance = parseInt(rpcData.result, 16) / 1e18;
+                            totalBalance += balance;
+                            console.log(`VIBESTR balance for ${address} (via RPC): ${balance.toLocaleString()}`);
+                        }
+                    } catch (rpcError) {
+                        console.log('RPC fallback also failed:', rpcError);
+                    }
                 }
             }
             
@@ -1338,8 +1330,8 @@
             // Add missing meta badges to the list
             missingBadgesList = [...missingBadgesList, ...missingComboBadges, ...missingCollectionBadges, ...missingVibestrBadges];
             
-            // Add VIBE Bounty Hunter to missing (always - it's self-reported)
-            if (!vibeBountyHunterClaimed) {
+            // Add VIBE Bounty Hunter to missing if not at max (2)
+            if (vibeBountyHunterCount < 2) {
                 missingBadgesList.push('vibe_bounty_hunter');
             }
             
@@ -1363,7 +1355,7 @@
             });
             
             // Update stats - use fixed total of 89
-            const ownedCount = ownedBadgeNames.length + (vibeBountyHunterClaimed ? 1 : 0);
+            const ownedCount = ownedBadgeNames.length + vibeBountyHunterCount;
             const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
             
             // Find rarest badge owned (fewest NFTs have it) - skip meta badges
@@ -1438,13 +1430,13 @@
                 `;
             }).join('');
             
-            // Add VIBE Bounty Hunter if claimed
-            if (vibeBountyHunterClaimed) {
+            // Add VIBE Bounty Hunter if claimed (1 or 2)
+            if (vibeBountyHunterCount > 0) {
                 const color = getBadgeColor('vibe_bounty_hunter');
                 html += `
                     <div class="badge-item" style="cursor: default;">
                         <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
-                        <span class="badge-count" style="color: var(--accent-green);">✓</span>
+                        <span class="badge-count" style="color: var(--accent-green);">×${vibeBountyHunterCount}</span>
                         <span class="badge-note">Self-reported badge</span>
                     </div>
                 `;
@@ -1472,13 +1464,15 @@
                 let extraContent = '';
                 
                 if (isSpecial) {
-                    requirement = 'Bought via Gondi or NFT Strategy';
+                    requirement = 'Bought via Gondi or NFT Strategy (max 2)';
                     extraContent = `
                         <div class="bounty-checkbox-container">
-                            <input type="checkbox" id="bountyHunterCheck" onchange="toggleBountyHunter(this.checked)">
-                            <label for="bountyHunterCheck">I have this badge</label>
+                            <input type="checkbox" id="bountyHunterCheck1" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 1 ? 'checked' : ''}>
+                            <label for="bountyHunterCheck1">I have 1</label>
+                            <input type="checkbox" id="bountyHunterCheck2" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 2 ? 'checked' : ''} style="margin-left: 16px;">
+                            <label for="bountyHunterCheck2">I have 2</label>
                         </div>
-                        <span class="badge-note">We can't verify this badge - check if you have it</span>
+                        <span class="badge-note">We can't verify this badge - check how many you have</span>
                     `;
                 } else if (badge.startsWith('collection_')) {
                     const num = badge.replace('collection_', '');
@@ -1520,11 +1514,19 @@
             }).join('');
         }
         
-        function toggleBountyHunter(checked) {
-            vibeBountyHunterClaimed = checked;
+        function updateBountyHunterCount() {
+            const check1 = document.getElementById('bountyHunterCheck1');
+            const check2 = document.getElementById('bountyHunterCheck2');
+            
+            // Count checked boxes
+            let count = 0;
+            if (check1 && check1.checked) count++;
+            if (check2 && check2.checked) count++;
+            
+            vibeBountyHunterCount = count;
             
             // Update counts
-            const ownedCount = Object.keys(walletBadges).length + (vibeBountyHunterClaimed ? 1 : 0);
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
             const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
             
             document.getElementById('ownedBadges').textContent = ownedCount;
@@ -1534,17 +1536,14 @@
             document.getElementById('ownedTabCount').textContent = ownedCount;
             document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
             
-            // Re-render both grids
-            if (checked) {
-                // Remove from missing list
+            // Update missing list
+            if (vibeBountyHunterCount >= 2) {
                 missingBadgesList = missingBadgesList.filter(b => b !== 'vibe_bounty_hunter');
-            } else {
-                // Add back to missing list
-                if (!missingBadgesList.includes('vibe_bounty_hunter')) {
-                    missingBadgesList.push('vibe_bounty_hunter');
-                }
+            } else if (!missingBadgesList.includes('vibe_bounty_hunter')) {
+                missingBadgesList.push('vibe_bounty_hunter');
             }
             
+            // Re-render both grids
             renderOwnedBadges();
             renderMissingBadges();
         }
