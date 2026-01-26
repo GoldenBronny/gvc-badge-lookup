@@ -1588,7 +1588,7 @@
                             <input type="checkbox" id="bountyHunterCheck1" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 1 ? 'checked' : ''}>
                             <label for="bountyHunterCheck1">I have this badge</label>
                         </div>
-                        <span class="badge-note">We can't verify this badge - check how many you have</span>
+                        <span class="badge-note">We can't verify this badge - manually check it if you have it</span>
                     `;
                 } else if (badge.startsWith('collection_')) {
                     const num = badge.replace('collection_', '');
