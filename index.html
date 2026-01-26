@@ -601,7 +601,7 @@
             'gold_member': 'Golden Fever',
             'gradient_lover': 'Gradient Gatherer',
             'grayscale_seeker': 'Grayscale Hunter',
-            'great_stacheby': 'Great \'Stacheby',
+            'great_stacheby': 'Shiba Syndicate',
             'gud_meat': 'Gud Moot',
             'hail_mary_heroes': 'Hail Mary Heroes',
             'high_noon_hustler': 'High Noon Hustler',
@@ -656,6 +656,7 @@
             'multi_type_master': 'Multi-Type Master',
             'yin_n_yang': "Yin N' Yang",
             'mountain_goat': 'Mountain GOAT',
+            'rainbow_warrior': 'Rainbow Warrior',
             // Special badges
             'vibe_bounty_hunter': 'VIBE Bounty Hunter'
         };
@@ -671,6 +672,7 @@
             'rainbow_boombox': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             // Gold/Yellow themed
             'gold_member': '#ffd700',
+            'great_stacheby': '#ff9500',
             'doge': '#ffd700',
             'great_stacheby': '#ffd700',
             'showtime': '#ffa500',
@@ -760,6 +762,7 @@
             'multi_type_master': 'linear-gradient(90deg, #ff69b4, #4ecdc4, #00ffff)',
             'yin_n_yang': 'linear-gradient(90deg, #888888, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff)',
             'mountain_goat': '#87CEEB',
+            'rainbow_warrior': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             // Special badges
             'vibe_bounty_hunter': '#a855f7'
         };
@@ -1173,6 +1176,12 @@
                 requirement: '2 NFTs with Snowboard Goggles or Puffy Jacket', 
                 check: (types, tokenIds) => hasMountainGoatTraits(tokenIds),
                 progress: (types, tokenIds) => ({ current: countMountainGoatTraits(tokenIds), needed: 2 })
+            },
+            { 
+                name: 'rainbow_warrior', 
+                requirement: 'Rainbow Type + Plastic Armor/Helmet', 
+                check: (types, tokenIds) => hasRainbowWarrior(types, tokenIds),
+                progress: (types, tokenIds) => getRainbowWarriorProgress(types, tokenIds)
             }
         ];
         
@@ -1237,6 +1246,22 @@
             return Math.min(count, 2); // Cap at 2 since that's the goal
         }
         
+        // Rainbow Warrior badge - needs Rainbow Type + Plastic Armor/Helmet
+        const PLASTIC_ARMOR_HELMET_IDS = new Set(["1", "113", "122", "138", "181", "270", "281", "282", "284", "303", "307", "394", "396", "427", "556", "572", "593", "614", "626", "644", "668", "688", "703", "716", "784", "817", "822", "931", "952", "959", "968", "993", "1000", "1023", "1037", "1052", "1073", "1075", "1078", "1171", "1217", "1239", "1240", "1261", "1267", "1311", "1315", "1319", "1426", "1436", "1466", "1481", "1528", "1536", "1547", "1582", "1594", "1624", "1652", "1653", "1657", "1740", "1746", "1755", "1787", "1815", "1818", "1820", "1861", "1879", "1908", "1909", "1926", "2021", "2060", "2077", "2140", "2196", "2229", "2270", "2281", "2318", "2345", "2358", "2366", "2422", "2423", "2465", "2470", "2490", "2509", "2579", "2604", "2698", "2724", "2732", "2763", "2810", "2828", "2837", "2853", "2905", "2965", "2991", "3025", "3175", "3189", "3206", "3276", "3284", "3329", "3333", "3334", "3371", "3392", "3471", "3526", "3548", "3574", "3616", "3635", "3656", "3669", "3695", "3760", "3804", "3823", "3849", "3872", "3875", "3884", "3906", "3947", "3988", "4000", "4001", "4062", "4104", "4135", "4179", "4180", "4216", "4246", "4248", "4302", "4332", "4432", "4508", "4570", "4585", "4589", "4600", "4655", "4667", "4684", "4701", "4724", "4799", "4824", "4877", "4884", "4900", "4911", "4930", "4938", "4974", "4977", "4984", "5033", "5041", "5084", "5091", "5104", "5143", "5147", "5158", "5163", "5211", "5229", "5236", "5332", "5346", "5372", "5403", "5438", "5482", "5515", "5527", "5528", "5531", "5576", "5578", "5596", "5667", "5697", "5739", "5745", "5759", "5784", "5806", "5866", "5884", "5976", "5979", "5999", "6030", "6164", "6186", "6189", "6222", "6226", "6240", "6326", "6361", "6371", "6383", "6389", "6394", "6414", "6441", "6472", "6511", "6557", "6578", "6636", "6653", "6656", "6691", "6703", "6712", "6753", "6760", "6772", "6777", "6779", "6814", "6921", "6925", "6946"]);
+        
+        function hasRainbowWarrior(types, tokenIds) {
+            const hasRainbow = types.some(t => t === 'Rainbow');
+            const hasPlasticArmorHelmet = tokenIds.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)));
+            return hasRainbow && hasPlasticArmorHelmet;
+        }
+        
+        function getRainbowWarriorProgress(types, tokenIds) {
+            let count = 0;
+            if (types.some(t => t === 'Rainbow')) count++;
+            if (tokenIds.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)))) count++;
+            return { current: count, needed: 2 };
+        }
+        
         // Store combo badge progress for display
         let comboBadgeProgress = {};
         
@@ -1265,7 +1290,7 @@
         }
         
         // Total badge count constant (for completion calculation)
-        const TOTAL_BADGES = 89;
+        const TOTAL_BADGES = 90;
         
         function processResults(tokenIds, vibestrBalance = 0) {
             // Get badges for these tokens
@@ -1358,8 +1383,8 @@
             // Add missing meta badges to the list
             missingBadgesList = [...missingBadgesList, ...missingComboBadges, ...missingCollectionBadges, ...missingVibestrBadges];
             
-            // Add VIBE Bounty Hunter to missing if not at max (2)
-            if (vibeBountyHunterCount < 2) {
+            // Add VIBE Bounty Hunter to missing if not checked
+            if (vibeBountyHunterCount < 1) {
                 missingBadgesList.push('vibe_bounty_hunter');
             }
             
@@ -1458,13 +1483,13 @@
                 `;
             }).join('');
             
-            // Add VIBE Bounty Hunter if claimed (1 or 2)
+            // Add VIBE Bounty Hunter if claimed
             if (vibeBountyHunterCount > 0) {
                 const color = getBadgeColor('vibe_bounty_hunter');
                 html += `
                     <div class="badge-item" style="cursor: default;">
                         <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
-                        <span class="badge-count" style="color: var(--accent-green);">×${vibeBountyHunterCount}</span>
+                        <span class="badge-count" style="color: var(--accent-green);">✓</span>
                         <span class="badge-note">Self-reported badge</span>
                     </div>
                 `;
@@ -1492,13 +1517,11 @@
                 let extraContent = '';
                 
                 if (isSpecial) {
-                    requirement = 'Bought via Gondi or NFT Strategy (max 2)';
+                    requirement = 'Bought via Gondi or NFT Strategy';
                     extraContent = `
                         <div class="bounty-checkbox-container">
                             <input type="checkbox" id="bountyHunterCheck1" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 1 ? 'checked' : ''}>
-                            <label for="bountyHunterCheck1">I have 1</label>
-                            <input type="checkbox" id="bountyHunterCheck2" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 2 ? 'checked' : ''} style="margin-left: 16px;">
-                            <label for="bountyHunterCheck2">I have 2</label>
+                            <label for="bountyHunterCheck1">I have this badge</label>
                         </div>
                         <span class="badge-note">We can't verify this badge - check how many you have</span>
                     `;
@@ -1580,14 +1603,9 @@
         
         function updateBountyHunterCount() {
             const check1 = document.getElementById('bountyHunterCheck1');
-            const check2 = document.getElementById('bountyHunterCheck2');
             
-            // Count checked boxes
-            let count = 0;
-            if (check1 && check1.checked) count++;
-            if (check2 && check2.checked) count++;
-            
-            vibeBountyHunterCount = count;
+            // Check if box is checked
+            vibeBountyHunterCount = (check1 && check1.checked) ? 1 : 0;
             
             // Update counts
             const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
@@ -1601,7 +1619,7 @@
             document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
             
             // Update missing list
-            if (vibeBountyHunterCount >= 2) {
+            if (vibeBountyHunterCount >= 1) {
                 missingBadgesList = missingBadgesList.filter(b => b !== 'vibe_bounty_hunter');
             } else if (!missingBadgesList.includes('vibe_bounty_hunter')) {
                 missingBadgesList.push('vibe_bounty_hunter');
