@@ -1007,50 +1007,52 @@
             
             for (const address of addresses) {
                 try {
-                    // Use Etherscan API (free tier, no API key needed for basic calls)
-                    const etherscanUrl = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${VIBESTR_CONTRACT}&address=${address}&tag=latest`;
+                    // Use public RPC with eth_call (most reliable, no API key needed)
+                    const balanceOfSelector = '0x70a08231';
+                    const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
+                    const callData = balanceOfSelector + paddedAddress;
                     
-                    const response = await fetch(etherscanUrl);
-                    const data = await response.json();
+                    // Try multiple public RPCs
+                    const rpcUrls = [
+                        'https://rpc.ankr.com/eth',
+                        'https://eth.llamarpc.com',
+                        'https://1rpc.io/eth',
+                        'https://ethereum.publicnode.com'
+                    ];
                     
-                    if (data.status === '1' && data.result) {
-                        // VIBESTR has 18 decimals
-                        const balance = parseInt(data.result) / 1e18;
-                        totalBalance += balance;
-                        console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
-                    } else {
-                        console.log(`Etherscan returned no balance for ${address}:`, data);
+                    let success = false;
+                    for (const rpcUrl of rpcUrls) {
+                        if (success) break;
+                        try {
+                            console.log(`Trying RPC: ${rpcUrl}`);
+                            const response = await fetch(rpcUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    jsonrpc: '2.0',
+                                    method: 'eth_call',
+                                    params: [{ to: VIBESTR_CONTRACT, data: callData }, 'latest'],
+                                    id: 1
+                                })
+                            });
+                            const data = await response.json();
+                            
+                            if (data.result && data.result !== '0x' && data.result !== '0x0') {
+                                const balance = parseInt(data.result, 16) / 1e18;
+                                totalBalance += balance;
+                                console.log(`VIBESTR balance for ${address}: ${balance.toLocaleString()}`);
+                                success = true;
+                            }
+                        } catch (e) {
+                            console.log(`RPC ${rpcUrl} failed:`, e.message);
+                        }
+                    }
+                    
+                    if (!success) {
+                        console.log(`Could not fetch VIBESTR balance for ${address} from any RPC`);
                     }
                 } catch (e) {
                     console.log('VIBESTR balance fetch failed:', e);
-                    
-                    // Fallback: try public RPC with eth_call
-                    try {
-                        const balanceOfSelector = '0x70a08231';
-                        const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
-                        const callData = balanceOfSelector + paddedAddress;
-                        
-                        const rpcUrl = 'https://eth.llamarpc.com';
-                        const rpcResponse = await fetch(rpcUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                jsonrpc: '2.0',
-                                method: 'eth_call',
-                                params: [{ to: VIBESTR_CONTRACT, data: callData }, 'latest'],
-                                id: 1
-                            })
-                        });
-                        const rpcData = await rpcResponse.json();
-                        
-                        if (rpcData.result && rpcData.result !== '0x') {
-                            const balance = parseInt(rpcData.result, 16) / 1e18;
-                            totalBalance += balance;
-                            console.log(`VIBESTR balance for ${address} (via RPC): ${balance.toLocaleString()}`);
-                        }
-                    } catch (rpcError) {
-                        console.log('RPC fallback also failed:', rpcError);
-                    }
                 }
             }
             
