@@ -1122,9 +1122,9 @@
             });
             
             // Count total badges BEFORE collection badges (NFT + combo + VIBESTR)
-            const badgeCountForCollection = Object.keys(walletBadges).length;
+            let badgeCountForCollection = Object.keys(walletBadges).length;
             
-            // Add Collection Badges (based on total badges earned: NFT + combo + VIBESTR)
+            // Add Collection Badges (cascading - each badge earned counts toward the next)
             const earnedCollectionBadges = [];
             const missingCollectionBadges = [];
             COLLECTION_BADGE_THRESHOLDS.forEach(threshold => {
@@ -1132,6 +1132,7 @@
                 if (badgeCountForCollection >= threshold) {
                     walletBadges[badgeName] = ['meta'];
                     earnedCollectionBadges.push(badgeName);
+                    badgeCountForCollection++; // This badge now counts toward the next threshold!
                 } else {
                     missingCollectionBadges.push(badgeName);
                 }
