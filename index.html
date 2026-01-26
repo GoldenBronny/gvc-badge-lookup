@@ -1582,7 +1582,10 @@
                             const hasPlasticArmorHelmet = walletNFTs.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)));
                             let missing = [];
                             if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow Type</a>`);
-                            if (!hasPlasticArmorHelmet) missing.push(`<a href="https://opensea.io/collection/good-vibes-club?search[stringTraits][0][name]=Body&search[stringTraits][0][values][0]=Plastic%20Armor%20Black" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Armor/Helmet</a>`);
+                            if (!hasPlasticArmorHelmet) {
+                                missing.push(`<a href="https://opensea.io/collection/good-vibes-club?traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Plastic+Armor+Light+Blue%22,%22Plastic+Armor+Yellow%22,%22Plastic+Armor+Blue%22,%22Plastic+Armor+Lime%22,%22Plastic+Armor+Glass%22,%22Plastic+Armor+Mint%22,%22Plastic+Armor+Red%22,%22Plastic+Armor+Pink%22,%22Plastic+Armor+Gold%22,%22Plastic+Armor+Purple%22,%22Plastic+Armor+Black%22,%22Plastic+Armor+White%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Armor</a>`);
+                                missing.push(`<a href="https://opensea.io/collection/good-vibes-club?traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Plastic+Helmet+White%22,%22Plastic+Helmet+Yellow%22,%22Plastic+Helmet+Glass%22,%22Plastic+Helmet+Light+Blue%22,%22Plastic+Helmet+Pink%22,%22Plastic+Helmet+Purple%22,%22Plastic+Helmet+Black%22,%22Plastic+Helmet+Blue%22,%22Plastic+Helmet+Gold%22,%22Plastic+Helmet+Mint%22,%22Plastic+Helmet+Lime%22,%22Plastic+Helmet+Red%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Helmet</a>`);
+                            }
                             if (missing.length > 0) {
                                 extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
                             }
