@@ -572,6 +572,7 @@
         let walletNFTs = [];
         let walletBadges = {};
         let missingBadgesList = [];
+        let ownedTypesGlobal = []; // Store owned types for use in renderMissingBadges
         
         // VIBE Bounty Hunter self-report state (0, 1, or 2)
         let vibeBountyHunterCount = 0;
@@ -1243,6 +1244,9 @@
             const ownedTypes = tokenIds.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
             console.log('Owned types:', ownedTypes);
             
+            // Store globally for use in renderMissingBadges
+            ownedTypesGlobal = ownedTypes;
+            
             const results = {};
             comboBadgeProgress = {}; // Reset progress
             
@@ -1522,9 +1526,8 @@
                             else if (badge.startsWith('plastic')) typePrefix = 'Plastic';
                             else if (badge.startsWith('robot')) typePrefix = 'Robot';
                             
-                            if (typePrefix) {
-                                const ownedTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
-                                const missingColors = getMissingColors(ownedTypes, typePrefix);
+                            if (typePrefix && ownedTypesGlobal.length > 0) {
+                                const missingColors = getMissingColors(ownedTypesGlobal, typePrefix);
                                 
                                 if (missingColors.length > 0 && missingColors.length <= 5) {
                                     const colorLinks = missingColors.map(color => 
@@ -1541,10 +1544,9 @@
                         }
                         
                         // Show missing for Yin N' Yang
-                        if (badge === 'yin_n_yang') {
-                            const ownedTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
-                            const hasGrayscale = ownedTypes.some(t => t === 'Grayscale');
-                            const hasRainbow = ownedTypes.some(t => t === 'Rainbow');
+                        if (badge === 'yin_n_yang' && ownedTypesGlobal.length > 0) {
+                            const hasGrayscale = ownedTypesGlobal.some(t => t === 'Grayscale');
+                            const hasRainbow = ownedTypesGlobal.some(t => t === 'Rainbow');
                             let missing = [];
                             if (!hasGrayscale) missing.push(`<a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a>`);
                             if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow</a>`);
