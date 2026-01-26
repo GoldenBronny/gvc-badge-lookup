@@ -803,6 +803,10 @@
             return BADGE_OPENSEA_LINKS[badge] || null;
         }
         
+        function getBadgeColor(badge) {
+            return BADGE_COLORS[badge] || '#00d4ff';
+        }
+        
         function formatBadgeName(badge) {
             // Check display name mapping first
             if (BADGE_DISPLAY_NAMES[badge]) {
