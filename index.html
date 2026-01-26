@@ -252,6 +252,7 @@
             padding: 16px 20px;
             cursor: pointer;
             transition: all 0.2s;
+            flex-wrap: wrap;
         }
         
         .badge-item:hover {
@@ -297,6 +298,37 @@
             background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
             border-radius: 2px;
             transition: width 0.3s ease;
+        }
+        
+        /* Special badge note */
+        .badge-note {
+            width: 100%;
+            font-size: 11px;
+            color: var(--accent-orange);
+            margin-top: 6px;
+            font-style: italic;
+        }
+        
+        /* Bounty Hunter checkbox */
+        .bounty-checkbox-container {
+            width: 100%;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .bounty-checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-cyan);
+        }
+        
+        .bounty-checkbox-container label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
         }
         
         /* NFT Preview Modal */
@@ -541,43 +573,172 @@
         let walletBadges = {};
         let missingBadgesList = [];
         
+        // VIBE Bounty Hunter self-report state
+        let vibeBountyHunterClaimed = false;
+        
+        // ===========================================
+        // BADGE NAME MAPPINGS (API name -> Display name)
+        // ===========================================
+        const BADGE_DISPLAY_NAMES = {
+            // NFT Trait Badges (62 from API)
+            'any_gvc': 'Official Citizen of Vibetown',
+            'astro_balls': 'Stellar Spheres',
+            'astro_bean': 'AstroBean',
+            'baller': 'Vibetown Baller',
+            'billiards': "Rack Em' Up",
+            'captain': 'Oh Captain My Captain',
+            'checkmate': 'No Pawn Intended',
+            'cosmic': 'Cosmic Guardian',
+            'doge': 'Great \'Stacheby',
+            'electric_rings': 'Atomic Aura',
+            'elite_rainbow_ranger': 'Elite Rainbow Ranger',
+            'full_send_maverick': 'Full Send Maverick',
+            'full_throttle': 'Full Throttle',
+            'funky_fresh': 'Funky Fresh',
+            'fur_the_win': 'Fur The Win',
+            'gamer': '360 No Scope',
+            'gold_member': 'Golden Fever',
+            'gradient_lover': 'Gradient Gatherer',
+            'grayscale_seeker': 'Grayscale Hunter',
+            'great_stacheby': 'Great \'Stacheby',
+            'gud_meat': 'Gud Moot',
+            'hail_mary_heroes': 'Hail Mary Heroes',
+            'high_noon_hustler': 'High Noon Hustler',
+            'homerun': 'Homerun',
+            'hoodie_up_society': 'Hoodie Up Society',
+            'king': 'Vibetown Royalty',
+            'ladies_night': 'Ladies Night',
+            'lamp': 'I Love Lamp',
+            'necks_level': 'Rocks Level',
+            'no_face_no_problem': 'No Face, No Problem',
+            'nourish_vibes': 'Nourish Vibes',
+            'one_of_one': 'One of One',
+            'party_in_the_back': 'Party In The Back',
+            'pepe': 'Pepe Posse',
+            'plants': 'Aloe You Vera Much',
+            'plastic_lover': 'Plastic Pioneer',
+            'poker_face': 'Pocket Rockets',
+            'pothead': 'High Vibes',
+            'rainbow_boombox': 'Bass In Your Face',
+            'rainbow_bubble_goggles': 'Bubble Visionary',
+            'rainbow_citizen': 'Rainbow Maxi',
+            'rainbow_visor': 'Visooor Enjoyooor',
+            'ranger': 'Vibe Ranger',
+            'robot_lover': 'Love at First Byte',
+            'science_goggles': 'Bubble Visionary',
+            'seas_the_day': 'Seas The Day',
+            'shower': 'Soaked N\' Stoked',
+            'showtime': 'Showtime',
+            'sir_vibes_a_lot': 'Sir Vibes-a-lot',
+            'stone': 'Marble Potential',
+            'straw_man': 'Straw Man',
+            'suited_up': 'Suited Up',
+            'super_rare': 'SuperRare',
+            'surfer': 'Get Pitted',
+            'sweettooth': 'Sugar Rush',
+            'tanks_a_lot': 'Tanks A Lot',
+            'toy_bricks': 'Brick By Brick',
+            'varsity_vibes': 'Varsity Vibes',
+            'vibefoot_fan_club': 'Vibetoot Fan Club',
+            'vibetown_social_club': 'Vibetown Social Club',
+            'visooor_enjoyooor': 'Visooor Enjoyooor',
+            'zoom_in_vibe_out': 'Zoom In, Vibe Out',
+            // Combo badges
+            'gradient_hatrick': 'Gradient Hatrick',
+            'plastic_hatrick': 'Plastic Hatrick',
+            'robot_hatrick': 'Robot Hatrick',
+            'gradient_high_five': 'Gradient High Five',
+            'plastic_high_five': 'Plastic High Five',
+            'robot_high_five': 'Robot High Five',
+            'power_duo': 'Power Duo',
+            'chris_favorite': "Chris' Favorite Badge",
+            'multi_type_master': 'Multi-Type Master',
+            'yin_n_yang': "Yin N' Yang",
+            'mountain_goat': 'Mountain GOAT',
+            // Special badges
+            'vibe_bounty_hunter': 'VIBE Bounty Hunter'
+        };
+        
         // Badge colors for display
         const BADGE_COLORS = {
+            // Rainbow/Special
             'rainbow_citizen': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'rainbow_visor': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'rainbow_bubble_goggles': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'science_goggles': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'elite_rainbow_ranger': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'rainbow_boombox': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            // Gold/Yellow themed
             'gold_member': '#ffd700',
+            'doge': '#ffd700',
+            'great_stacheby': '#ffd700',
+            'showtime': '#ffa500',
+            // Grayscale
             'grayscale_seeker': '#888888',
+            'chris_favorite': '#888888',
+            // Special/Rare
             'one_of_one': '#ff00ff',
             'super_rare': '#ff4500',
             'cosmic': '#9933ff',
+            // Type lovers
             'robot_lover': '#00ffff',
             'plastic_lover': '#ff69b4',
             'gradient_lover': 'linear-gradient(90deg, #ff6b6b, #4ecdc4)',
+            // General
             'any_gvc': '#00d4ff',
             'ranger': '#228b22',
             'pothead': '#32cd32',
-            'doge': '#c4a000',
             'pepe': '#00aa00',
             'gamer': '#9400d3',
-            'checkmate': '#000000',
+            'checkmate': '#1a1a2e',
             'poker_face': '#006400',
             'captain': '#000080',
             'suited_up': '#1a1a2e',
             'ladies_night': '#ff1493',
             'party_in_the_back': '#8b4513',
             'funky_fresh': '#ff6347',
-            'showtime': '#ffa500',
             'homerun': '#dc143c',
+            // New badges
+            'astro_balls': '#9933ff',
+            'astro_bean': '#00d4ff',
+            'baller': '#ff9500',
+            'billiards': '#228b22',
+            'electric_rings': '#00ffff',
+            'full_send_maverick': '#00d4ff',
+            'full_throttle': '#ff4500',
+            'fur_the_win': '#8b4513',
+            'gud_meat': '#ff6347',
+            'hail_mary_heroes': '#000080',
+            'high_noon_hustler': '#a855f7',
+            'hoodie_up_society': '#00d4ff',
+            'king': '#ffd700',
+            'lamp': '#ffa500',
+            'necks_level': '#a855f7',
+            'no_face_no_problem': '#ffd700',
+            'nourish_vibes': '#32cd32',
+            'plants': '#32cd32',
+            'seas_the_day': '#00d4ff',
+            'shower': '#00d4ff',
+            'sir_vibes_a_lot': '#a855f7',
+            'stone': '#888888',
+            'straw_man': '#ffa500',
+            'surfer': '#00d4ff',
+            'sweettooth': '#ff69b4',
+            'tanks_a_lot': '#228b22',
+            'toy_bricks': '#ff4500',
+            'varsity_vibes': '#00d4ff',
+            'vibefoot_fan_club': '#00d4ff',
+            'vibetown_social_club': '#ff4500',
+            'visooor_enjoyooor': '#00ffff',
+            'zoom_in_vibe_out': '#00d4ff',
             // Collection badges (milestone badges)
-            'collection_5': '#ff69b4',
+            'collection_5': '#ff9500',
             'collection_10': '#c0c0c0',
             'collection_15': '#ffd700',
-            'collection_20': '#ffd700',
-            'collection_30': '#a855f7',
-            'collection_40': '#a855f7',
-            'collection_50': '#a855f7',
+            'collection_20': '#a855f7',
+            'collection_30': '#ff4500',
+            'collection_40': '#ff69b4',
+            'collection_50': '#00d4ff',
             // VIBESTR tier badges
             'vibestr_blue': '#87CEEB',
             'vibestr_pink': '#FF69B4',
@@ -595,10 +756,22 @@
             'plastic_high_five': '#FF69B4',
             'robot_high_five': '#00ffff',
             'power_duo': '#ffd700',
-            'chris_favorite': '#888888',
             'multi_type_master': 'linear-gradient(90deg, #ff69b4, #4ecdc4, #00ffff)',
             'yin_n_yang': 'linear-gradient(90deg, #888888, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff)',
-            'mountain_goat': '#87CEEB'
+            'mountain_goat': '#87CEEB',
+            // Special badges
+            'vibe_bounty_hunter': '#a855f7'
+        };
+        
+        // Collection badge display names
+        const COLLECTION_BADGE_NAMES = {
+            'collection_5': 'Collector of Epic Vibes',
+            'collection_10': 'Collector of Exquisite Vibes',
+            'collection_15': 'Collector of Legendary Vibes',
+            'collection_20': 'Collector of Immaculate Vibes',
+            'collection_30': 'Collector of Pristine Vibes',
+            'collection_40': 'Collector of Transcendent Vibes',
+            'collection_50': 'Collector of Magnificent Vibes'
         };
         
         function getBadgeColor(badge) {
@@ -606,31 +779,20 @@
         }
         
         function formatBadgeName(badge) {
-            // Special formatting for meta badges
-            if (badge.startsWith('collection_')) {
-                const num = badge.replace('collection_', '');
-                return `${num} Badges`;
+            // Check display name mapping first
+            if (BADGE_DISPLAY_NAMES[badge]) {
+                return BADGE_DISPLAY_NAMES[badge];
             }
+            // Collection badges
+            if (badge.startsWith('collection_')) {
+                return COLLECTION_BADGE_NAMES[badge] || `${badge.replace('collection_', '')} Badges`;
+            }
+            // VIBESTR badges
             if (badge.startsWith('vibestr_')) {
                 const tier = badge.replace('vibestr_', '');
-                return `$VIBESTR ${tier.charAt(0).toUpperCase() + tier.slice(1)}`;
+                return `$VIBESTR ${tier.charAt(0).toUpperCase() + tier.slice(1)} Tier`;
             }
-            // Combo badge names
-            const comboNames = {
-                'gradient_hatrick': 'Gradient Hatrick',
-                'plastic_hatrick': 'Plastic Hatrick',
-                'robot_hatrick': 'Robot Hatrick',
-                'gradient_high_five': 'Gradient High Five',
-                'plastic_high_five': 'Plastic High Five',
-                'robot_high_five': 'Robot High Five',
-                'power_duo': 'Power Duo',
-                'chris_favorite': "Chris' Favorite Badge",
-                'multi_type_master': 'Multi-Type Master',
-                'yin_n_yang': "Yin N' Yang",
-                'mountain_goat': 'Mountain GOAT'
-            };
-            if (comboNames[badge]) return comboNames[badge];
-            
+            // Fallback: format from snake_case
             return badge.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         }
         
@@ -718,8 +880,9 @@
             error.style.display = 'none';
             content.style.display = 'none';
             
-            // Reset resolved addresses
+            // Reset resolved addresses and bounty hunter state
             resolvedAddresses = [];
+            vibeBountyHunterClaimed = false;
             
             try {
                 let tokenIds = [];
@@ -730,7 +893,6 @@
                     tokenIds = input.split(',').map(id => id.trim()).filter(id => id);
                 } else {
                     // Parse input for multiple wallets/ENS names
-                    // Split by comma, newline, or space (but not spaces within ENS names)
                     const inputs = input.split(/[,\n]+/)
                         .map(s => s.trim())
                         .filter(s => s.length > 0);
@@ -801,35 +963,35 @@
                 resolvedAddresses.push(address);
             }
             
-            const GVC_CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            // Try Reservoir API first
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
-            // Try Reservoir API (CORS-friendly)
             try {
-                const url = `https://api.reservoir.tools/users/${address}/tokens/v10?collection=${GVC_CONTRACT}&limit=200`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
+                const reservoirUrl = `https://api.reservoir.tools/users/${address}/tokens/v7?collection=${CONTRACT}&limit=200`;
+                console.log('Trying Reservoir:', reservoirUrl);
+                const response = await fetch(reservoirUrl);
                 const data = await response.json();
                 
                 if (data.tokens && data.tokens.length > 0) {
-                    console.log(`Found ${data.tokens.length} NFTs via Reservoir`);
-                    return data.tokens.map(t => t.token.tokenId);
+                    const tokens = data.tokens.map(t => t.token.tokenId);
+                    console.log(`Found ${tokens.length} NFTs via Reservoir`);
+                    return tokens;
                 }
             } catch (e) {
                 console.log('Reservoir failed:', e);
             }
             
-            // Fallback: Try Alchemy
+            // Fallback to Alchemy
             try {
-                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${address}&contractAddresses[]=${GVC_CONTRACT}&withMetadata=false`;
+                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${address}&contractAddresses[]=${CONTRACT}&withMetadata=false`;
+                console.log('Trying Alchemy:', alchemyUrl);
                 const response = await fetch(alchemyUrl);
                 const data = await response.json();
                 
                 if (data.ownedNfts && data.ownedNfts.length > 0) {
-                    console.log(`Found ${data.ownedNfts.length} NFTs via Alchemy`);
-                    return data.ownedNfts.map(nft => nft.tokenId);
+                    const tokens = data.ownedNfts.map(nft => nft.tokenId);
+                    console.log(`Found ${tokens.length} NFTs via Alchemy`);
+                    return tokens;
                 }
             } catch (e) {
                 console.log('Alchemy failed:', e);
@@ -838,15 +1000,15 @@
             return [];
         }
         
-        // Fetch VIBESTR token balance for addresses
+        // Fetch VIBESTR token balance
         async function fetchVibestrBalance(addresses) {
-            const VIBESTR_CONTRACT = '0xd0cc2b0efb168bfe1f94a948d8df70fa10257196';
+            const VIBESTR_CONTRACT = '0x2c2a0836028D03fBDC84B5B03592D5ac52D99f77';
             let totalBalance = 0;
             
             for (const address of addresses) {
                 try {
-                    // Use Alchemy to get token balance
-                    const url = `https://eth-mainnet.g.alchemy.com/v2/demo/`;
+                    // Use Alchemy for token balance
+                    const url = 'https://eth-mainnet.g.alchemy.com/v2/demo';
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -888,7 +1050,6 @@
         ];
         
         // Combo badges - based on owning NFTs with specific type combinations
-        // Each badge has: name, requirement text, check function, and progress function
         const COMBO_BADGES = [
             { 
                 name: 'gradient_hatrick', 
@@ -1020,7 +1181,6 @@
         }
         
         function countMountainGoatTraits(tokenIds) {
-            // Check special traits data for Snowboard Goggles or Puffy Jacket
             let count = 0;
             for (const tokenId of tokenIds) {
                 const traits = specialTraitsData[tokenId] || specialTraitsData[String(tokenId)];
@@ -1054,6 +1214,9 @@
             
             return results;
         }
+        
+        // Total badge count constant (for completion calculation)
+        const TOTAL_BADGES = 89;
         
         function processResults(tokenIds, vibestrBalance = 0) {
             // Get badges for these tokens
@@ -1146,11 +1309,19 @@
             // Add missing meta badges to the list
             missingBadgesList = [...missingBadgesList, ...missingComboBadges, ...missingCollectionBadges, ...missingVibestrBadges];
             
+            // Add VIBE Bounty Hunter to missing (always - it's self-reported)
+            if (!vibeBountyHunterClaimed) {
+                missingBadgesList.push('vibe_bounty_hunter');
+            }
+            
             // Sort missing by rarity (fewer tokens = rarer), meta badges go last
             missingBadgesList.sort((a, b) => {
-                // Meta badges go to the end
-                const aIsMeta = a.startsWith('collection_') || a.startsWith('vibestr_');
-                const bIsMeta = b.startsWith('collection_') || b.startsWith('vibestr_');
+                // Special badges go to the end
+                if (a === 'vibe_bounty_hunter') return 1;
+                if (b === 'vibe_bounty_hunter') return -1;
+                // Meta badges go after NFT badges but before special
+                const aIsMeta = a.startsWith('collection_') || a.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === a);
+                const bIsMeta = b.startsWith('collection_') || b.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === b);
                 if (aIsMeta && !bIsMeta) return 1;
                 if (!aIsMeta && bIsMeta) return -1;
                 if (aIsMeta && bIsMeta) return 0;
@@ -1162,15 +1333,16 @@
                 return aLen - bLen;
             });
             
-            // Update stats - total badges includes meta badges
-            const totalPossibleBadges = allBadges.length + COMBO_BADGES.length + COLLECTION_BADGE_THRESHOLDS.length + VIBESTR_TIERS.length;
-            const completion = Math.round((ownedBadgeNames.length / totalPossibleBadges) * 100);
+            // Update stats - use fixed total of 89
+            const ownedCount = ownedBadgeNames.length + (vibeBountyHunterClaimed ? 1 : 0);
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
             
             // Find rarest badge owned (fewest NFTs have it) - skip meta badges
             let rarestBadge = '-';
             let rarestCount = Infinity;
             ownedBadgeNames.forEach(badge => {
                 if (badge.startsWith('collection_') || badge.startsWith('vibestr_')) return;
+                if (COMBO_BADGES.some(cb => cb.name === badge)) return;
                 const tokens = badgeData[badge];
                 if (!tokens) return;
                 const count = Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
@@ -1181,13 +1353,13 @@
             });
             
             document.getElementById('nftCount').textContent = tokenIds.length;
-            document.getElementById('ownedBadges').textContent = ownedBadgeNames.length;
-            document.getElementById('missingBadges').textContent = missingBadgesList.length;
+            document.getElementById('ownedBadges').textContent = ownedCount;
+            document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
             document.getElementById('rarestBadge').textContent = rarestBadge;
             document.getElementById('completionPct').textContent = `${completion}%`;
             document.getElementById('progressFill').style.width = `${completion}%`;
-            document.getElementById('ownedTabCount').textContent = ownedBadgeNames.length;
-            document.getElementById('missingTabCount').textContent = missingBadgesList.length;
+            document.getElementById('ownedTabCount').textContent = ownedCount;
+            document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
             
             // Render badge grids
             renderOwnedBadges();
@@ -1216,7 +1388,7 @@
                 return b[1].length - a[1].length;
             });
             
-            grid.innerHTML = sorted.map(([badge, tokens]) => {
+            let html = sorted.map(([badge, tokens]) => {
                 const color = getBadgeColor(badge);
                 const isGradient = color.includes('gradient');
                 const style = isGradient 
@@ -1236,6 +1408,20 @@
                     </div>
                 `;
             }).join('');
+            
+            // Add VIBE Bounty Hunter if claimed
+            if (vibeBountyHunterClaimed) {
+                const color = getBadgeColor('vibe_bounty_hunter');
+                html += `
+                    <div class="badge-item" style="cursor: default;">
+                        <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
+                        <span class="badge-count" style="color: var(--accent-green);">✓</span>
+                        <span class="badge-note">Self-reported badge</span>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
         }
         
         function renderMissingBadges() {
@@ -1243,7 +1429,7 @@
             
             grid.innerHTML = missingBadgesList.map(badge => {
                 const color = getBadgeColor(badge);
-                const isGradient = color.includes('gradient');
+                const isGradient = color.includes && color.includes('gradient');
                 const style = isGradient 
                     ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
                     : `color: ${color};`;
@@ -1251,12 +1437,23 @@
                 const comboInfo = COMBO_BADGES.find(cb => cb.name === badge);
                 const isCombo = !!comboInfo;
                 const isMeta = badge.startsWith('collection_') || badge.startsWith('vibestr_') || isCombo;
+                const isSpecial = badge === 'vibe_bounty_hunter';
                 let requirement = '';
                 let progressBar = '';
+                let extraContent = '';
                 
-                if (badge.startsWith('collection_')) {
+                if (isSpecial) {
+                    requirement = 'Bought via Gondi or NFT Strategy';
+                    extraContent = `
+                        <div class="bounty-checkbox-container">
+                            <input type="checkbox" id="bountyHunterCheck" onchange="toggleBountyHunter(this.checked)">
+                            <label for="bountyHunterCheck">I have this badge</label>
+                        </div>
+                        <span class="badge-note">We can't verify this badge - check if you have it</span>
+                    `;
+                } else if (badge.startsWith('collection_')) {
                     const num = badge.replace('collection_', '');
-                    requirement = `Earn ${num} badges`;
+                    requirement = `Collect ${num} badges`;
                 } else if (badge.startsWith('vibestr_')) {
                     const tier = VIBESTR_TIERS.find(t => t.name === badge);
                     requirement = tier ? `Hold ${tier.threshold.toLocaleString()} $VIBESTR` : '';
@@ -1280,17 +1477,47 @@
                     requirement = `${rarity} NFTs have this`;
                 }
                 
-                const clickHandler = isMeta ? '' : `onclick="showBadgeNFTs('${badge}', false)"`;
-                const cursorStyle = isMeta ? 'cursor: default;' : '';
+                const clickHandler = (isMeta || isSpecial) ? '' : `onclick="showBadgeNFTs('${badge}', false)"`;
+                const cursorStyle = (isMeta || isSpecial) ? 'cursor: default;' : '';
                 
                 return `
                     <div class="badge-item missing" ${clickHandler} style="${cursorStyle}">
                         <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
                         <span class="badge-count">${requirement}</span>
                         ${progressBar}
+                        ${extraContent}
                     </div>
                 `;
             }).join('');
+        }
+        
+        function toggleBountyHunter(checked) {
+            vibeBountyHunterClaimed = checked;
+            
+            // Update counts
+            const ownedCount = Object.keys(walletBadges).length + (vibeBountyHunterClaimed ? 1 : 0);
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            document.getElementById('ownedBadges').textContent = ownedCount;
+            document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
+            document.getElementById('completionPct').textContent = `${completion}%`;
+            document.getElementById('progressFill').style.width = `${completion}%`;
+            document.getElementById('ownedTabCount').textContent = ownedCount;
+            document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
+            
+            // Re-render both grids
+            if (checked) {
+                // Remove from missing list
+                missingBadgesList = missingBadgesList.filter(b => b !== 'vibe_bounty_hunter');
+            } else {
+                // Add back to missing list
+                if (!missingBadgesList.includes('vibe_bounty_hunter')) {
+                    missingBadgesList.push('vibe_bounty_hunter');
+                }
+            }
+            
+            renderOwnedBadges();
+            renderMissingBadges();
         }
         
         function showTab(tab) {
