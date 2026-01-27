@@ -805,9 +805,45 @@
             border-color: var(--accent-cyan);
         }
         
+        .share-nft-option {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .share-nft-option:hover {
+            border-color: var(--accent-cyan);
+        }
+        
         .share-nft-option.selected {
             border-color: var(--accent-gold);
             box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+        }
+        
+        .share-nft-option.rare {
+            border-color: var(--accent-purple);
+        }
+        
+        .share-nft-option.rare::after {
+            content: '★';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--accent-purple);
+            color: #fff;
+            font-size: 8px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .share-nft-option img {
@@ -2589,7 +2625,15 @@
         function showShareModal(mode) {
             shareMode = mode;
             selectedShareBadges = [];
-            selectedShareNft = walletNFTs.length > 0 ? walletNFTs[0] : null;
+            
+            // Auto-select the NFT that earned the rarest badge
+            if (rarestBadgeData.tokenId) {
+                selectedShareNft = rarestBadgeData.tokenId;
+            } else if (walletNFTs.length > 0) {
+                selectedShareNft = walletNFTs[0];
+            } else {
+                selectedShareNft = null;
+            }
             
             const modal = document.getElementById('shareModal');
             const title = document.getElementById('shareModalTitle');
@@ -2621,13 +2665,27 @@
         function buildNftPicker() {
             const picker = document.getElementById('shareNftPicker');
             
-            // Show first 20 NFTs
-            const nftsToShow = walletNFTs.slice(0, 20);
+            // Sort NFTs: ones that earned rare badges first
+            const nftsByRarity = walletNFTs.slice().sort((a, b) => {
+                // Get the rarest badge each NFT has
+                const badgesA = window.tokenToBadges ? (window.tokenToBadges[a] || window.tokenToBadges[String(a)] || []) : [];
+                const badgesB = window.tokenToBadges ? (window.tokenToBadges[b] || window.tokenToBadges[String(b)] || []) : [];
+                
+                // Find rarest badge for each (lowest rarity number = rarest)
+                const rarestA = badgesA.length > 0 ? Math.min(...badgesA.map(badge => getBadgeRarity(badge))) : 99999;
+                const rarestB = badgesB.length > 0 ? Math.min(...badgesB.map(badge => getBadgeRarity(badge))) : 99999;
+                
+                return rarestA - rarestB;
+            });
             
-            picker.innerHTML = nftsToShow.map(tokenId => {
+            picker.innerHTML = nftsByRarity.map(tokenId => {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 const isSelected = tokenId === selectedShareNft || String(tokenId) === String(selectedShareNft);
-                return '<div class="share-nft-option ' + (isSelected ? 'selected' : '') + '" onclick="selectShareNft(\'' + tokenId + '\')">' +
+                const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                const rarestBadge = badges.length > 0 ? badges.reduce((a, b) => getBadgeRarity(a) < getBadgeRarity(b) ? a : b) : null;
+                const isRare = rarestBadge && getBadgeRarity(rarestBadge) < 100; // Highlight if badge has <100 holders
+                
+                return '<div class="share-nft-option ' + (isSelected ? 'selected' : '') + (isRare ? ' rare' : '') + '" onclick="selectShareNft(\'' + tokenId + '\')" title="' + (rarestBadge ? formatBadgeName(rarestBadge) : '#' + tokenId) + '">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:10px;">#' + tokenId + '</div>') +
                     '</div>';
             }).join('');
