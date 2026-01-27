@@ -238,11 +238,12 @@
         }
         
         .rarest-nft-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
             object-fit: cover;
             border: 2px solid var(--accent-gold);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
         }
         
         .rarest-badge-name {
@@ -340,6 +341,11 @@
             background: var(--accent-cyan);
             color: #000;
             border-color: var(--accent-cyan);
+        }
+        
+        .sort-btn .arrow {
+            margin-left: 4px;
+            font-size: 10px;
         }
         
         /* Share Buttons */
@@ -915,9 +921,9 @@
                     </div>
                     <div class="sort-controls">
                         <span class="sort-label">Sort:</span>
-                        <button class="sort-btn active" data-sort="rarity" onclick="setSortMode('rarity')">Rarity</button>
-                        <button class="sort-btn" data-sort="quantity" onclick="setSortMode('quantity')">Quantity</button>
-                        <button class="sort-btn" data-sort="alpha" onclick="setSortMode('alpha')">A-Z</button>
+                        <button class="sort-btn active" data-sort="rarity" onclick="setSortMode('rarity')">Rarity <span class="arrow">↑</span></button>
+                        <button class="sort-btn" data-sort="quantity" onclick="setSortMode('quantity')">Quantity <span class="arrow">↓</span></button>
+                        <button class="sort-btn" data-sort="alpha" onclick="setSortMode('alpha')">A-Z <span class="arrow">↓</span></button>
                     </div>
                 </div>
                 
@@ -997,6 +1003,7 @@
         
         // New state variables
         let currentSortMode = 'rarity';
+        let sortDirection = 'asc'; // 'asc' or 'desc'
         let currentTab = 'owned';
         let shareMode = 'owned';
         let rarestBadgeData = { badge: null, badgeName: '-', tokenId: null };
@@ -2282,10 +2289,46 @@
         // SORTING FUNCTIONALITY
         // ========================================
         function setSortMode(mode) {
-            currentSortMode = mode;
+            // If clicking the same mode, toggle direction
+            if (currentSortMode === mode) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortMode = mode;
+                // Default directions for each mode
+                if (mode === 'rarity') {
+                    sortDirection = 'asc'; // Rarest first
+                } else if (mode === 'quantity') {
+                    sortDirection = 'desc'; // Most owned first
+                } else if (mode === 'alpha') {
+                    sortDirection = 'asc'; // A-Z
+                }
+            }
+            
+            // Update button states and arrows
             document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.sort === mode);
+                const isActive = btn.dataset.sort === mode;
+                btn.classList.toggle('active', isActive);
+                
+                // Update arrow for active button
+                const arrow = btn.querySelector('.arrow');
+                if (arrow) {
+                    if (isActive) {
+                        arrow.textContent = sortDirection === 'asc' ? '↑' : '↓';
+                    } else {
+                        // Reset inactive buttons to default arrows
+                        if (btn.dataset.sort === 'rarity') arrow.textContent = '↑';
+                        else arrow.textContent = '↓';
+                    }
+                }
+                
+                // Update button text for alpha
+                if (btn.dataset.sort === 'alpha' && isActive) {
+                    btn.innerHTML = (sortDirection === 'asc' ? 'A-Z' : 'Z-A') + ' <span class="arrow">' + (sortDirection === 'asc' ? '↓' : '↑') + '</span>';
+                } else if (btn.dataset.sort === 'alpha' && !isActive) {
+                    btn.innerHTML = 'A-Z <span class="arrow">↓</span>';
+                }
             });
+            
             if (currentTab === 'owned') {
                 renderOwnedBadges();
             } else {
@@ -2302,27 +2345,43 @@
         }
         
         function sortBadges(badges, isOwned) {
-            return badges.slice().sort((a, b) => {
+            const sorted = badges.slice().sort((a, b) => {
                 const badgeA = isOwned ? a[0] : a;
                 const badgeB = isOwned ? b[0] : b;
                 
+                // Special badges always go last
                 if (badgeA === 'vibe_bounty_hunter') return 1;
                 if (badgeB === 'vibe_bounty_hunter') return -1;
                 
+                let result = 0;
                 switch (currentSortMode) {
                     case 'rarity':
-                        return getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                        result = getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                        break;
                     case 'quantity':
                         if (isOwned) {
-                            return b[1].length - a[1].length;
+                            result = b[1].length - a[1].length; // Default: most first
+                            if (sortDirection === 'asc') result = -result;
+                            return result;
                         }
-                        return getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                        result = getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                        break;
                     case 'alpha':
-                        return formatBadgeName(badgeA).localeCompare(formatBadgeName(badgeB));
+                        result = formatBadgeName(badgeA).localeCompare(formatBadgeName(badgeB));
+                        break;
                     default:
                         return 0;
                 }
+                
+                // Apply direction (except quantity which is handled above)
+                if (currentSortMode !== 'quantity' && sortDirection === 'desc') {
+                    result = -result;
+                }
+                
+                return result;
             });
+            
+            return sorted;
         }
         
         // ========================================
