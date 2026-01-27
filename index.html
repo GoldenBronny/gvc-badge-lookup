@@ -201,6 +201,11 @@
             padding: 24px;
             text-align: center;
             transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 160px;
         }
         
         .stat-card.clickable {
@@ -214,9 +219,10 @@
         
         .stat-card .value {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 2rem;
+            font-size: 3.5rem;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+            line-height: 1;
         }
         
         .stat-card .label {
@@ -234,21 +240,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
             padding: 16px;
+            min-height: 160px;
         }
         
         .rarest-nft-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 12px;
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
             object-fit: cover;
             border: 3px solid var(--accent-gold);
             box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
         }
         
         .rarest-badge-name {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: var(--accent-gold);
             text-align: center;
@@ -257,7 +265,7 @@
         
         .stat-card.rarest .label {
             font-size: 12px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         
         /* Completion Bar */
