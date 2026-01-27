@@ -33,38 +33,63 @@
             overflow-x: hidden;
         }
         
-        /* Floating NFT decorations */
-        .floating-nft {
+        /* Floating NFT decorations - dynamic */
+        .floating-nfts-container {
             position: fixed;
-            width: 120px;
-            height: 120px;
-            border-radius: 16px;
-            opacity: 0.6;
-            transition: opacity 0.3s, transform 0.3s;
-            z-index: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             pointer-events: none;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 0;
         }
         
-        .floating-nft:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
+        .floating-nft {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            opacity: 0.5;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-nft:nth-child(odd) { animation-delay: -3s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+            50% { transform: translateY(-10px) rotate(var(--rotate, 0deg)); }
         }
         
         .floating-nft img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 16px;
+            border-radius: 12px;
         }
         
-        .nft-left-1 { top: 15%; left: 2%; transform: rotate(-8deg); }
-        .nft-left-2 { top: 55%; left: 3%; transform: rotate(5deg); }
-        .nft-right-1 { top: 20%; right: 2%; transform: rotate(8deg); }
-        .nft-right-2 { top: 60%; right: 3%; transform: rotate(-5deg); }
+        /* Left side positions (up to 8) */
+        .floating-nft.left-0 { top: 3%; left: 1%; --rotate: -8deg; }
+        .floating-nft.left-1 { top: 14%; left: 2.5%; --rotate: 5deg; }
+        .floating-nft.left-2 { top: 25%; left: 1.5%; --rotate: -3deg; }
+        .floating-nft.left-3 { top: 36%; left: 3%; --rotate: 7deg; }
+        .floating-nft.left-4 { top: 47%; left: 1%; --rotate: -6deg; }
+        .floating-nft.left-5 { top: 58%; left: 2.5%; --rotate: 4deg; }
+        .floating-nft.left-6 { top: 69%; left: 1.5%; --rotate: -5deg; }
+        .floating-nft.left-7 { top: 80%; left: 3%; --rotate: 3deg; }
+        
+        /* Right side positions (up to 8) */
+        .floating-nft.right-0 { top: 3%; right: 1%; --rotate: 8deg; }
+        .floating-nft.right-1 { top: 14%; right: 2.5%; --rotate: -5deg; }
+        .floating-nft.right-2 { top: 25%; right: 1.5%; --rotate: 3deg; }
+        .floating-nft.right-3 { top: 36%; right: 3%; --rotate: -7deg; }
+        .floating-nft.right-4 { top: 47%; right: 1%; --rotate: 6deg; }
+        .floating-nft.right-5 { top: 58%; right: 2.5%; --rotate: -4deg; }
+        .floating-nft.right-6 { top: 69%; right: 1.5%; --rotate: 5deg; }
+        .floating-nft.right-7 { top: 80%; right: 3%; --rotate: -3deg; }
         
         @media (max-width: 1400px) {
-            .floating-nft { display: none; }
+            .floating-nfts-container { display: none; }
         }
         
         .container {
@@ -175,6 +200,16 @@
             border-radius: 16px;
             padding: 24px;
             text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .stat-card.clickable {
+            cursor: pointer;
+        }
+        
+        .stat-card.clickable:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-cyan);
         }
         
         .stat-card .value {
@@ -193,6 +228,30 @@
         .stat-card.green .value { color: var(--accent-green); }
         .stat-card.pink .value { color: var(--accent-pink); }
         .stat-card.gold .value { color: var(--accent-gold); }
+        
+        /* Rarest badge card with image */
+        .stat-card.rarest {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .rarest-nft-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--accent-gold);
+        }
+        
+        .rarest-badge-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            text-align: center;
+            line-height: 1.2;
+        }
         
         /* Completion Bar */
         .completion-section {
@@ -235,10 +294,88 @@
         }
         
         /* Badge Tabs */
+        .tabs-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
         .tabs {
             display: flex;
             gap: 8px;
+        }
+        
+        /* Sort Controls */
+        .sort-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .sort-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .sort-btn {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .sort-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+        
+        .sort-btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            border-color: var(--accent-cyan);
+        }
+        
+        /* Share Buttons */
+        .share-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .share-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .share-btn.owned {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: #000;
+        }
+        
+        .share-btn.hunting {
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            color: #fff;
         }
         
         .tab {
@@ -468,6 +605,154 @@
             background: var(--bg-card);
         }
         
+        /* NFT Gallery Grid - larger cards with badge info */
+        .nft-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        
+        .nft-gallery-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .nft-gallery-card:hover {
+            transform: scale(1.03);
+            border-color: var(--accent-cyan);
+        }
+        
+        .nft-gallery-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .nft-gallery-info {
+            padding: 10px;
+            background: var(--bg-card);
+        }
+        
+        .nft-gallery-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        
+        .nft-gallery-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .nft-badge-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-hover);
+            color: var(--accent-cyan);
+            white-space: nowrap;
+        }
+        
+        /* Share Modal Styles */
+        .share-modal {
+            max-width: 500px;
+        }
+        
+        .share-preview {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0f1020 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .share-preview-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .share-preview-header h3 {
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .share-preview-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .share-stat {
+            text-align: center;
+        }
+        
+        .share-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .share-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .share-badges-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .share-badge-tag {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--bg-card);
+        }
+        
+        .share-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .share-action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+        
+        .share-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .share-action-btn.copy {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+        
+        .share-action-btn.twitter {
+            background: #1DA1F2;
+            color: #fff;
+        }
+        
         /* Loading State */
         .loading {
             text-align: center;
@@ -542,6 +827,10 @@
             .search-box button { width: 100%; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .tabs { flex-wrap: wrap; }
+            .tabs-container { flex-direction: column; align-items: stretch; }
+            .sort-controls { justify-content: center; }
+            .share-buttons { flex-direction: column; }
+            .share-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -572,9 +861,9 @@
             
             <div id="resultsContent" style="display: none;">
                 <div class="stats-grid">
-                    <div class="stat-card cyan">
+                    <div class="stat-card cyan clickable" onclick="showNFTGallery()">
                         <div class="value" id="nftCount">0</div>
-                        <div class="label">GVC NFTs</div>
+                        <div class="label">GVC NFTs (click to view)</div>
                     </div>
                     <div class="stat-card green">
                         <div class="value" id="ownedBadges">0</div>
@@ -584,9 +873,10 @@
                         <div class="value" id="missingBadges">0</div>
                         <div class="label">Missing</div>
                     </div>
-                    <div class="stat-card gold">
-                        <div class="value" id="rarestBadge" style="font-size: 1rem;">-</div>
+                    <div class="stat-card gold rarest" id="rarestCard">
                         <div class="label">Rarest Badge</div>
+                        <img class="rarest-nft-img" id="rarestNftImg" src="" alt="Rarest NFT" style="display: none;">
+                        <div class="rarest-badge-name" id="rarestBadge">-</div>
                     </div>
                 </div>
                 
@@ -600,9 +890,35 @@
                     </div>
                 </div>
                 
-                <div class="tabs">
-                    <button class="tab active" onclick="showTab('owned')">Owned (<span id="ownedTabCount">0</span>)</button>
-                    <button class="tab missing" onclick="showTab('missing')">Missing (<span id="missingTabCount">0</span>)</button>
+                <div class="share-buttons">
+                    <button class="share-btn owned" onclick="showShareModal('owned')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                            <polyline points="16 6 12 2 8 6"/>
+                            <line x1="12" y1="2" x2="12" y2="15"/>
+                        </svg>
+                        Share My Badges
+                    </button>
+                    <button class="share-btn hunting" onclick="showShareModal('hunting')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        I'm On The Hunt
+                    </button>
+                </div>
+                
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="showTab('owned')">Owned (<span id="ownedTabCount">0</span>)</button>
+                        <button class="tab missing" onclick="showTab('missing')">Missing (<span id="missingTabCount">0</span>)</button>
+                    </div>
+                    <div class="sort-controls">
+                        <span class="sort-label">Sort:</span>
+                        <button class="sort-btn active" data-sort="rarity" onclick="setSortMode('rarity')">Rarity</button>
+                        <button class="sort-btn" data-sort="quantity" onclick="setSortMode('quantity')">Quantity</button>
+                        <button class="sort-btn" data-sort="alpha" onclick="setSortMode('alpha')">A-Z</button>
+                    </div>
                 </div>
                 
                 <div class="badge-grid" id="ownedGrid"></div>
@@ -622,19 +938,8 @@
         </footer>
     </div>
     
-    <!-- Floating NFT Decorations -->
-    <div class="floating-nft nft-left-1">
-        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/143349dabbea4adb108d88ea458ae4/b8143349dabbea4adb108d88ea458ae4.jpeg" alt="GVC #4182">
-    </div>
-    <div class="floating-nft nft-left-2">
-        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/bbf83d63359c01c672a3ff7ee5b9d6/b1bbf83d63359c01c672a3ff7ee5b9d6.jpeg" alt="GVC #3128">
-    </div>
-    <div class="floating-nft nft-right-1">
-        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/7e5cce86e8d33f0ed69a1e115446d3/5c7e5cce86e8d33f0ed69a1e115446d3.jpeg" alt="GVC #5313">
-    </div>
-    <div class="floating-nft nft-right-2">
-        <img src="https://i2c.seadn.io/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/f0571694cd42aa1b0568b042c1df21/64f0571694cd42aa1b0568b042c1df21.jpeg" alt="GVC #4194">
-    </div>
+    <!-- Dynamic Floating NFTs Container -->
+    <div class="floating-nfts-container" id="floatingNftsContainer"></div>
     
     <!-- NFT Preview Modal -->
     <div class="modal-overlay" id="modal" onclick="closeModal(event)">
@@ -650,6 +955,36 @@
         </div>
     </div>
     
+    <!-- NFT Gallery Modal -->
+    <div class="modal-overlay" id="galleryModal" onclick="closeGalleryModal(event)">
+        <div class="modal" style="max-width: 1000px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="galleryTitle">Your GVC Collection</h2>
+                <button class="modal-close" onclick="closeGalleryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="nft-gallery-grid" id="galleryNFTs"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Share Modal -->
+    <div class="modal-overlay" id="shareModal" onclick="closeShareModal(event)">
+        <div class="modal share-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="shareModalTitle">Share Your Badges</h2>
+                <button class="modal-close" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="share-preview" id="sharePreview"></div>
+                <div class="share-actions">
+                    <button class="share-action-btn copy" onclick="copyShareText()">📋 Copy Text</button>
+                    <button class="share-action-btn twitter" onclick="shareToTwitter()">𝕏 Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Badge data will be loaded from GVC's API
         let badgeData = {};
@@ -659,6 +994,12 @@
         let walletBadges = {};
         let missingBadgesList = [];
         let ownedTypesGlobal = []; // Store owned types for use in renderMissingBadges
+        
+        // New state variables
+        let currentSortMode = 'rarity';
+        let currentTab = 'owned';
+        let shareMode = 'owned';
+        let rarestBadgeData = { badge: null, badgeName: '-', tokenId: null };
         
         // VIBE Bounty Hunter self-report state (0, 1, or 2)
         let vibeBountyHunterCount = 0;
@@ -1017,12 +1358,23 @@
         loadTypeData();
         loadSpecialTraitsData();
         
+        // Load last wallet from localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastWallet = localStorage.getItem('gvc_last_wallet');
+            if (lastWallet) {
+                document.getElementById('walletInput').value = lastWallet;
+            }
+        });
+        
         // Store resolved addresses for VIBESTR lookup
         let resolvedAddresses = [];
         
         async function lookupWallet() {
             const input = document.getElementById('walletInput').value.trim();
             if (!input) return;
+            
+            // Save to localStorage
+            localStorage.setItem('gvc_last_wallet', input);
             
             const results = document.getElementById('results');
             const loading = document.getElementById('loading');
@@ -1088,6 +1440,9 @@
                 processResults(tokenIds, vibestrBalance);
                 loading.style.display = 'none';
                 content.style.display = 'block';
+                
+                // Update floating NFTs with wallet's NFTs
+                updateFloatingNFTs(tokenIds);
                 
             } catch (err) {
                 console.error(err);
@@ -1279,6 +1634,921 @@
                 requirement: '5 different Plastic colors', 
                 check: (types) => countUniqueByPrefix(types, 'Plastic') >= 5,
                 progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Plastic'), needed: 5 })
+            },
+            { 
+                name: 'robot_high_five', 
+                requirement: '5 different Robot colors', 
+                check: (types) => countUniqueByPrefix(types, 'Robot') >= 5,
+                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Robot'), needed: 5 })
+            },
+            { 
+                name: 'power_duo', 
+                requirement: '2 GVCs of same type & color', 
+                check: (types) => hasDuplicateType(types),
+                progress: (types, tokenIds) => ({ current: getMaxDuplicateCount(types), needed: 2 })
+            },
+            { 
+                name: 'chris_favorite', 
+                requirement: '2 Grayscale GVCs', 
+                check: (types) => countByType(types, 'Grayscale') >= 2,
+                progress: (types, tokenIds) => ({ current: countByType(types, 'Grayscale'), needed: 2 })
+            },
+            { 
+                name: 'multi_type_master', 
+                requirement: '1 Plastic + 1 Gradient + 1 Robot', 
+                check: (types) => hasAllThreeTypes(types),
+                progress: (types, tokenIds) => {
+                    let count = 0;
+                    if (types.some(t => t && t.startsWith('Plastic'))) count++;
+                    if (types.some(t => t && t.startsWith('Gradient'))) count++;
+                    if (types.some(t => t && t.startsWith('Robot'))) count++;
+                    return { current: count, needed: 3 };
+                }
+            },
+            { 
+                name: 'yin_n_yang', 
+                requirement: 'Own Grayscale + Rainbow', 
+                check: (types) => hasGrayscaleAndRainbow(types),
+                progress: (types, tokenIds) => {
+                    let count = 0;
+                    if (types.some(t => t === 'Grayscale')) count++;
+                    if (types.some(t => t === 'Rainbow')) count++;
+                    return { current: count, needed: 2 };
+                }
+            },
+            { 
+                name: 'mountain_goat', 
+                requirement: '2 NFTs with Snowboard Goggles or Puffy Jacket', 
+                check: (types, tokenIds) => hasMountainGoatTraits(tokenIds),
+                progress: (types, tokenIds) => ({ current: countMountainGoatTraits(tokenIds), needed: 2 })
+            },
+            { 
+                name: 'elite_rainbow_ranger', 
+                requirement: 'Rainbow Type + Plastic Armor/Helmet', 
+                check: (types, tokenIds) => hasRainbowWarrior(types, tokenIds),
+                progress: (types, tokenIds) => getRainbowWarriorProgress(types, tokenIds)
+            }
+        ];
+        
+        // Helper functions for combo badge checks
+        function countUniqueByPrefix(types, prefix) {
+            const unique = new Set(types.filter(t => t && t.startsWith(prefix)));
+            return unique.size;
+        }
+        
+        function countByType(types, exactType) {
+            return types.filter(t => t === exactType).length;
+        }
+        
+        function hasDuplicateType(types) {
+            const counts = {};
+            for (const t of types) {
+                if (t) {
+                    counts[t] = (counts[t] || 0) + 1;
+                    if (counts[t] >= 2) return true;
+                }
+            }
+            return false;
+        }
+        
+        function getMaxDuplicateCount(types) {
+            const counts = {};
+            let max = 0;
+            for (const t of types) {
+                if (t) {
+                    counts[t] = (counts[t] || 0) + 1;
+                    max = Math.max(max, counts[t]);
+                }
+            }
+            return Math.min(max, 2);
+        }
+        
+        function hasAllThreeTypes(types) {
+            const hasPlastic = types.some(t => t && t.startsWith('Plastic'));
+            const hasGradient = types.some(t => t && t.startsWith('Gradient'));
+            const hasRobot = types.some(t => t && t.startsWith('Robot'));
+            return hasPlastic && hasGradient && hasRobot;
+        }
+        
+        function hasGrayscaleAndRainbow(types) {
+            const hasGrayscale = types.some(t => t === 'Grayscale');
+            const hasRainbow = types.some(t => t === 'Rainbow');
+            return hasGrayscale && hasRainbow;
+        }
+        
+        function hasMountainGoatTraits(tokenIds) {
+            return countMountainGoatTraits(tokenIds) >= 2;
+        }
+        
+        function countMountainGoatTraits(tokenIds) {
+            let count = 0;
+            for (const tokenId of tokenIds) {
+                const traits = specialTraitsData[tokenId] || specialTraitsData[String(tokenId)];
+                if (traits && traits.length > 0) {
+                    count++;
+                }
+            }
+            return Math.min(count, 2);
+        }
+        
+        const PLASTIC_ARMOR_HELMET_IDS = new Set(["1", "113", "122", "138", "181", "270", "281", "282", "284", "303", "307", "394", "396", "427", "556", "572", "593", "614", "626", "644", "668", "688", "703", "716", "784", "817", "822", "931", "952", "959", "968", "993", "1000", "1023", "1037", "1052", "1073", "1075", "1078", "1171", "1217", "1239", "1240", "1261", "1267", "1311", "1315", "1319", "1426", "1436", "1466", "1481", "1528", "1536", "1547", "1582", "1594", "1624", "1652", "1653", "1657", "1740", "1746", "1755", "1787", "1815", "1818", "1820", "1861", "1879", "1908", "1909", "1926", "2021", "2060", "2077", "2140", "2196", "2229", "2270", "2281", "2318", "2345", "2358", "2366", "2422", "2423", "2465", "2470", "2490", "2509", "2579", "2604", "2698", "2724", "2732", "2763", "2810", "2828", "2837", "2853", "2905", "2965", "2991", "3025", "3175", "3189", "3206", "3276", "3284", "3329", "3333", "3334", "3371", "3392", "3471", "3526", "3548", "3574", "3616", "3635", "3656", "3669", "3695", "3760", "3804", "3823", "3849", "3872", "3875", "3884", "3906", "3947", "3988", "4000", "4001", "4062", "4104", "4135", "4179", "4180", "4216", "4246", "4248", "4302", "4332", "4432", "4508", "4570", "4585", "4589", "4600", "4655", "4667", "4684", "4701", "4724", "4799", "4824", "4877", "4884", "4900", "4911", "4930", "4938", "4974", "4977", "4984", "5033", "5041", "5084", "5091", "5104", "5143", "5147", "5158", "5163", "5211", "5229", "5236", "5332", "5346", "5372", "5403", "5438", "5482", "5515", "5527", "5528", "5531", "5576", "5578", "5596", "5667", "5697", "5739", "5745", "5759", "5784", "5806", "5866", "5884", "5976", "5979", "5999", "6030", "6164", "6186", "6189", "6222", "6226", "6240", "6326", "6361", "6371", "6383", "6389", "6394", "6414", "6441", "6472", "6511", "6557", "6578", "6636", "6653", "6656", "6691", "6703", "6712", "6753", "6760", "6772", "6777", "6779", "6814", "6921", "6925", "6946"]);
+        
+        function hasRainbowWarrior(types, tokenIds) {
+            const hasRainbow = types.some(t => t === 'Rainbow');
+            const hasPlasticArmorHelmet = tokenIds.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)));
+            return hasRainbow && hasPlasticArmorHelmet;
+        }
+        
+        function getRainbowWarriorProgress(types, tokenIds) {
+            let count = 0;
+            if (types.some(t => t === 'Rainbow')) count++;
+            if (tokenIds.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)))) count++;
+            return { current: count, needed: 2 };
+        }
+        
+        let comboBadgeProgress = {};
+        
+        function calculateComboBadges(tokenIds) {
+            const ownedTypes = tokenIds.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+            ownedTypesGlobal = ownedTypes;
+            
+            const results = {};
+            comboBadgeProgress = {};
+            
+            COMBO_BADGES.forEach(badge => {
+                const earned = badge.check(ownedTypes, tokenIds);
+                results[badge.name] = earned;
+                
+                if (!earned && badge.progress) {
+                    comboBadgeProgress[badge.name] = badge.progress(ownedTypes, tokenIds);
+                }
+            });
+            
+            return results;
+        }
+        
+        const TOTAL_BADGES = 89;
+        
+        function processResults(tokenIds, vibestrBalance = 0) {
+            walletBadges = {};
+            let totalBadgeCount = 0;
+            
+            if (window.tokenToBadges) {
+                tokenIds.forEach(tokenId => {
+                    const badges = window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || [];
+                    badges.forEach(badge => {
+                        if (!walletBadges[badge]) {
+                            walletBadges[badge] = [];
+                        }
+                        walletBadges[badge].push(tokenId);
+                        totalBadgeCount++;
+                    });
+                });
+            } else {
+                tokenIds.forEach(tokenId => {
+                    Object.entries(badgeData).forEach(([badge, tokens]) => {
+                        let tokenList = Array.isArray(tokens) ? tokens : Object.values(tokens);
+                        const hasToken = tokenList.some(t => 
+                            String(t) === String(tokenId) || parseInt(t) === parseInt(tokenId)
+                        );
+                        
+                        if (hasToken) {
+                            if (!walletBadges[badge]) {
+                                walletBadges[badge] = [];
+                            }
+                            walletBadges[badge].push(tokenId);
+                            totalBadgeCount++;
+                        }
+                    });
+                });
+            }
+            
+            const nftBadgeCount = Object.keys(walletBadges).length;
+            
+            const comboBadges = calculateComboBadges(tokenIds);
+            const earnedComboBadges = [];
+            const missingComboBadges = [];
+            
+            Object.entries(comboBadges).forEach(([badge, earned]) => {
+                if (earned) {
+                    walletBadges[badge] = ['meta'];
+                    earnedComboBadges.push(badge);
+                } else {
+                    missingComboBadges.push(badge);
+                }
+            });
+            
+            const earnedVibestrBadges = [];
+            const missingVibestrBadges = [];
+            VIBESTR_TIERS.forEach(tier => {
+                if (vibestrBalance >= tier.threshold) {
+                    walletBadges[tier.name] = ['meta'];
+                    earnedVibestrBadges.push(tier.name);
+                } else {
+                    missingVibestrBadges.push(tier.name);
+                }
+            });
+            
+            let badgeCountForCollection = Object.keys(walletBadges).length;
+            
+            const earnedCollectionBadges = [];
+            const missingCollectionBadges = [];
+            COLLECTION_BADGE_THRESHOLDS.forEach(threshold => {
+                const badgeName = `collection_${threshold}`;
+                if (badgeCountForCollection >= threshold) {
+                    walletBadges[badgeName] = ['meta'];
+                    earnedCollectionBadges.push(badgeName);
+                    badgeCountForCollection++;
+                } else {
+                    missingCollectionBadges.push(badgeName);
+                }
+            });
+            
+            const allBadges = Object.keys(badgeData);
+            const ownedBadgeNames = Object.keys(walletBadges);
+            missingBadgesList = allBadges.filter(b => !ownedBadgeNames.includes(b));
+            
+            missingBadgesList = [...missingBadgesList, ...missingComboBadges, ...missingCollectionBadges, ...missingVibestrBadges];
+            
+            if (vibeBountyHunterCount < 1) {
+                missingBadgesList.push('vibe_bounty_hunter');
+            }
+            
+            // Sort missing by rarity
+            missingBadgesList.sort((a, b) => {
+                if (a === 'vibe_bounty_hunter') return 1;
+                if (b === 'vibe_bounty_hunter') return -1;
+                const aIsMeta = a.startsWith('collection_') || a.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === a);
+                const bIsMeta = b.startsWith('collection_') || b.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === b);
+                if (aIsMeta && !bIsMeta) return 1;
+                if (!aIsMeta && bIsMeta) return -1;
+                if (aIsMeta && bIsMeta) return 0;
+                
+                const aTokens = badgeData[a];
+                const bTokens = badgeData[b];
+                const aLen = aTokens ? (Array.isArray(aTokens) ? aTokens.length : Object.keys(aTokens).length) : 999;
+                const bLen = bTokens ? (Array.isArray(bTokens) ? bTokens.length : Object.keys(bTokens).length) : 999;
+                return aLen - bLen;
+            });
+            
+            const ownedCount = ownedBadgeNames.length + vibeBountyHunterCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            // Find rarest badge owned and the NFT that earned it
+            let rarestBadge = '-';
+            let rarestCount = Infinity;
+            let rarestTokenId = null;
+            ownedBadgeNames.forEach(badge => {
+                if (badge.startsWith('collection_') || badge.startsWith('vibestr_')) return;
+                if (COMBO_BADGES.some(cb => cb.name === badge)) return;
+                const tokens = badgeData[badge];
+                if (!tokens) return;
+                const count = Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
+                if (count < rarestCount) {
+                    rarestCount = count;
+                    rarestBadge = formatBadgeName(badge);
+                    // Get the first token ID from this wallet that has this badge
+                    rarestTokenId = walletBadges[badge] ? walletBadges[badge][0] : null;
+                }
+            });
+            
+            rarestBadgeData = { badge: rarestBadge, tokenId: rarestTokenId };
+            
+            document.getElementById('nftCount').textContent = tokenIds.length;
+            document.getElementById('ownedBadges').textContent = ownedCount;
+            document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
+            document.getElementById('rarestBadge').textContent = rarestBadge;
+            document.getElementById('completionPct').textContent = `${completion}%`;
+            document.getElementById('progressFill').style.width = `${completion}%`;
+            document.getElementById('ownedTabCount').textContent = ownedCount;
+            document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
+            
+            // Show rarest NFT image
+            const rarestImg = document.getElementById('rarestNftImg');
+            if (rarestTokenId && imageData[rarestTokenId]) {
+                rarestImg.src = imageData[rarestTokenId];
+                rarestImg.style.display = 'block';
+            } else {
+                rarestImg.style.display = 'none';
+            }
+            
+            renderOwnedBadges();
+            renderMissingBadges();
+            
+            walletNFTs = tokenIds;
+        }
+        
+        // Get badge rarity count
+        function getBadgeRarity(badge) {
+            if (badge.startsWith('collection_') || badge.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === badge)) {
+                return 999999;
+            }
+            const tokens = badgeData[badge];
+            if (!tokens) return 999999;
+            return Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
+        }
+        
+        // Sort functions
+        function sortBadges(badges, mode, isOwned = true) {
+            const sorted = [...badges];
+            
+            const isMetaBadge = (name) => {
+                return name.startsWith('collection_') || 
+                       name.startsWith('vibestr_') || 
+                       COMBO_BADGES.some(cb => cb.name === name) ||
+                       name === 'vibe_bounty_hunter';
+            };
+            
+            sorted.sort((a, b) => {
+                const aKey = isOwned ? a[0] : a;
+                const bKey = isOwned ? b[0] : b;
+                const aIsMeta = isMetaBadge(aKey);
+                const bIsMeta = isMetaBadge(bKey);
+                
+                // Special badges always last
+                if (aKey === 'vibe_bounty_hunter') return 1;
+                if (bKey === 'vibe_bounty_hunter') return -1;
+                
+                // Meta badges after NFT badges
+                if (aIsMeta && !bIsMeta) return 1;
+                if (!aIsMeta && bIsMeta) return -1;
+                
+                // Both meta - keep original order
+                if (aIsMeta && bIsMeta) return 0;
+                
+                // Sort by selected mode
+                if (mode === 'rarity') {
+                    return getBadgeRarity(aKey) - getBadgeRarity(bKey);
+                } else if (mode === 'quantity') {
+                    if (isOwned) {
+                        return b[1].length - a[1].length;
+                    } else {
+                        return getBadgeRarity(aKey) - getBadgeRarity(bKey);
+                    }
+                } else if (mode === 'alpha') {
+                    return formatBadgeName(aKey).localeCompare(formatBadgeName(bKey));
+                }
+                return 0;
+            });
+            
+            return sorted;
+        }
+        
+        function setSortMode(mode) {
+            currentSortMode = mode;
+            
+            // Update active button
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sort === mode);
+            });
+            
+            // Re-render current tab
+            if (currentTab === 'owned') {
+                renderOwnedBadges();
+            } else {
+                renderMissingBadges();
+            }
+        }
+        
+        function renderOwnedBadges() {
+            const grid = document.getElementById('ownedGrid');
+            
+            const isMetaBadge = (name) => {
+                return name.startsWith('collection_') || 
+                       name.startsWith('vibestr_') || 
+                       COMBO_BADGES.some(cb => cb.name === name);
+            };
+            
+            const sorted = sortBadges(Object.entries(walletBadges), currentSortMode, true);
+            
+            let html = sorted.map(([badge, tokens]) => {
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes('gradient');
+                const style = isGradient 
+                    ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                    : `color: ${color};`;
+                
+                const isCombo = COMBO_BADGES.some(cb => cb.name === badge);
+                const isMeta = badge.startsWith('collection_') || badge.startsWith('vibestr_') || isCombo;
+                const countDisplay = isMeta ? '✓' : `×${tokens.length}`;
+                const clickHandler = isMeta ? '' : `onclick="showBadgeNFTs('${badge}', true)"`;
+                const cursorStyle = isMeta ? 'cursor: default;' : '';
+                
+                return `
+                    <div class="badge-item" ${clickHandler} style="${cursorStyle}">
+                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                        <span class="badge-count" style="${isMeta ? 'color: var(--accent-green);' : ''}">${countDisplay}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            if (vibeBountyHunterCount > 0) {
+                const color = getBadgeColor('vibe_bounty_hunter');
+                html += `
+                    <div class="badge-item" style="cursor: default;">
+                        <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
+                        <span class="badge-count" style="color: var(--accent-green);">✓</span>
+                        <span class="badge-note">Self-reported badge</span>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+        
+        function renderMissingBadges() {
+            const grid = document.getElementById('missingGrid');
+            
+            const sorted = sortBadges(missingBadgesList, currentSortMode, false);
+            
+            grid.innerHTML = sorted.map(badge => {
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes && color.includes('gradient');
+                const style = isGradient 
+                    ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                    : `color: ${color};`;
+                
+                const comboInfo = COMBO_BADGES.find(cb => cb.name === badge);
+                const isCombo = !!comboInfo;
+                const isMeta = badge.startsWith('collection_') || badge.startsWith('vibestr_') || isCombo;
+                const isSpecial = badge === 'vibe_bounty_hunter';
+                let requirement = '';
+                let progressBar = '';
+                let extraContent = '';
+                
+                if (isSpecial) {
+                    requirement = 'Bought via Gondi or NFT Strategy';
+                    extraContent = `
+                        <div class="bounty-checkbox-container">
+                            <input type="checkbox" id="bountyHunterCheck1" onchange="updateBountyHunterCount()" ${vibeBountyHunterCount >= 1 ? 'checked' : ''}>
+                            <label for="bountyHunterCheck1">I have this badge</label>
+                        </div>
+                        <span class="badge-note">We can't verify this badge - manually check it if you have it</span>
+                    `;
+                } else if (badge.startsWith('collection_')) {
+                    const num = badge.replace('collection_', '');
+                    requirement = `Collect ${num} badges`;
+                } else if (badge.startsWith('vibestr_')) {
+                    const tier = VIBESTR_TIERS.find(t => t.name === badge);
+                    requirement = tier ? `Hold ${tier.threshold.toLocaleString()} $VIBESTR` : '';
+                } else if (isCombo) {
+                    const progress = comboBadgeProgress[badge];
+                    if (progress && progress.current > 0) {
+                        const pct = Math.round((progress.current / progress.needed) * 100);
+                        requirement = `${progress.current}/${progress.needed} - ${comboInfo.requirement}`;
+                        progressBar = `
+                            <div class="combo-progress">
+                                <div class="combo-progress-fill" style="width: ${pct}%"></div>
+                            </div>
+                        `;
+                        
+                        if (badge.includes('high_five') || badge.includes('hatrick')) {
+                            let typePrefix = '';
+                            if (badge.startsWith('gradient')) typePrefix = 'Gradient';
+                            else if (badge.startsWith('plastic')) typePrefix = 'Plastic';
+                            else if (badge.startsWith('robot')) typePrefix = 'Robot';
+                            
+                            if (typePrefix && ownedTypesGlobal.length > 0) {
+                                const missingColors = getMissingColors(ownedTypesGlobal, typePrefix);
+                                
+                                if (missingColors.length > 0 && missingColors.length <= 5) {
+                                    const colorLinks = missingColors.map(color => 
+                                        `<a href="${getOpenSeaLink(color)}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">${color.replace(typePrefix + ' ', '')}</a>`
+                                    ).join(', ');
+                                    extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${colorLinks}</div>`;
+                                }
+                            }
+                        }
+                        
+                        if (badge === 'chris_favorite' && progress.current === 1) {
+                            extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Need 1 more: <a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a></div>`;
+                        }
+                        
+                        if (badge === 'yin_n_yang' && ownedTypesGlobal.length > 0) {
+                            const hasGrayscale = ownedTypesGlobal.some(t => t === 'Grayscale');
+                            const hasRainbow = ownedTypesGlobal.some(t => t === 'Rainbow');
+                            let missing = [];
+                            if (!hasGrayscale) missing.push(`<a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a>`);
+                            if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow</a>`);
+                            if (missing.length > 0) {
+                                extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
+                            }
+                        }
+                        
+                        if (badge === 'elite_rainbow_ranger') {
+                            const hasRainbow = ownedTypesGlobal.some(t => t === 'Rainbow');
+                            const hasPlasticArmorHelmet = walletNFTs.some(id => PLASTIC_ARMOR_HELMET_IDS.has(String(id)));
+                            let missing = [];
+                            if (!hasRainbow) missing.push(`<a href="${getOpenSeaLink('Rainbow')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Rainbow Type</a>`);
+                            if (!hasPlasticArmorHelmet) {
+                                missing.push(`<a href="https://opensea.io/collection/good-vibes-club?traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Plastic+Armor+Light+Blue%22,%22Plastic+Armor+Yellow%22,%22Plastic+Armor+Blue%22,%22Plastic+Armor+Lime%22,%22Plastic+Armor+Glass%22,%22Plastic+Armor+Mint%22,%22Plastic+Armor+Red%22,%22Plastic+Armor+Pink%22,%22Plastic+Armor+Gold%22,%22Plastic+Armor+Purple%22,%22Plastic+Armor+Black%22,%22Plastic+Armor+White%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Armor</a>`);
+                                missing.push(`<a href="https://opensea.io/collection/good-vibes-club?traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Plastic+Helmet+White%22,%22Plastic+Helmet+Yellow%22,%22Plastic+Helmet+Glass%22,%22Plastic+Helmet+Light+Blue%22,%22Plastic+Helmet+Pink%22,%22Plastic+Helmet+Purple%22,%22Plastic+Helmet+Black%22,%22Plastic+Helmet+Blue%22,%22Plastic+Helmet+Gold%22,%22Plastic+Helmet+Mint%22,%22Plastic+Helmet+Lime%22,%22Plastic+Helmet+Red%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Plastic Helmet</a>`);
+                            }
+                            if (missing.length > 0) {
+                                extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Missing: ${missing.join(', ')}</div>`;
+                            }
+                        }
+                    } else {
+                        requirement = comboInfo.requirement;
+                    }
+                } else {
+                    const tokens = badgeData[badge];
+                    const rarity = tokens ? (Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length) : 0;
+                    requirement = `${rarity} NFTs have this`;
+                }
+                
+                const clickHandler = (isMeta || isSpecial) ? '' : `onclick="showBadgeNFTs('${badge}', false)"`;
+                const cursorStyle = (isMeta || isSpecial) ? 'cursor: default;' : '';
+                
+                return `
+                    <div class="badge-item missing" ${clickHandler} style="${cursorStyle}">
+                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                        <span class="badge-count">${requirement}</span>
+                        ${progressBar}
+                        ${extraContent}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateBountyHunterCount() {
+            const check1 = document.getElementById('bountyHunterCheck1');
+            vibeBountyHunterCount = (check1 && check1.checked) ? 1 : 0;
+            
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            document.getElementById('ownedBadges').textContent = ownedCount;
+            document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
+            document.getElementById('completionPct').textContent = `${completion}%`;
+            document.getElementById('progressFill').style.width = `${completion}%`;
+            document.getElementById('ownedTabCount').textContent = ownedCount;
+            document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
+            
+            if (vibeBountyHunterCount >= 1) {
+                missingBadgesList = missingBadgesList.filter(b => b !== 'vibe_bounty_hunter');
+            } else if (!missingBadgesList.includes('vibe_bounty_hunter')) {
+                missingBadgesList.push('vibe_bounty_hunter');
+            }
+            
+            renderOwnedBadges();
+            renderMissingBadges();
+        }
+        
+        function showTab(tab) {
+            currentTab = tab;
+            const ownedGrid = document.getElementById('ownedGrid');
+            const missingGrid = document.getElementById('missingGrid');
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'owned') {
+                ownedGrid.style.display = 'grid';
+                missingGrid.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                ownedGrid.style.display = 'none';
+                missingGrid.style.display = 'grid';
+                tabs[1].classList.add('active');
+            }
+        }
+        
+        function showBadgeNFTs(badge, isOwned) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const nftGrid = document.getElementById('modalNFTs');
+            const openSeaLink = document.getElementById('modalOpenSeaLink');
+            
+            title.textContent = formatBadgeName(badge);
+            
+            const badgeLink = getBadgeOpenSeaLink(badge);
+            if (badge === 'ranger') {
+                openSeaLink.href = '#';
+                openSeaLink.style.display = 'none';
+                const rangerLinks = `<a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Plastic+Helmet+White%22,%22Plastic+Helmet+Yellow%22,%22Plastic+Helmet+Glass%22,%22Plastic+Helmet+Light+Blue%22,%22Plastic+Helmet+Pink%22,%22Plastic+Helmet+Purple%22,%22Plastic+Helmet+Black%22,%22Plastic+Helmet+Blue%22,%22Plastic+Helmet+Gold%22,%22Plastic+Helmet+Mint%22,%22Plastic+Helmet+Lime%22,%22Plastic+Helmet+Red%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Plastic Helmet →</a> <a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Plastic+Armor+Light+Blue%22,%22Plastic+Armor+Yellow%22,%22Plastic+Armor+Blue%22,%22Plastic+Armor+Lime%22,%22Plastic+Armor+Glass%22,%22Plastic+Armor+Mint%22,%22Plastic+Armor+Red%22,%22Plastic+Armor+Pink%22,%22Plastic+Armor+Gold%22,%22Plastic+Armor+Purple%22,%22Plastic+Armor+Black%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Plastic Armor →</a>`;
+                title.innerHTML = formatBadgeName(badge) + rangerLinks;
+            } else if (badge === 'super_rare') {
+                openSeaLink.href = '#';
+                openSeaLink.style.display = 'none';
+                const superRareLinks = `<a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Ballcap+Forward+Black+SuperRare%22,%22Bucket+Hat+Black+SuperRare%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Hair →</a> <a href="https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Hoodie+Black+SuperRare%22]}]" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 13px; margin-left: 12px;">Body →</a>`;
+                title.innerHTML = formatBadgeName(badge) + superRareLinks;
+            } else if (badgeLink) {
+                title.textContent = formatBadgeName(badge);
+                openSeaLink.href = badgeLink;
+                openSeaLink.style.display = 'inline';
+            } else {
+                title.textContent = formatBadgeName(badge);
+                openSeaLink.style.display = 'none';
+            }
+            
+            let tokenIds;
+            if (isOwned) {
+                tokenIds = walletBadges[badge];
+            } else {
+                const tokens = badgeData[badge];
+                const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
+                tokenIds = allTokens.slice(0, 50);
+            }
+            
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            nftGrid.innerHTML = tokenIds.map(tokenId => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                
+                if (imgUrl) {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card">
+                            <img src="${imgUrl}" alt="#${tokenId}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display:none; padding: 20px; text-align: center;">
+                                <div style="font-size: 16px; font-weight: 600;">#${tokenId}</div>
+                            </div>
+                            <div class="nft-id">#${tokenId}</div>
+                        </a>
+                    `;
+                } else {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card" style="text-decoration: none;">
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 20px;">#${tokenId}</div>
+                            <div style="font-size: 11px; color: var(--accent-cyan);">View on OpenSea →</div>
+                        </a>
+                    `;
+                }
+            }).join('');
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById('modal')) {
+                document.getElementById('modal').classList.remove('active');
+            }
+        }
+        
+        // NFT Gallery functions
+        function showNFTGallery() {
+            const modal = document.getElementById('galleryModal');
+            const title = document.getElementById('galleryTitle');
+            const nftGrid = document.getElementById('galleryNFTs');
+            
+            title.textContent = `Your GVC Collection (${walletNFTs.length} NFTs)`;
+            
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            nftGrid.innerHTML = walletNFTs.map(tokenId => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                
+                // Get top 3 badges (sorted by rarity)
+                const topBadges = badges
+                    .filter(b => b !== 'any_gvc')
+                    .sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b))
+                    .slice(0, 3);
+                
+                const badgeTags = topBadges.map(badge => {
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const tagStyle = isGradient 
+                        ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                        : `color: ${color};`;
+                    return `<span class="nft-badge-tag" style="${tagStyle}">${formatBadgeName(badge)}</span>`;
+                }).join('');
+                
+                const moreCount = badges.length - topBadges.length - 1; // -1 for any_gvc
+                const moreTag = moreCount > 0 ? `<span class="nft-badge-tag">+${moreCount} more</span>` : '';
+                
+                if (imgUrl) {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-gallery-card">
+                            <img src="${imgUrl}" alt="#${tokenId}" loading="lazy">
+                            <div class="nft-gallery-info">
+                                <div class="nft-gallery-id">#${tokenId}</div>
+                                <div class="nft-gallery-badges">${badgeTags}${moreTag}</div>
+                            </div>
+                        </a>
+                    `;
+                } else {
+                    return `
+                        <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-gallery-card">
+                            <div style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg-dark);">
+                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px;">#${tokenId}</span>
+                            </div>
+                            <div class="nft-gallery-info">
+                                <div class="nft-gallery-id">#${tokenId}</div>
+                                <div class="nft-gallery-badges">${badgeTags}${moreTag}</div>
+                            </div>
+                        </a>
+                    `;
+                }
+            }).join('');
+            
+            modal.classList.add('active');
+        }
+        
+        function closeGalleryModal(event) {
+            if (!event || event.target === document.getElementById('galleryModal')) {
+                document.getElementById('galleryModal').classList.remove('active');
+            }
+        }
+        
+        // Dynamic floating NFTs
+        function updateFloatingNFTs(tokenIds) {
+            const container = document.getElementById('floatingNftsContainer');
+            container.innerHTML = '';
+            
+            if (tokenIds.length === 0) return;
+            
+            // Shuffle and take up to 16 (8 per side)
+            const shuffled = [...tokenIds].sort(() => Math.random() - 0.5);
+            const maxPerSide = Math.min(8, Math.ceil(shuffled.length / 2));
+            const leftNFTs = shuffled.slice(0, maxPerSide);
+            const rightNFTs = shuffled.slice(maxPerSide, maxPerSide * 2);
+            
+            // Create left side NFTs
+            leftNFTs.forEach((tokenId, i) => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    const div = document.createElement('div');
+                    div.className = `floating-nft left-${i}`;
+                    div.innerHTML = `<img src="${imgUrl}" alt="GVC #${tokenId}">`;
+                    container.appendChild(div);
+                }
+            });
+            
+            // Create right side NFTs
+            rightNFTs.forEach((tokenId, i) => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    const div = document.createElement('div');
+                    div.className = `floating-nft right-${i}`;
+                    div.innerHTML = `<img src="${imgUrl}" alt="GVC #${tokenId}">`;
+                    container.appendChild(div);
+                }
+            });
+        }
+        
+        // Share functions
+        function showShareModal(mode) {
+            shareMode = mode;
+            const modal = document.getElementById('shareModal');
+            const title = document.getElementById('shareModalTitle');
+            const preview = document.getElementById('sharePreview');
+            
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            if (mode === 'owned') {
+                title.textContent = '🏆 Share Your Badges';
+                
+                // Get top 5 rarest badges
+                const ownedBadgeNames = Object.keys(walletBadges);
+                const topBadges = ownedBadgeNames
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b))
+                    .sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b))
+                    .slice(0, 5);
+                
+                const badgeTags = topBadges.map(badge => {
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const tagStyle = isGradient 
+                        ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                        : `color: ${color};`;
+                    return `<span class="share-badge-tag" style="${tagStyle}">${formatBadgeName(badge)}</span>`;
+                }).join('');
+                
+                preview.innerHTML = `
+                    <div class="share-preview-header">
+                        <h3>🤙 My GVC Badge Collection</h3>
+                    </div>
+                    <div class="share-preview-stats">
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-cyan);">${walletNFTs.length}</div>
+                            <div class="share-stat-label">NFTs</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-green);">${ownedCount}</div>
+                            <div class="share-stat-label">Badges</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-gold);">${completion}%</div>
+                            <div class="share-stat-label">Complete</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);">Rarest Badges:</div>
+                    <div class="share-badges-list">${badgeTags}</div>
+                `;
+            } else {
+                title.textContent = '🎯 I\'m On The Hunt';
+                
+                // Get top 5 most achievable missing badges
+                const topMissing = missingBadgesList
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && b !== 'vibe_bounty_hunter' && !COMBO_BADGES.some(cb => cb.name === b))
+                    .slice(0, 5);
+                
+                const badgeTags = topMissing.map(badge => {
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes && color.includes('gradient');
+                    const tagStyle = isGradient 
+                        ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                        : `color: ${color};`;
+                    return `<span class="share-badge-tag" style="${tagStyle}">${formatBadgeName(badge)}</span>`;
+                }).join('');
+                
+                preview.innerHTML = `
+                    <div class="share-preview-header">
+                        <h3>🎯 Badges I'm Hunting</h3>
+                    </div>
+                    <div class="share-preview-stats">
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-pink);">${TOTAL_BADGES - ownedCount}</div>
+                            <div class="share-stat-label">Missing</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-green);">${ownedCount}</div>
+                            <div class="share-stat-label">Owned</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);">Looking for:</div>
+                    <div class="share-badges-list">${badgeTags}</div>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeShareModal(event) {
+            if (!event || event.target === document.getElementById('shareModal')) {
+                document.getElementById('shareModal').classList.remove('active');
+            }
+        }
+        
+        function getShareText() {
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            if (shareMode === 'owned') {
+                const ownedBadgeNames = Object.keys(walletBadges);
+                const topBadges = ownedBadgeNames
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b))
+                    .sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b))
+                    .slice(0, 3)
+                    .map(b => formatBadgeName(b));
+                
+                return `🤙 My GVC Badge Collection
+
+📊 ${walletNFTs.length} NFTs | ${ownedCount} Badges | ${completion}% Complete
+
+🏆 Rarest: ${topBadges.join(', ')}
+
+Check yours at gvcbadges.com 🔍`;
+            } else {
+                const topMissing = missingBadgesList
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && b !== 'vibe_bounty_hunter' && !COMBO_BADGES.some(cb => cb.name === b))
+                    .slice(0, 3)
+                    .map(b => formatBadgeName(b));
+                
+                return `🎯 I'm On The Hunt for GVC Badges!
+
+📊 ${TOTAL_BADGES - ownedCount} badges to go
+
+🔍 Looking for: ${topMissing.join(', ')}
+
+Check your badges at gvcbadges.com 🤙`;
+            }
+        }
+        
+        function copyShareText() {
+            const text = getShareText();
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.share-action-btn.copy');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+        
+        function shareToTwitter() {
+            const text = encodeURIComponent(getShareText());
+            window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+        }
+        
+        // Event listeners
+        document.getElementById('walletInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                lookupWallet();
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeGalleryModal();
+                closeShareModal();
+            }
+        });
+    </script>
+</body>
+</html> 5 })
             },
             { 
                 name: 'robot_high_five', 
@@ -1564,6 +2834,8 @@
             // Find rarest badge owned (fewest NFTs have it) - skip meta badges
             let rarestBadge = '-';
             let rarestCount = Infinity;
+            let rarestTokenId = null;
+            let rarestBadgeKey = null;
             ownedBadgeNames.forEach(badge => {
                 if (badge.startsWith('collection_') || badge.startsWith('vibestr_')) return;
                 if (COMBO_BADGES.some(cb => cb.name === badge)) return;
@@ -1572,14 +2844,30 @@
                 const count = Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length;
                 if (count < rarestCount) {
                     rarestCount = count;
+                    rarestBadgeKey = badge;
                     rarestBadge = formatBadgeName(badge);
+                    // Get the first token ID from this badge that the wallet owns
+                    rarestTokenId = walletBadges[badge] ? walletBadges[badge][0] : null;
                 }
             });
+            
+            // Store rarest badge data for use elsewhere
+            rarestBadgeData = { badge: rarestBadgeKey, badgeName: rarestBadge, tokenId: rarestTokenId };
             
             document.getElementById('nftCount').textContent = tokenIds.length;
             document.getElementById('ownedBadges').textContent = ownedCount;
             document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
             document.getElementById('rarestBadge').textContent = rarestBadge;
+            
+            // Show rarest NFT image if we have one
+            const rarestImg = document.getElementById('rarestNftImg');
+            if (rarestTokenId && imageData[rarestTokenId]) {
+                rarestImg.src = imageData[rarestTokenId];
+                rarestImg.style.display = 'block';
+            } else {
+                rarestImg.style.display = 'none';
+            }
+            
             document.getElementById('completionPct').textContent = `${completion}%`;
             document.getElementById('progressFill').style.width = `${completion}%`;
             document.getElementById('ownedTabCount').textContent = ownedCount;
@@ -1595,6 +2883,7 @@
         
         function renderOwnedBadges() {
             const grid = document.getElementById('ownedGrid');
+            currentTab = 'owned';
             
             // Helper to check if badge is meta (combo, collection, or vibestr)
             const isMetaBadge = (name) => {
@@ -1603,14 +2892,8 @@
                        COMBO_BADGES.some(cb => cb.name === name);
             };
             
-            // Sort: NFT badges by count, then meta badges at the end
-            const sorted = Object.entries(walletBadges).sort((a, b) => {
-                const aIsMeta = isMetaBadge(a[0]);
-                const bIsMeta = isMetaBadge(b[0]);
-                if (aIsMeta && !bIsMeta) return 1;
-                if (!aIsMeta && bIsMeta) return -1;
-                return b[1].length - a[1].length;
-            });
+            // Apply sorting
+            const sorted = sortBadges(Object.entries(walletBadges), true);
             
             let html = sorted.map(([badge, tokens]) => {
                 const color = getBadgeColor(badge);
@@ -1650,8 +2933,12 @@
         
         function renderMissingBadges() {
             const grid = document.getElementById('missingGrid');
+            currentTab = 'missing';
             
-            grid.innerHTML = missingBadgesList.map(badge => {
+            // Apply sorting
+            const sortedMissing = sortBadges(missingBadgesList, false);
+            
+            grid.innerHTML = sortedMissing.map(badge => {
                 const color = getBadgeColor(badge);
                 const isGradient = color.includes && color.includes('gradient');
                 const style = isGradient 
@@ -1796,6 +3083,7 @@
         }
         
         function showTab(tab) {
+            currentTab = tab;
             const ownedGrid = document.getElementById('ownedGrid');
             const missingGrid = document.getElementById('missingGrid');
             const tabs = document.querySelectorAll('.tab');
@@ -1806,10 +3094,12 @@
                 ownedGrid.style.display = 'grid';
                 missingGrid.style.display = 'none';
                 tabs[0].classList.add('active');
+                renderOwnedBadges();
             } else {
                 ownedGrid.style.display = 'none';
                 missingGrid.style.display = 'grid';
                 tabs[1].classList.add('active');
+                renderMissingBadges();
             }
         }
         
@@ -1900,8 +3190,288 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
+                closeGalleryModal();
+                closeShareModal();
             }
         });
+        
+        // ========================================
+        // SORTING FUNCTIONALITY
+        // ========================================
+        function setSortMode(mode) {
+            currentSortMode = mode;
+            // Update button states
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sort === mode);
+            });
+            // Re-render current tab
+            if (currentTab === 'owned') {
+                renderOwnedBadges();
+            } else {
+                renderMissingBadges();
+            }
+        }
+        
+        function getBadgeRarity(badge) {
+            if (badge.startsWith('collection_') || badge.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === badge)) {
+                return 9999; // Meta badges go to end for rarity sort
+            }
+            const tokens = badgeData[badge];
+            return tokens ? (Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length) : 9999;
+        }
+        
+        function sortBadges(badges, isOwned) {
+            return badges.slice().sort((a, b) => {
+                const badgeA = isOwned ? a[0] : a;
+                const badgeB = isOwned ? b[0] : b;
+                
+                // Special badges always go last
+                if (badgeA === 'vibe_bounty_hunter') return 1;
+                if (badgeB === 'vibe_bounty_hunter') return -1;
+                
+                switch (currentSortMode) {
+                    case 'rarity':
+                        return getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                    case 'quantity':
+                        if (isOwned) {
+                            return b[1].length - a[1].length;
+                        }
+                        return getBadgeRarity(badgeA) - getBadgeRarity(badgeB);
+                    case 'alpha':
+                        return formatBadgeName(badgeA).localeCompare(formatBadgeName(badgeB));
+                    default:
+                        return 0;
+                }
+            });
+        }
+        
+        // ========================================
+        // NFT GALLERY MODAL
+        // ========================================
+        function showNFTGallery() {
+            const modal = document.getElementById('galleryModal');
+            const grid = document.getElementById('galleryNFTs');
+            const title = document.getElementById('galleryTitle');
+            
+            title.textContent = `Your GVC Collection (${walletNFTs.length} NFTs)`;
+            
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            grid.innerHTML = walletNFTs.map(tokenId => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                
+                // Get up to 3 badge names to display
+                const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
+                const moreBadges = badges.length > 3 ? `+${badges.length - 3}` : '';
+                
+                return `
+                    <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-gallery-card">
+                        ${imgUrl ? `<img src="${imgUrl}" alt="#${tokenId}" loading="lazy">` : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>'}
+                        <div class="nft-gallery-info">
+                            <div class="nft-gallery-id">#${tokenId}</div>
+                            <div class="nft-gallery-badges">
+                                ${displayBadges.map(b => `<span class="nft-badge-tag">${b}</span>`).join('')}
+                                ${moreBadges ? `<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;">${moreBadges}</span>` : ''}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+            
+            modal.classList.add('active');
+        }
+        
+        function closeGalleryModal(event) {
+            if (!event || event.target === document.getElementById('galleryModal')) {
+                document.getElementById('galleryModal').classList.remove('active');
+            }
+        }
+        
+        // ========================================
+        // SHARE FUNCTIONALITY
+        // ========================================
+        function showShareModal(mode) {
+            shareMode = mode;
+            const modal = document.getElementById('shareModal');
+            const title = document.getElementById('shareModalTitle');
+            const preview = document.getElementById('sharePreview');
+            
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
+            const missingCount = TOTAL_BADGES - ownedCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            if (mode === 'owned') {
+                title.textContent = '🤙 Share Your Badges';
+                
+                // Get top 5 rarest badges owned
+                const ownedBadgeNames = Object.keys(walletBadges);
+                const sortedByRarity = ownedBadgeNames
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b))
+                    .sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b))
+                    .slice(0, 5);
+                
+                preview.innerHTML = `
+                    <div class="share-preview-header">
+                        <h3>🤙 My GVC Badge Collection</h3>
+                    </div>
+                    <div class="share-preview-stats">
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-cyan);">${walletNFTs.length}</div>
+                            <div class="share-stat-label">NFTs</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-green);">${ownedCount}</div>
+                            <div class="share-stat-label">Badges</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-gold);">${completion}%</div>
+                            <div class="share-stat-label">Complete</div>
+                        </div>
+                    </div>
+                    <div style="text-align:center;margin-bottom:12px;color:var(--text-secondary);font-size:13px;">Rarest Badges:</div>
+                    <div class="share-badges-list">
+                        ${sortedByRarity.map(b => {
+                            const color = getBadgeColor(b);
+                            const style = color.includes('gradient') 
+                                ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                                : `color: ${color};`;
+                            return `<span class="share-badge-tag" style="${style}">${formatBadgeName(b)}</span>`;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                title.textContent = '🔍 Badges I\'m Hunting';
+                
+                // Get top 5 most achievable missing badges
+                const achievableMissing = missingBadgesList
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b) && b !== 'vibe_bounty_hunter')
+                    .slice(0, 5);
+                
+                preview.innerHTML = `
+                    <div class="share-preview-header">
+                        <h3>🔍 Badges I'm Hunting</h3>
+                    </div>
+                    <div class="share-preview-stats">
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-pink);">${missingCount}</div>
+                            <div class="share-stat-label">Missing</div>
+                        </div>
+                        <div class="share-stat">
+                            <div class="share-stat-value" style="color: var(--accent-green);">${ownedCount}</div>
+                            <div class="share-stat-label">Owned</div>
+                        </div>
+                    </div>
+                    <div style="text-align:center;margin-bottom:12px;color:var(--text-secondary);font-size:13px;">Most Wanted:</div>
+                    <div class="share-badges-list">
+                        ${achievableMissing.map(b => {
+                            const color = getBadgeColor(b);
+                            const style = color.includes('gradient') 
+                                ? `background: ${color}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+                                : `color: ${color};`;
+                            return `<span class="share-badge-tag" style="${style}">${formatBadgeName(b)}</span>`;
+                        }).join('')}
+                    </div>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeShareModal(event) {
+            if (!event || event.target === document.getElementById('shareModal')) {
+                document.getElementById('shareModal').classList.remove('active');
+            }
+        }
+        
+        function getShareText() {
+            const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
+            const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
+            
+            if (shareMode === 'owned') {
+                const ownedBadgeNames = Object.keys(walletBadges);
+                const sortedByRarity = ownedBadgeNames
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b))
+                    .sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b))
+                    .slice(0, 3);
+                
+                return `🤙 My @GoodVibesClub_ Badge Collection
+
+📊 ${walletNFTs.length} NFTs | ${ownedCount} Badges | ${completion}% Complete
+
+✨ Rarest: ${sortedByRarity.map(b => formatBadgeName(b)).join(', ')}
+
+Check yours at gvcbadges.com`;
+            } else {
+                const achievableMissing = missingBadgesList
+                    .filter(b => !b.startsWith('collection_') && !b.startsWith('vibestr_') && !COMBO_BADGES.some(cb => cb.name === b) && b !== 'vibe_bounty_hunter')
+                    .slice(0, 3);
+                
+                return `🔍 I'm hunting @GoodVibesClub_ badges!
+
+🎯 Most Wanted: ${achievableMissing.map(b => formatBadgeName(b)).join(', ')}
+
+📊 ${ownedCount}/${TOTAL_BADGES} badges collected (${completion}%)
+
+Got any leads? 👀
+
+gvcbadges.com`;
+            }
+        }
+        
+        function copyShareText() {
+            const text = getShareText();
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.share-action-btn.copy');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+        
+        function shareToTwitter() {
+            const text = encodeURIComponent(getShareText());
+            window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+        }
+        
+        // ========================================
+        // DYNAMIC FLOATING NFTs
+        // ========================================
+        function updateFloatingNFTs(tokenIds) {
+            const container = document.getElementById('floatingNftsContainer');
+            container.innerHTML = '';
+            
+            if (tokenIds.length === 0) return;
+            
+            // Shuffle and take up to 16 NFTs (8 per side)
+            const shuffled = [...tokenIds].sort(() => Math.random() - 0.5);
+            const leftNFTs = shuffled.slice(0, Math.min(8, Math.ceil(shuffled.length / 2)));
+            const rightNFTs = shuffled.slice(Math.min(8, Math.ceil(shuffled.length / 2)), Math.min(16, shuffled.length));
+            
+            // Create left side NFTs
+            leftNFTs.forEach((tokenId, i) => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    const div = document.createElement('div');
+                    div.className = `floating-nft left-${i}`;
+                    div.innerHTML = `<img src="${imgUrl}" alt="GVC #${tokenId}">`;
+                    container.appendChild(div);
+                }
+            });
+            
+            // Create right side NFTs
+            rightNFTs.forEach((tokenId, i) => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    const div = document.createElement('div');
+                    div.className = `floating-nft right-${i}`;
+                    div.innerHTML = `<img src="${imgUrl}" alt="GVC #${tokenId}">`;
+                    container.appendChild(div);
+                }
+            });
+        }
     </script>
 </body>
 </html>
