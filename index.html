@@ -761,6 +761,11 @@
             color: #000;
         }
         
+        .share-action-btn.copy-img {
+            background: var(--accent-purple);
+            color: #fff;
+        }
+        
         .share-action-btn.twitter {
             background: #1DA1F2;
             color: #fff;
@@ -1174,6 +1179,7 @@
                 <!-- Actions -->
                 <div class="share-actions" style="margin-top: 16px;">
                     <button class="share-action-btn copy" onclick="copyShareText()">📋 Copy Text</button>
+                    <button class="share-action-btn copy-img" onclick="copyShareImage()">🖼️ Copy Image</button>
                     <button class="share-action-btn twitter" onclick="shareToTwitter()">𝕏 Share</button>
                     <button class="share-action-btn download" onclick="downloadShareImage()">📥 Save Image</button>
                 </div>
@@ -2847,18 +2853,48 @@
         }
         
         function shareToTwitter() {
-            // First prompt to download the image
-            const shouldDownload = confirm('📸 Want to download your badge image first?\n\nClick OK to download, then attach it to your tweet for maximum impact!');
-            if (shouldDownload) {
-                downloadShareImage();
-            }
-            
-            // Open Twitter with the text
             const text = encodeURIComponent(getShareText());
             window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
         }
         
-        function downloadShareImage() {
+        function copyShareImage() {
+            const btn = document.querySelector('.share-action-btn.copy-img');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Creating...';
+            
+            // Generate the canvas
+            generateShareCanvas(function(canvas) {
+                canvas.toBlob(function(blob) {
+                    try {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]).then(function() {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(function() {
+                                btn.textContent = originalText;
+                            }, 2000);
+                        }).catch(function(err) {
+                            console.error('Failed to copy image:', err);
+                            btn.textContent = '❌ Failed';
+                            setTimeout(function() {
+                                btn.textContent = originalText;
+                            }, 2000);
+                            // Fallback: offer to download instead
+                            alert('Could not copy to clipboard. Your browser may not support this feature. Try the "Save Image" button instead.');
+                        });
+                    } catch (err) {
+                        console.error('Clipboard API not supported:', err);
+                        btn.textContent = '❌ Not supported';
+                        setTimeout(function() {
+                            btn.textContent = originalText;
+                        }, 2000);
+                        alert('Your browser does not support copying images to clipboard. Try the "Save Image" button instead.');
+                    }
+                }, 'image/png');
+            });
+        }
+        
+        function generateShareCanvas(callback) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
@@ -2971,8 +3007,8 @@
                 ctx.fillStyle = '#666677';
                 ctx.fillText('Good Vibes Club Badge Lookup', 400, 480);
                 
-                // Trigger download
-                triggerDownload(canvas);
+                // Return canvas via callback
+                callback(canvas);
             }
             
             // Try to load NFT image
@@ -2992,6 +3028,20 @@
             } else {
                 drawContent(null);
             }
+        }
+        
+        function downloadShareImage() {
+            const btn = document.querySelector('.share-action-btn.download');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Creating...';
+            
+            generateShareCanvas(function(canvas) {
+                triggerDownload(canvas);
+                btn.textContent = '✓ Saved!';
+                setTimeout(function() {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
         }
         
         function triggerDownload(canvas) {
