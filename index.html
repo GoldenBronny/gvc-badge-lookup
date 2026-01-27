@@ -2816,18 +2816,21 @@
             const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
             const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
             
-            const badgeNames = selectedShareBadges.map(b => formatBadgeName(b)).join(', ');
+            const badgeNames = selectedShareBadges.map(b => '• ' + formatBadgeName(b)).join('\n');
             
             if (shareMode === 'owned') {
                 return '🤙 My @GoodVibesClub_ Badge Collection\n\n' +
                     '📊 ' + walletNFTs.length + ' NFTs | ' + ownedCount + ' Badges | ' + completion + '% Complete\n\n' +
-                    '✨ Featured: ' + badgeNames + '\n\n' +
-                    'Check yours at gvcbadges.com';
+                    '✨ Featured Badges:\n' + badgeNames + '\n\n' +
+                    '🔍 Check yours at gvcbadges.com\n\n' +
+                    '#GVC #GoodVibesClub #NFT';
             } else {
                 return "🔍 I'm hunting @GoodVibesClub_ badges!\n\n" +
-                    '🎯 Most Wanted: ' + badgeNames + '\n\n' +
-                    '📊 ' + ownedCount + '/' + TOTAL_BADGES + ' badges collected (' + completion + '%)\n\n' +
-                    'Got any leads? 👀\n\ngvcbadges.com';
+                    '📊 ' + ownedCount + '/' + TOTAL_BADGES + ' collected (' + completion + '%)\n\n' +
+                    '🎯 Most Wanted:\n' + badgeNames + '\n\n' +
+                    'Got any leads? 👀\n\n' +
+                    'gvcbadges.com\n\n' +
+                    '#GVC #GoodVibesClub #NFT';
             }
         }
         
@@ -2844,33 +2847,37 @@
         }
         
         function shareToTwitter() {
+            // First prompt to download the image
+            const shouldDownload = confirm('📸 Want to download your badge image first?\n\nClick OK to download, then attach it to your tweet for maximum impact!');
+            if (shouldDownload) {
+                downloadShareImage();
+            }
+            
+            // Open Twitter with the text
             const text = encodeURIComponent(getShareText());
             window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
         }
         
         function downloadShareImage() {
-            // Use html2canvas to capture the preview
-            const preview = document.getElementById('shareImagePreview');
-            
-            // Create a canvas manually since we can't load external libraries easily
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size
-            canvas.width = 600;
-            canvas.height = 400;
+            // Set canvas size (good for Twitter)
+            canvas.width = 800;
+            canvas.height = 500;
             
             // Draw background gradient
-            const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+            const gradient = ctx.createLinearGradient(0, 0, 800, 500);
             gradient.addColorStop(0, '#0a0a0f');
             gradient.addColorStop(0.5, '#1a1025');
             gradient.addColorStop(1, '#0f1020');
             ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 600, 400);
+            ctx.fillRect(0, 0, 800, 500);
             
-            // Draw text
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
+            // Add subtle border
+            ctx.strokeStyle = '#2a2a3a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(10, 10, 780, 480);
             
             const ownedCount = Object.keys(walletBadges).length + vibeBountyHunterCount;
             const completion = Math.round((ownedCount / TOTAL_BADGES) * 100);
@@ -2878,68 +2885,112 @@
             let titleText, statsText;
             if (shareMode === 'owned') {
                 titleText = '🤙 My GVC Badge Collection';
-                statsText = walletNFTs.length + ' NFTs • ' + ownedCount + ' Badges • ' + completion + '%';
+                statsText = walletNFTs.length + ' NFTs  •  ' + ownedCount + ' Badges  •  ' + completion + '% Complete';
             } else {
                 titleText = "🔍 Badges I'm Hunting";
-                statsText = (TOTAL_BADGES - ownedCount) + ' Missing • ' + ownedCount + '/' + TOTAL_BADGES + ' Collected';
+                statsText = (TOTAL_BADGES - ownedCount) + ' Missing  •  ' + ownedCount + '/' + TOTAL_BADGES + ' Collected';
             }
             
-            ctx.font = 'bold 24px Inter, sans-serif';
-            ctx.fillText(titleText, 300, 180);
-            
-            ctx.font = '16px Inter, sans-serif';
-            ctx.fillStyle = '#888899';
-            ctx.fillText(statsText, 300, 210);
-            
-            // Draw badges
-            ctx.font = '14px Inter, sans-serif';
-            ctx.fillStyle = '#00d4ff';
-            const badgeText = selectedShareBadges.slice(0, 4).map(b => formatBadgeName(b)).join(' • ');
-            ctx.fillText(badgeText, 300, 260);
-            
-            if (selectedShareBadges.length > 4) {
-                const badgeText2 = selectedShareBadges.slice(4).map(b => formatBadgeName(b)).join(' • ');
-                ctx.fillText(badgeText2, 300, 285);
+            // Function to draw everything after image loads (or without image)
+            function drawContent(nftImg) {
+                // Draw NFT image if available (centered near top)
+                if (nftImg) {
+                    const imgSize = 140;
+                    const imgX = 400 - imgSize/2;
+                    const imgY = 40;
+                    
+                    // Draw rounded rectangle clip for image
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.roundRect(imgX, imgY, imgSize, imgSize, 16);
+                    ctx.closePath();
+                    ctx.clip();
+                    ctx.drawImage(nftImg, imgX, imgY, imgSize, imgSize);
+                    ctx.restore();
+                    
+                    // Draw gold border
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.roundRect(imgX, imgY, imgSize, imgSize, 16);
+                    ctx.stroke();
+                }
+                
+                const startY = nftImg ? 210 : 100;
+                
+                // Draw title
+                ctx.font = 'bold 32px Inter, Arial, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.fillText(titleText, 400, startY);
+                
+                // Draw stats
+                ctx.font = '18px Inter, Arial, sans-serif';
+                ctx.fillStyle = '#888899';
+                ctx.fillText(statsText, 400, startY + 40);
+                
+                // Draw "Featured Badges" label
+                ctx.font = '16px Inter, Arial, sans-serif';
+                ctx.fillStyle = shareMode === 'owned' ? '#00d4ff' : '#ff44aa';
+                ctx.fillText(shareMode === 'owned' ? '✨ Featured Badges' : '🎯 Most Wanted', 400, startY + 90);
+                
+                // Draw badges in a nice grid
+                ctx.font = '15px Inter, Arial, sans-serif';
+                const badgesToDraw = selectedShareBadges.slice(0, 6);
+                const cols = 2;
+                const rows = Math.ceil(badgesToDraw.length / cols);
+                const badgeStartY = startY + 120;
+                const colWidth = 300;
+                const rowHeight = 32;
+                
+                badgesToDraw.forEach((badge, i) => {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const x = 400 + (col - 0.5) * colWidth;
+                    const y = badgeStartY + row * rowHeight;
+                    
+                    // Get badge color
+                    const color = getBadgeColor(badge);
+                    if (color.includes('gradient')) {
+                        ctx.fillStyle = '#00d4ff'; // Fallback for gradients
+                    } else {
+                        ctx.fillStyle = color;
+                    }
+                    
+                    ctx.textAlign = 'center';
+                    ctx.fillText('• ' + formatBadgeName(badge), x, y);
+                });
+                
+                // Draw footer
+                ctx.font = 'bold 16px Inter, Arial, sans-serif';
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('gvcbadges.com', 400, 460);
+                
+                // Draw GVC branding
+                ctx.font = '12px Inter, Arial, sans-serif';
+                ctx.fillStyle = '#666677';
+                ctx.fillText('Good Vibes Club Badge Lookup', 400, 480);
+                
+                // Trigger download
+                triggerDownload(canvas);
             }
             
-            // Draw footer
-            ctx.font = '12px Inter, sans-serif';
-            ctx.fillStyle = '#00d4ff';
-            ctx.fillText('gvcbadges.com', 300, 360);
-            
-            // If we have an NFT image, load it and add to canvas
+            // Try to load NFT image
             const nftImgUrl = selectedShareNft ? (imageData[selectedShareNft] || imageData[String(selectedShareNft)]) : null;
             
             if (nftImgUrl) {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = function() {
-                    // Draw NFT image
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(300, 80, 50, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.clip();
-                    ctx.drawImage(img, 250, 30, 100, 100);
-                    ctx.restore();
-                    
-                    // Draw border
-                    ctx.strokeStyle = '#ffd700';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(300, 80, 50, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // Download
-                    triggerDownload(canvas);
+                    drawContent(img);
                 };
                 img.onerror = function() {
-                    // Download without image
-                    triggerDownload(canvas);
+                    console.log('Could not load NFT image, drawing without it');
+                    drawContent(null);
                 };
                 img.src = nftImgUrl;
             } else {
-                triggerDownload(canvas);
+                drawContent(null);
             }
         }
         
