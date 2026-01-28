@@ -2855,23 +2855,23 @@
                 <button class="modal-close" onclick="closeTradeOfferModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Trade Simulator - at top for visibility -->
-                <div class="trade-simulator" id="tradeSimulator" style="display: block; border: 2px solid lime;">
-                    <div class="trade-sim-header">
-                        📊 Badge Impact Analysis
-                        <span class="trade-sim-net" id="tradeSimNet">Loading...</span>
-                    </div>
-                    <div class="trade-sim-section" id="tradeSimGain">
-                        <div class="trade-sim-section-title gain">🟢 You'd GAIN:</div>
-                        <div class="trade-sim-badges" id="tradeSimGainBadges">Select NFTs to see analysis</div>
-                    </div>
-                    <div class="trade-sim-section" id="tradeSimLose">
-                        <div class="trade-sim-section-title lose">🔴 You'd LOSE:</div>
-                        <div class="trade-sim-badges" id="tradeSimLoseBadges">Select NFTs to see analysis</div>
-                    </div>
-                </div>
-                
                 <div class="trade-builder">
+                    <!-- Trade Simulator - spans all columns -->
+                    <div class="trade-simulator" id="tradeSimulator" style="grid-column: 1 / -1; display: block;">
+                        <div class="trade-sim-header">
+                            📊 Badge Impact Analysis
+                            <span class="trade-sim-net" id="tradeSimNet">Select NFTs</span>
+                        </div>
+                        <div class="trade-sim-section" id="tradeSimGain">
+                            <div class="trade-sim-section-title gain">🟢 You'd GAIN:</div>
+                            <div class="trade-sim-badges" id="tradeSimGainBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                        </div>
+                        <div class="trade-sim-section" id="tradeSimLose">
+                            <div class="trade-sim-section-title lose">🔴 You'd LOSE:</div>
+                            <div class="trade-sim-badges" id="tradeSimLoseBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                        </div>
+                    </div>
+                    
                     <!-- Your Side -->
                     <div class="trade-side yours">
                         <div class="trade-side-header">📤 You're Offering</div>
