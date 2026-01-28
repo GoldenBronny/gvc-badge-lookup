@@ -444,12 +444,12 @@
         
         .badge-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 12px 16px;
             cursor: pointer;
             transition: all 0.2s;
             flex-wrap: wrap;
@@ -468,6 +468,22 @@
             border-color: var(--accent-pink);
         }
         
+        .badge-item-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .badge-item-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 0;
+        }
+        
         .badge-name {
             font-weight: 500;
             font-size: 15px;
@@ -477,6 +493,7 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             color: var(--text-secondary);
+            flex-shrink: 0;
         }
         
         .badge-item.missing .badge-count {
@@ -1821,6 +1838,27 @@
             font-size: 13px;
         }
         
+        /* Badge Image Styles */
+        .badge-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .badge-img.small {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+        
+        .badge-img.large {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+        }
+        
         /* High Value Target Cards */
         .target-nft-grid {
             display: grid;
@@ -2332,6 +2370,114 @@
         
         // VIBE Bounty Hunter self-report state
         let vibeBountyHunterCount = 0;
+        
+        // ===========================================
+        // BADGE IMAGE URLs (from GVC API)
+        // ===========================================
+        const BADGE_IMAGES = {
+            "multi_type_master": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/multi_type_master_1759173898608.webp",
+            "five_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/five_badges_1759173901700.webp",
+            "ten_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/ten_badges_1759173905051.webp",
+            "fifteen_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifteen_badges_1759173908432.webp",
+            "thirty_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/thirty_badges_1760378215065.webp",
+            "forty_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/forty_badges_1760378218029.webp",
+            "twenty_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/twenty_badges_1760372854419.webp",
+            "fifty_badges": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifty_badges_1760378221304.webp",
+            "gradient_hatrick": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gradient_hatrick_1759173915751.webp",
+            "plastic_hatrick": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/plastic_hatrick_1759173918553.webp",
+            "robot_hatrick": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/robot_hatrick_1759173921703.webp",
+            "gradient_high_five": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gradient_high_five_1759173924809.webp",
+            "plastic_high_five": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/plastic_high_five_1759173927856.webp",
+            "robot_high_five": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/robot_high_five_1759173931029.webp",
+            "yin_n_yang": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/yin_n_yang_1759173942484.webp",
+            "power_duo": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/power_duo_1759173963251.webp",
+            "chris_favorite_badge": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/chris_favorite_badge_1759173988815.webp",
+            "elite_rainbow_ranger": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/elite_rainbow_ranger_1759174003980.webp",
+            "vibestr_blue_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_blue_tier_1762440817215.webp",
+            "vibestr_pink_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_pink_tier_1759174030384.webp",
+            "vibestr_purple_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_purple_tier_1764590442681.webp",
+            "vibestr_bronze_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_bronze_tier_1759174034267.webp",
+            "vibestr_silver_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_silver_tier_1759174037847.webp",
+            "vibestr_gold_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_gold_tier_1759174041345.webp",
+            "vibestr_diamond_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_diamond_tier_1764590445999.webp",
+            "vibestr_cosmic_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_cosmic_tier_1764590448508.webp",
+            "mountain_goat": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/mountain_goat_1759174026593.webp",
+            "vibestr_bounty_hunter": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_bounty_hunter_1759174044563.webp",
+            "one_of_one": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/one_of_one_1759173811608.webp",
+            "stone": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/stone_1759173815165.webp",
+            "cosmic": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/cosmic_1759173818340.webp",
+            "ranger": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/ranger_1759173821753.webp",
+            "astro_bean": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/astro_bean_1759173824578.webp",
+            "pothead": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/pothead_1759173827603.webp",
+            "surfer": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/surfer_1759173830462.webp",
+            "super_rare": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/super_rare_1759173833292.webp",
+            "science_goggles": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/science_goggles_1759173835714.webp",
+            "astro_balls": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/astro_balls_1759173838889.webp",
+            "doge": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/doge_1759173842640.webp",
+            "pepe": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/pepe_1759173846260.webp",
+            "rainbow_visor": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/rainbow_visor_1759173849941.webp",
+            "rainbow_bubble_goggles": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/rainbow_bubble_goggles_1759173853819.webp",
+            "gamer": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gamer_1759173856821.webp",
+            "sweettooth": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/sweettooth_1759173860105.webp",
+            "checkmate": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/checkmate_1759173863329.webp",
+            "shower": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/shower_1759173865972.webp",
+            "baller": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/baller_1759173868839.webp",
+            "plants": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/plants_1759173871973.webp",
+            "rainbow_boombox": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/rainbow_boombox_1759173875165.webp",
+            "electric_rings": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/electric_rings_1759173878797.webp",
+            "king": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/king_1759173882056.webp",
+            "poker_face": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/poker_face_1759173884906.webp",
+            "toy_bricks": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/toy_bricks_1759173887659.webp",
+            "billiards": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/billiards_1759173890603.webp",
+            "lamp": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/lamp_1759173892925.webp",
+            "captain": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/captain_1759173895611.webp",
+            "suited_up": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/suited_up_1759173934070.webp",
+            "gud_meat": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gud_meat_1759173936766.webp",
+            "vibefoot_fan_club": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibefoot_fan_club_1759173939420.webp",
+            "seas_the_day": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/seas_the_day_1759173945252.webp",
+            "no_face_no_problem": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/no_face_no_problem_1759173948247.webp",
+            "varsity_vibes": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/varsity_vibes_1759173950723.webp",
+            "hail_mary_heroes": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/hail_mary_heroes_1759173953534.webp",
+            "great_stacheby": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/great_stacheby_1759173956903.webp",
+            "vibetown_social_club": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibetown_social_club_1759173960008.webp",
+            "necks_level": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/necks_level_1759173966777.webp",
+            "fur_the_win": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fur_the_win_1759173969828.webp",
+            "nounish_vibes": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/nounish_vibes_1759173973218.webp",
+            "tanks_a_lot": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/tanks_a_lot_1759173976815.webp",
+            "sir_vibes_a_lot": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/sir_vibes_a_lot_1759173980023.webp",
+            "full_send_maverick": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/full_send_maverick_1759173982959.webp",
+            "straw_man": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/straw_man_1759173985595.webp",
+            "ladies_night": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/ladies_night_1759173991853.webp",
+            "showtime": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/showtime_1759173995136.webp",
+            "party_in_the_back": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/party_in_the_back_1759173998578.webp",
+            "funky_fresh": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/funky_fresh_1759174001274.webp",
+            "high_noon_hustler": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/high_noon_hustler_1759174007143.webp",
+            "visooor_enjoyooor": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/visooor_enjoyooor_1759174010233.webp",
+            "homerun": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/homerun_1759174013207.webp",
+            "hoodie_up_society": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/hoodie_up_society_1759174015984.webp",
+            "zoom_in_vibe_out": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/zoom_in_vibe_out_1759174018930.webp",
+            "full_throttle": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/full_throttle_1759174022912.webp",
+            "rainbow_citizen": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/rainbow_citizen_1759173791000.webp",
+            "gold_member": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gold_member_1759173793799.webp",
+            "grayscale_seeker": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/grayscale_seeker_1759173797002.webp",
+            "any_gvc": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/any_gvc_1759173799963.webp",
+            "robot_lover": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/robot_lover_1759173802514.webp",
+            "plastic_lover": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/plastic_lover_1759173806081.webp",
+            "gradient_lover": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/gradient_lover_1759173808918.webp",
+            // Combo badges (constructed from base badges)
+            "collection_5": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/five_badges_1759173901700.webp",
+            "collection_10": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/ten_badges_1759173905051.webp",
+            "collection_15": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifteen_badges_1759173908432.webp",
+            "collection_20": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/twenty_badges_1760372854419.webp",
+            "collection_30": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/thirty_badges_1760378215065.webp",
+            "collection_40": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/forty_badges_1760378218029.webp",
+            "collection_50": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifty_badges_1760378221304.webp"
+        };
+        
+        // Helper to get badge image URL
+        function getBadgeImage(badge) {
+            return BADGE_IMAGES[badge] || null;
+        }
         
         // ===========================================
         // BADGE NAME MAPPINGS (API name -> Display name)
@@ -3319,11 +3465,16 @@
                 const countDisplay = isMeta ? '✓' : `×${tokens.length}`;
                 const clickHandler = isMeta ? '' : `onclick="showBadgeNFTs('${badge}', true)"`;
                 const cursorStyle = isMeta ? 'cursor: default;' : '';
+                const badgeImgUrl = getBadgeImage(badge);
+                const imgHtml = badgeImgUrl ? `<img class="badge-item-img" src="${badgeImgUrl}" alt="">` : '';
                 
                 return `
                     <div class="badge-item" ${clickHandler} style="${cursorStyle}">
-                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
-                        <span class="badge-count" style="${isMeta ? 'color: var(--accent-green);' : ''}">${countDisplay}</span>
+                        ${imgHtml}
+                        <div class="badge-item-content">
+                            <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                            <span class="badge-count" style="${isMeta ? 'color: var(--accent-green);' : ''}">${countDisplay}</span>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -3331,10 +3482,15 @@
             // Add VIBE Bounty Hunter if claimed
             if (vibeBountyHunterCount > 0) {
                 const color = getBadgeColor('vibe_bounty_hunter');
+                const badgeImgUrl = getBadgeImage('vibestr_bounty_hunter');
+                const imgHtml = badgeImgUrl ? `<img class="badge-item-img" src="${badgeImgUrl}" alt="">` : '';
                 html += `
                     <div class="badge-item" style="cursor: default;">
-                        <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
-                        <span class="badge-count" style="color: var(--accent-green);">✓</span>
+                        ${imgHtml}
+                        <div class="badge-item-content">
+                            <span class="badge-name" style="color: ${color};">${formatBadgeName('vibe_bounty_hunter')}</span>
+                            <span class="badge-count" style="color: var(--accent-green);">✓</span>
+                        </div>
                         <span class="badge-note">Self-reported badge</span>
                     </div>
                 `;
@@ -3453,11 +3609,16 @@
                 
                 const clickHandler = (isMeta || isSpecial) ? '' : `onclick="showBadgeNFTs('${badge}', false)"`;
                 const cursorStyle = (isMeta || isSpecial) ? 'cursor: default;' : '';
+                const badgeImgUrl = getBadgeImage(badge);
+                const imgHtml = badgeImgUrl ? `<img class="badge-item-img" src="${badgeImgUrl}" alt="" style="opacity: 0.5;">` : '';
                 
                 return `
                     <div class="badge-item missing" ${clickHandler} style="${cursorStyle}">
-                        <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
-                        <span class="badge-count">${requirement}</span>
+                        ${imgHtml}
+                        <div class="badge-item-content">
+                            <span class="badge-name" style="${style}">${formatBadgeName(badge)}</span>
+                            <span class="badge-count">${requirement}</span>
+                        </div>
                         ${progressBar}
                         ${extraContent}
                     </div>
@@ -4614,8 +4775,11 @@
                         : 'color: ' + color + ';';
                     const rarity = getBadgeRarity(badge);
                     const rarityClass = rarity < 50 ? 'rare' : '';
+                    const badgeImgUrl = getBadgeImage(badge);
+                    const imgHtml = badgeImgUrl ? '<img class="badge-img small" src="' + badgeImgUrl + '" alt="">' : '';
                     
                     return '<div class="nft-lookup-badge">' +
+                        imgHtml +
                         '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
                         '<span class="nft-lookup-badge-rarity ' + rarityClass + '">(' + rarity + ' NFTs)</span>' +
                         '</div>';
