@@ -2072,6 +2072,59 @@
             color: var(--text-primary);
         }
         
+        /* Badge Explorer Button (shown after wallet lookup) */
+        .badge-explorer-btn {
+            display: none;
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .badge-explorer-btn:hover {
+            border-color: var(--accent-cyan);
+            background: var(--bg-hover);
+        }
+        
+        .badge-explorer-btn span {
+            margin-right: 8px;
+        }
+        
+        /* Badge Explorer Modal */
+        .badge-explorer-modal {
+            max-width: 1000px;
+            max-height: 85vh;
+        }
+        
+        .badge-explorer-modal .modal-body {
+            padding: 0;
+        }
+        
+        .badge-explorer-modal .badge-explorer-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0;
+        }
+        
+        .badge-explorer-modal .explorer-stats {
+            padding: 12px 20px;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .badge-explorer-modal .badge-explorer-grid {
+            max-height: 55vh;
+            padding: 16px 20px;
+        }
+        
         /* High Value Target Cards */
         .target-nft-grid {
             display: grid;
@@ -2194,7 +2247,12 @@
             <div class="nft-lookup-result" id="nftLookupResult"></div>
         </section>
         
-        <!-- Badge Explorer Section -->
+        <!-- Badge Explorer Button (shown after wallet lookup) -->
+        <button class="badge-explorer-btn" id="badgeExplorerBtn" onclick="showBadgeExplorerModal()">
+            <span>🏅</span> Explore All 89 Badges
+        </button>
+        
+        <!-- Badge Explorer Section (visible on load, hidden after lookup) -->
         <section class="badge-explorer-section" id="badgeExplorerSection">
             <div class="badge-explorer-header">
                 <h3>🏅 Badge Explorer</h3>
@@ -2490,6 +2548,42 @@
                         <button class="compare-trade-btn copy" onclick="copyTradeSummary()">📋 Copy Trade Summary</button>
                         <button class="compare-trade-btn create-offer" onclick="showTradeOfferBuilder()">🎨 Create Trade Offer</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Badge Explorer Modal -->
+    <div class="modal-overlay" id="badgeExplorerModal" onclick="closeBadgeExplorerModal(event)">
+        <div class="modal badge-explorer-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>🏅 Badge Explorer</h2>
+                <button class="modal-close" onclick="closeBadgeExplorerModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="badge-explorer-header">
+                    <div class="badge-explorer-controls">
+                        <input type="text" class="badge-explorer-search" id="badgeExplorerSearchModal" placeholder="Search badges..." oninput="filterBadgeExplorerModal()">
+                        <select class="badge-explorer-filter" id="badgeExplorerFilterModal" onchange="filterBadgeExplorerModal()">
+                            <option value="all">All Categories</option>
+                            <option value="trait">Trait Badges</option>
+                            <option value="type">Type Badges</option>
+                            <option value="collection">Collection Badges</option>
+                            <option value="vibestr">$VIBESTR Badges</option>
+                        </select>
+                        <select class="badge-explorer-filter" id="badgeExplorerSortModal" onchange="filterBadgeExplorerModal()">
+                            <option value="rarity">Sort: Rarest First</option>
+                            <option value="rarity-desc">Sort: Most Common</option>
+                            <option value="alpha">Sort: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="explorer-stats" id="explorerStatsModal">
+                    <span>📊 <strong>89</strong> total badges</span>
+                    <span id="explorerOwnedStatModal" style="display: none;">✅ <strong>0</strong> owned</span>
+                </div>
+                <div class="badge-explorer-grid" id="badgeExplorerGridModal">
+                    <!-- Badges will be rendered here -->
                 </div>
             </div>
         </div>
@@ -3679,11 +3773,8 @@
             renderOwnedBadges();
             renderMissingBadges();
             
-            // Refresh badge explorer to show owned status
-            filterBadgeExplorer();
-            
-            // Move badge explorer to bottom so user sees their results first
-            moveBadgeExplorerToBottom();
+            // Hide badge explorer section and show button instead
+            hideBadgeExplorerShowButton();
             
             // Store for modal use
             walletNFTs = tokenIds;
@@ -5059,50 +5150,16 @@
             }
             
             // Update owned stat
-            const ownedCount = badges.filter(b => walletBadges[b]).length;
+            const ownedCount = countOwnedBadges(badges);
             const ownedStat = document.getElementById('explorerOwnedStat');
-            if (Object.keys(walletBadges).length > 0) {
+            if (Object.keys(walletBadges).length > 0 || ownedTypesGlobal.length > 0) {
                 ownedStat.innerHTML = '✅ <strong>' + ownedCount + '</strong> owned';
                 ownedStat.style.display = 'inline-flex';
             }
             
             // Render
             const grid = document.getElementById('badgeExplorerGrid');
-            
-            if (badges.length === 0) {
-                grid.innerHTML = '<div class="explorer-empty">No badges found matching your search</div>';
-                return;
-            }
-            
-            grid.innerHTML = badges.map(function(badge) {
-                const imgUrl = getBadgeImage(badge);
-                const color = getBadgeColor(badge);
-                const isGradient = color.includes('gradient');
-                const nameStyle = isGradient 
-                    ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
-                    : 'color: ' + color + ';';
-                
-                const category = getBadgeCategory(badge);
-                const rarity = getBadgeRarity(badge);
-                const isOwned = walletBadges[badge];
-                const isRare = rarity < 100;
-                
-                const imgHtml = imgUrl 
-                    ? '<img class="explorer-badge-img" src="' + imgUrl + '" alt="">'
-                    : '<div class="explorer-badge-img" style="background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-secondary);">?</div>';
-                
-                return '<div class="explorer-badge-card' + (isOwned ? ' owned' : '') + '" onclick="showBadgeDetail(\'' + badge + '\')">' +
-                    imgHtml +
-                    '<div class="explorer-badge-info">' +
-                        '<div class="explorer-badge-name" style="' + nameStyle + '">' + formatBadgeName(badge) + '</div>' +
-                        '<div class="explorer-badge-meta">' +
-                            '<span class="explorer-badge-category ' + category + '">' + category.charAt(0).toUpperCase() + category.slice(1) + '</span>' +
-                            '<span class="explorer-badge-rarity' + (isRare ? ' rare' : '') + '">' + (rarity < 9999 ? rarity + ' NFTs' : '—') + '</span>' +
-                            (isOwned ? '<span class="explorer-badge-owned">✓ Owned</span>' : '') +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
+            renderBadgeExplorerGrid(grid, badges);
         }
         
         function showBadgeDetail(badge) {
@@ -5122,15 +5179,140 @@
             }
         }
         
-        // Move badge explorer to bottom after wallet lookup
-        function moveBadgeExplorerToBottom() {
+        // Hide badge explorer section and show button after wallet lookup
+        function hideBadgeExplorerShowButton() {
             const explorer = document.getElementById('badgeExplorerSection');
-            const results = document.getElementById('results');
+            const btn = document.getElementById('badgeExplorerBtn');
             
-            // Only move if it's currently before the results section
-            if (explorer && results && explorer.nextElementSibling === results) {
-                results.parentNode.insertBefore(explorer, results.nextElementSibling);
+            if (explorer) {
+                explorer.style.display = 'none';
             }
+            if (btn) {
+                btn.style.display = 'block';
+            }
+        }
+        
+        // Show badge explorer modal
+        function showBadgeExplorerModal() {
+            filterBadgeExplorerModal();
+            document.getElementById('badgeExplorerModal').classList.add('active');
+        }
+        
+        // Close badge explorer modal
+        function closeBadgeExplorerModal(event) {
+            if (!event || event.target === document.getElementById('badgeExplorerModal')) {
+                document.getElementById('badgeExplorerModal').classList.remove('active');
+            }
+        }
+        
+        // Filter for modal version
+        function filterBadgeExplorerModal() {
+            const searchTerm = document.getElementById('badgeExplorerSearchModal').value.toLowerCase();
+            const categoryFilter = document.getElementById('badgeExplorerFilterModal').value;
+            const sortMode = document.getElementById('badgeExplorerSortModal').value;
+            
+            let badges = getAllBadges();
+            
+            // Filter by search
+            if (searchTerm) {
+                badges = badges.filter(b => {
+                    const name = formatBadgeName(b).toLowerCase();
+                    return name.includes(searchTerm);
+                });
+            }
+            
+            // Filter by category
+            if (categoryFilter !== 'all') {
+                badges = badges.filter(b => getBadgeCategory(b) === categoryFilter);
+            }
+            
+            // Sort
+            if (sortMode === 'rarity') {
+                badges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
+            } else if (sortMode === 'rarity-desc') {
+                badges.sort((a, b) => getBadgeRarity(b) - getBadgeRarity(a));
+            } else if (sortMode === 'alpha') {
+                badges.sort((a, b) => formatBadgeName(a).localeCompare(formatBadgeName(b)));
+            }
+            
+            // Count owned (including VIBESTR badges from ownedTypesGlobal check)
+            const ownedCount = countOwnedBadges(badges);
+            const ownedStat = document.getElementById('explorerOwnedStatModal');
+            if (Object.keys(walletBadges).length > 0 || ownedTypesGlobal.length > 0) {
+                ownedStat.innerHTML = '✅ <strong>' + ownedCount + '</strong> owned';
+                ownedStat.style.display = 'inline-flex';
+            }
+            
+            // Render
+            const grid = document.getElementById('badgeExplorerGridModal');
+            renderBadgeExplorerGrid(grid, badges);
+        }
+        
+        // Count owned badges properly (including VIBESTR)
+        function countOwnedBadges(badges) {
+            let count = 0;
+            badges.forEach(b => {
+                if (isBadgeOwned(b)) count++;
+            });
+            return count;
+        }
+        
+        // Check if a badge is owned (works for all badge types)
+        function isBadgeOwned(badge) {
+            // Check walletBadges first
+            if (walletBadges[badge]) return true;
+            
+            // Check VIBESTR badges
+            if (badge.startsWith('vibestr_') && window.vibestrBadgesOwned && window.vibestrBadgesOwned.includes(badge)) {
+                return true;
+            }
+            
+            // Check collection badges
+            if (badge.startsWith('collection_')) {
+                const num = parseInt(badge.split('_')[1]);
+                const ownedCount = Object.keys(walletBadges).length;
+                if (ownedCount >= num) return true;
+            }
+            
+            return false;
+        }
+        
+        // Render badge grid (shared between section and modal)
+        function renderBadgeExplorerGrid(grid, badges) {
+            if (badges.length === 0) {
+                grid.innerHTML = '<div class="explorer-empty">No badges found matching your search</div>';
+                return;
+            }
+            
+            grid.innerHTML = badges.map(function(badge) {
+                const imgUrl = getBadgeImage(badge);
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes('gradient');
+                const nameStyle = isGradient 
+                    ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                    : 'color: ' + color + ';';
+                
+                const category = getBadgeCategory(badge);
+                const rarity = getBadgeRarity(badge);
+                const isOwned = isBadgeOwned(badge);
+                const isRare = rarity < 100;
+                
+                const imgHtml = imgUrl 
+                    ? '<img class="explorer-badge-img" src="' + imgUrl + '" alt="">'
+                    : '<div class="explorer-badge-img" style="background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-secondary);">?</div>';
+                
+                return '<div class="explorer-badge-card' + (isOwned ? ' owned' : '') + '" onclick="showBadgeDetail(\'' + badge + '\')">' +
+                    imgHtml +
+                    '<div class="explorer-badge-info">' +
+                        '<div class="explorer-badge-name" style="' + nameStyle + '">' + formatBadgeName(badge) + '</div>' +
+                        '<div class="explorer-badge-meta">' +
+                            '<span class="explorer-badge-category ' + category + '">' + category.charAt(0).toUpperCase() + category.slice(1) + '</span>' +
+                            '<span class="explorer-badge-rarity' + (isRare ? ' rare' : '') + '">' + (rarity < 9999 ? rarity + ' NFTs' : '—') + '</span>' +
+                            (isOwned ? '<span class="explorer-badge-owned">✓ Owned</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
         }
         
         // ========================================
