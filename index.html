@@ -1859,6 +1859,219 @@
             border-radius: 8px;
         }
         
+        /* Badge Explorer */
+        .badge-explorer-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .badge-explorer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .badge-explorer-header h3 {
+            font-size: 18px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge-explorer-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .badge-explorer-search {
+            padding: 8px 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 180px;
+        }
+        
+        .badge-explorer-search:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .badge-explorer-filter {
+            padding: 8px 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .badge-explorer-filter:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .badge-explorer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .badge-explorer-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .badge-explorer-grid::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+        
+        .badge-explorer-grid::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        
+        .badge-explorer-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-purple);
+        }
+        
+        .explorer-badge-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .explorer-badge-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+        
+        .explorer-badge-card.owned {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.05);
+        }
+        
+        .explorer-badge-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .explorer-badge-card.owned .explorer-badge-img {
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+        }
+        
+        .explorer-badge-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .explorer-badge-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .explorer-badge-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .explorer-badge-category {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        
+        .explorer-badge-category.trait {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent-cyan);
+        }
+        
+        .explorer-badge-category.collection {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--accent-purple);
+        }
+        
+        .explorer-badge-category.type {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-gold);
+        }
+        
+        .explorer-badge-category.vibestr {
+            background: rgba(255, 0, 128, 0.15);
+            color: var(--accent-pink);
+        }
+        
+        .explorer-badge-rarity {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .explorer-badge-rarity.rare {
+            color: var(--accent-gold);
+        }
+        
+        .explorer-badge-owned {
+            font-size: 11px;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+        
+        .explorer-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .explorer-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .explorer-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .explorer-stats strong {
+            color: var(--text-primary);
+        }
+        
         /* High Value Target Cards */
         .target-nft-grid {
             display: grid;
@@ -1979,6 +2192,35 @@
                 <button onclick="lookupNFT()">Look Up NFT</button>
             </div>
             <div class="nft-lookup-result" id="nftLookupResult"></div>
+        </section>
+        
+        <!-- Badge Explorer Section -->
+        <section class="badge-explorer-section" id="badgeExplorerSection">
+            <div class="badge-explorer-header">
+                <h3>🏅 Badge Explorer</h3>
+                <div class="badge-explorer-controls">
+                    <input type="text" class="badge-explorer-search" id="badgeExplorerSearch" placeholder="Search badges..." oninput="filterBadgeExplorer()">
+                    <select class="badge-explorer-filter" id="badgeExplorerFilter" onchange="filterBadgeExplorer()">
+                        <option value="all">All Categories</option>
+                        <option value="trait">Trait Badges</option>
+                        <option value="type">Type Badges</option>
+                        <option value="collection">Collection Badges</option>
+                        <option value="vibestr">$VIBESTR Badges</option>
+                    </select>
+                    <select class="badge-explorer-filter" id="badgeExplorerSort" onchange="filterBadgeExplorer()">
+                        <option value="rarity">Sort: Rarest First</option>
+                        <option value="rarity-desc">Sort: Most Common</option>
+                        <option value="alpha">Sort: A-Z</option>
+                    </select>
+                </div>
+            </div>
+            <div class="explorer-stats" id="explorerStats">
+                <span>📊 <strong>89</strong> total badges</span>
+                <span id="explorerOwnedStat" style="display: none;">✅ <strong>0</strong> owned</span>
+            </div>
+            <div class="badge-explorer-grid" id="badgeExplorerGrid">
+                <!-- Badges will be rendered here -->
+            </div>
         </section>
         
         <section class="results" id="results">
@@ -2828,7 +3070,9 @@
         }
         
         // Initialize on page load
-        loadBadgeData();
+        loadBadgeData().then(function() {
+            initBadgeExplorer();
+        });
         loadImageData();
         loadTypeData();
         loadSpecialTraitsData();
@@ -3434,6 +3678,9 @@
             // Render badge grids
             renderOwnedBadges();
             renderMissingBadges();
+            
+            // Refresh badge explorer to show owned status
+            filterBadgeExplorer();
             
             // Store for modal use
             walletNFTs = tokenIds;
@@ -4724,6 +4971,152 @@
                     btn.textContent = originalText;
                 }, 2000);
             });
+        }
+        
+        // ========================================
+        // BADGE EXPLORER
+        // ========================================
+        
+        // Badge category mapping
+        const BADGE_CATEGORIES = {
+            // Type badges
+            'any_gvc': 'type', 'rainbow_citizen': 'type', 'gold_member': 'type', 
+            'grayscale_seeker': 'type', 'robot_lover': 'type', 'plastic_lover': 'type', 
+            'gradient_lover': 'type',
+            
+            // Collection badges
+            'multi_type_master': 'collection', 'five_badges': 'collection', 'ten_badges': 'collection',
+            'fifteen_badges': 'collection', 'twenty_badges': 'collection', 'thirty_badges': 'collection',
+            'forty_badges': 'collection', 'fifty_badges': 'collection', 'gradient_hatrick': 'collection',
+            'plastic_hatrick': 'collection', 'robot_hatrick': 'collection', 'gradient_high_five': 'collection',
+            'plastic_high_five': 'collection', 'robot_high_five': 'collection', 'yin_n_yang': 'collection',
+            'power_duo': 'collection', 'chris_favorite_badge': 'collection', 'elite_rainbow_ranger': 'collection',
+            'collection_5': 'collection', 'collection_10': 'collection', 'collection_15': 'collection',
+            'collection_20': 'collection', 'collection_30': 'collection', 'collection_40': 'collection',
+            'collection_50': 'collection',
+            
+            // VIBESTR badges
+            'vibestr_blue_tier': 'vibestr', 'vibestr_pink_tier': 'vibestr', 'vibestr_purple_tier': 'vibestr',
+            'vibestr_bronze_tier': 'vibestr', 'vibestr_silver_tier': 'vibestr', 'vibestr_gold_tier': 'vibestr',
+            'vibestr_diamond_tier': 'vibestr', 'vibestr_cosmic_tier': 'vibestr', 'vibestr_bounty_hunter': 'vibestr',
+            'mountain_goat': 'vibestr'
+        };
+        
+        function getBadgeCategory(badge) {
+            return BADGE_CATEGORIES[badge] || 'trait';
+        }
+        
+        function getAllBadges() {
+            // Get all badges from badgeData plus known special badges
+            const badges = new Set(Object.keys(badgeData));
+            
+            // Add VIBESTR badges
+            ['vibestr_blue_tier', 'vibestr_pink_tier', 'vibestr_purple_tier', 'vibestr_bronze_tier',
+             'vibestr_silver_tier', 'vibestr_gold_tier', 'vibestr_diamond_tier', 'vibestr_cosmic_tier',
+             'vibestr_bounty_hunter', 'mountain_goat'].forEach(b => badges.add(b));
+            
+            // Add collection badges
+            ['collection_5', 'collection_10', 'collection_15', 'collection_20', 
+             'collection_30', 'collection_40', 'collection_50'].forEach(b => badges.add(b));
+            
+            return Array.from(badges);
+        }
+        
+        function renderBadgeExplorer() {
+            filterBadgeExplorer();
+        }
+        
+        function filterBadgeExplorer() {
+            const searchTerm = document.getElementById('badgeExplorerSearch').value.toLowerCase();
+            const categoryFilter = document.getElementById('badgeExplorerFilter').value;
+            const sortMode = document.getElementById('badgeExplorerSort').value;
+            
+            let badges = getAllBadges();
+            
+            // Filter by search
+            if (searchTerm) {
+                badges = badges.filter(b => {
+                    const name = formatBadgeName(b).toLowerCase();
+                    return name.includes(searchTerm);
+                });
+            }
+            
+            // Filter by category
+            if (categoryFilter !== 'all') {
+                badges = badges.filter(b => getBadgeCategory(b) === categoryFilter);
+            }
+            
+            // Sort
+            if (sortMode === 'rarity') {
+                badges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
+            } else if (sortMode === 'rarity-desc') {
+                badges.sort((a, b) => getBadgeRarity(b) - getBadgeRarity(a));
+            } else if (sortMode === 'alpha') {
+                badges.sort((a, b) => formatBadgeName(a).localeCompare(formatBadgeName(b)));
+            }
+            
+            // Update owned stat
+            const ownedCount = badges.filter(b => walletBadges[b]).length;
+            const ownedStat = document.getElementById('explorerOwnedStat');
+            if (Object.keys(walletBadges).length > 0) {
+                ownedStat.innerHTML = '✅ <strong>' + ownedCount + '</strong> owned';
+                ownedStat.style.display = 'inline-flex';
+            }
+            
+            // Render
+            const grid = document.getElementById('badgeExplorerGrid');
+            
+            if (badges.length === 0) {
+                grid.innerHTML = '<div class="explorer-empty">No badges found matching your search</div>';
+                return;
+            }
+            
+            grid.innerHTML = badges.map(function(badge) {
+                const imgUrl = getBadgeImage(badge);
+                const color = getBadgeColor(badge);
+                const isGradient = color.includes('gradient');
+                const nameStyle = isGradient 
+                    ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                    : 'color: ' + color + ';';
+                
+                const category = getBadgeCategory(badge);
+                const rarity = getBadgeRarity(badge);
+                const isOwned = walletBadges[badge];
+                const isRare = rarity < 100;
+                
+                const imgHtml = imgUrl 
+                    ? '<img class="explorer-badge-img" src="' + imgUrl + '" alt="">'
+                    : '<div class="explorer-badge-img" style="background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-secondary);">?</div>';
+                
+                return '<div class="explorer-badge-card' + (isOwned ? ' owned' : '') + '" onclick="showBadgeDetail(\'' + badge + '\')">' +
+                    imgHtml +
+                    '<div class="explorer-badge-info">' +
+                        '<div class="explorer-badge-name" style="' + nameStyle + '">' + formatBadgeName(badge) + '</div>' +
+                        '<div class="explorer-badge-meta">' +
+                            '<span class="explorer-badge-category ' + category + '">' + category.charAt(0).toUpperCase() + category.slice(1) + '</span>' +
+                            '<span class="explorer-badge-rarity' + (isRare ? ' rare' : '') + '">' + (rarity < 9999 ? rarity + ' NFTs' : '—') + '</span>' +
+                            (isOwned ? '<span class="explorer-badge-owned">✓ Owned</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+        
+        function showBadgeDetail(badge) {
+            // For now, show the NFTs that have this badge (reuse existing function)
+            const isMeta = badge.startsWith('collection_') || badge.startsWith('vibestr_') || 
+                           COMBO_BADGES.some(cb => cb.name === badge);
+            
+            if (!isMeta && badgeData[badge]) {
+                showBadgeNFTs(badge, !!walletBadges[badge]);
+            }
+        }
+        
+        // Initialize badge explorer when badge data loads
+        function initBadgeExplorer() {
+            if (Object.keys(badgeData).length > 0) {
+                renderBadgeExplorer();
+            }
         }
         
         // ========================================
