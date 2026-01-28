@@ -2862,13 +2862,31 @@
                             📊 Badge Impact Analysis
                             <span class="trade-sim-net" id="tradeSimNet">Select NFTs</span>
                         </div>
-                        <div class="trade-sim-section" id="tradeSimGain">
-                            <div class="trade-sim-section-title gain">🟢 You'd GAIN:</div>
-                            <div class="trade-sim-badges" id="tradeSimGainBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                        
+                        <!-- Your impact -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 8px;">📤 YOUR IMPACT:</div>
+                            <div class="trade-sim-section" id="tradeSimGain">
+                                <div class="trade-sim-section-title gain">🟢 You'd GAIN:</div>
+                                <div class="trade-sim-badges" id="tradeSimGainBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                            </div>
+                            <div class="trade-sim-section" id="tradeSimLose">
+                                <div class="trade-sim-section-title lose">🔴 You'd LOSE:</div>
+                                <div class="trade-sim-badges" id="tradeSimLoseBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                            </div>
                         </div>
-                        <div class="trade-sim-section" id="tradeSimLose">
-                            <div class="trade-sim-section-title lose">🔴 You'd LOSE:</div>
-                            <div class="trade-sim-badges" id="tradeSimLoseBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                        
+                        <!-- Their impact -->
+                        <div style="border-top: 1px dashed var(--border); padding-top: 12px;">
+                            <div style="font-size: 11px; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;">📥 THEIR IMPACT:</div>
+                            <div class="trade-sim-section" id="tradeSimTheirGain">
+                                <div class="trade-sim-section-title gain">🟢 They'd GAIN:</div>
+                                <div class="trade-sim-badges" id="tradeSimTheirGainBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                            </div>
+                            <div class="trade-sim-section" id="tradeSimTheirLose">
+                                <div class="trade-sim-section-title lose">🔴 They'd LOSE:</div>
+                                <div class="trade-sim-badges" id="tradeSimTheirLoseBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
+                            </div>
                         </div>
                     </div>
                     
@@ -6241,6 +6259,22 @@
             const lost = [...currentBadgeSet].filter(b => !afterBadgeSet.has(b));
             console.log('Lost:', lost);
             
+            // Calculate THEIR impact (reverse the trade)
+            const theirCurrentBadges = calculateBadgesForTokens(compareWalletData.nfts || []);
+            const theirCurrentBadgeSet = new Set(Object.keys(theirCurrentBadges));
+            
+            // Simulate trade from their perspective: they lose their offered NFTs, gain yours
+            const theirSimulatedTokens = (compareWalletData.nfts || [])
+                .filter(id => !tradeOfferData.theirNfts.includes(String(id)))
+                .concat(tradeOfferData.yourNfts.map(id => String(id)));
+            
+            const theirAfterBadges = calculateBadgesForTokens(theirSimulatedTokens);
+            const theirAfterBadgeSet = new Set(Object.keys(theirAfterBadges));
+            
+            const theirGained = [...theirAfterBadgeSet].filter(b => !theirCurrentBadgeSet.has(b));
+            const theirLost = [...theirCurrentBadgeSet].filter(b => !theirAfterBadgeSet.has(b));
+            console.log('Their gained:', theirGained, 'Their lost:', theirLost);
+            
             // Render gained badges
             if (gained.length > 0) {
                 gainSection.style.display = 'block';
@@ -6283,7 +6317,54 @@
                 loseBadges.innerHTML = '<span class="trade-sim-empty">No badges lost - you have duplicates! ✓</span>';
             }
             
-            // Update net change
+            // Render THEIR gained badges
+            const theirGainSection = document.getElementById('tradeSimTheirGain');
+            const theirGainBadges = document.getElementById('tradeSimTheirGainBadges');
+            const theirLoseSection = document.getElementById('tradeSimTheirLose');
+            const theirLoseBadges = document.getElementById('tradeSimTheirLoseBadges');
+            
+            if (theirGained.length > 0) {
+                theirGainSection.style.display = 'block';
+                theirGainBadges.innerHTML = theirGained.map(badge => {
+                    const imgUrl = getBadgeImage(badge);
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    
+                    return '<div class="trade-sim-badge gain">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '') +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '</div>';
+                }).join('');
+            } else {
+                theirGainSection.style.display = 'block';
+                theirGainBadges.innerHTML = '<span class="trade-sim-empty">No new badges for them</span>';
+            }
+            
+            // Render THEIR lost badges
+            if (theirLost.length > 0) {
+                theirLoseSection.style.display = 'block';
+                theirLoseBadges.innerHTML = theirLost.map(badge => {
+                    const imgUrl = getBadgeImage(badge);
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    
+                    return '<div class="trade-sim-badge lose">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '') +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '</div>';
+                }).join('');
+            } else {
+                theirLoseSection.style.display = 'block';
+                theirLoseBadges.innerHTML = '<span class="trade-sim-empty">No badges lost - they have duplicates! ✓</span>';
+            }
+            
+            // Update net change (your perspective)
             const netChange = gained.length - lost.length;
             if (netChange > 0) {
                 netDisplay.textContent = '+' + netChange + ' badges';
