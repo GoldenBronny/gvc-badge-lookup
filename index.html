@@ -5168,7 +5168,12 @@
                            COMBO_BADGES.some(cb => cb.name === badge);
             
             if (!isMeta && badgeData[badge]) {
-                showBadgeNFTs(badge, !!walletBadges[badge]);
+                // Close the badge explorer modal first
+                closeBadgeExplorerModal();
+                // Small delay to let it close, then show NFTs
+                setTimeout(function() {
+                    showBadgeNFTs(badge, !!walletBadges[badge]);
+                }, 100);
             }
         }
         
