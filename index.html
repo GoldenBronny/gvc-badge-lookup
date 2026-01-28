@@ -1540,6 +1540,109 @@
             opacity: 1;
         }
         
+        /* Trade Simulator */
+        .trade-simulator {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .trade-sim-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .trade-sim-net {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .trade-sim-net.positive {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-green);
+        }
+        
+        .trade-sim-net.negative {
+            background: rgba(255, 0, 128, 0.15);
+            color: var(--accent-pink);
+        }
+        
+        .trade-sim-net.neutral {
+            background: rgba(136, 136, 153, 0.15);
+            color: var(--text-secondary);
+        }
+        
+        .trade-sim-section {
+            margin-bottom: 12px;
+        }
+        
+        .trade-sim-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .trade-sim-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .trade-sim-section-title.gain {
+            color: var(--accent-green);
+        }
+        
+        .trade-sim-section-title.lose {
+            color: var(--accent-pink);
+        }
+        
+        .trade-sim-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .trade-sim-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .trade-sim-badge img {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .trade-sim-badge.gain {
+            border: 1px solid var(--accent-green);
+        }
+        
+        .trade-sim-badge.lose {
+            border: 1px solid var(--accent-pink);
+        }
+        
+        .trade-sim-empty {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
         .trade-selected-nfts {
             display: flex;
             flex-wrap: wrap;
@@ -2797,6 +2900,22 @@
                             <label>+ ETH:</label>
                             <input type="number" id="tradeTheirEth" placeholder="0.00" step="0.01" min="0" onchange="updateTradePreview()">
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Trade Simulator -->
+                <div class="trade-simulator" id="tradeSimulator" style="display: none;">
+                    <div class="trade-sim-header">
+                        📊 Badge Impact Analysis
+                        <span class="trade-sim-net" id="tradeSimNet"></span>
+                    </div>
+                    <div class="trade-sim-section" id="tradeSimGain">
+                        <div class="trade-sim-section-title gain">🟢 You'd GAIN:</div>
+                        <div class="trade-sim-badges" id="tradeSimGainBadges"></div>
+                    </div>
+                    <div class="trade-sim-section" id="tradeSimLose">
+                        <div class="trade-sim-section-title lose">🔴 You'd LOSE:</div>
+                        <div class="trade-sim-badges" id="tradeSimLoseBadges"></div>
                     </div>
                 </div>
                 
@@ -5648,10 +5767,101 @@
         }
         
         // Get badges that the other party needs from an NFT
-        function getNftBadgesTheyNeed(tokenId, theirBadges) {
+        // This includes both trait badges AND potential combo badge contributions
+        function getNftBadgesTheyNeed(tokenId, theirBadges, theirNfts) {
+            const needed = [];
+            
+            // 1. Check trait badges
             const nftBadges = window.tokenToBadges ? window.tokenToBadges[String(tokenId)] : [];
-            if (!nftBadges) return [];
-            return nftBadges.filter(badge => !theirBadges[badge]);
+            if (nftBadges) {
+                nftBadges.forEach(badge => {
+                    if (!theirBadges[badge]) {
+                        needed.push(badge);
+                    }
+                });
+            }
+            
+            // 2. Check if this NFT would help them earn combo badges
+            const nftType = typeData[tokenId] || typeData[String(tokenId)];
+            if (nftType && theirNfts) {
+                // Get their current types
+                const theirTypes = theirNfts.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+                
+                // Check hatrick/high five badges
+                const prefixes = ['Gradient', 'Plastic', 'Robot'];
+                prefixes.forEach(prefix => {
+                    if (nftType.startsWith(prefix)) {
+                        // Count their unique colors of this type
+                        const theirUniqueColors = new Set(theirTypes.filter(t => t && t.startsWith(prefix)));
+                        
+                        // If adding this NFT gives them a new color
+                        if (!theirUniqueColors.has(nftType)) {
+                            const newCount = theirUniqueColors.size + 1;
+                            
+                            // Check hatrick (3 colors)
+                            const hatrickBadge = prefix.toLowerCase() + '_hatrick';
+                            if (newCount >= 3 && theirUniqueColors.size < 3 && !theirBadges[hatrickBadge]) {
+                                needed.push(hatrickBadge);
+                            }
+                            
+                            // Check high five (5 colors)
+                            const highFiveBadge = prefix.toLowerCase() + '_high_five';
+                            if (newCount >= 5 && theirUniqueColors.size < 5 && !theirBadges[highFiveBadge]) {
+                                needed.push(highFiveBadge);
+                            }
+                        }
+                    }
+                });
+                
+                // Check multi_type_master
+                if (!theirBadges['multi_type_master']) {
+                    const hasPlastic = theirTypes.some(t => t && t.startsWith('Plastic'));
+                    const hasGradient = theirTypes.some(t => t && t.startsWith('Gradient'));
+                    const hasRobot = theirTypes.some(t => t && t.startsWith('Robot'));
+                    
+                    const wouldAdd = (nftType.startsWith('Plastic') && !hasPlastic) ||
+                                    (nftType.startsWith('Gradient') && !hasGradient) ||
+                                    (nftType.startsWith('Robot') && !hasRobot);
+                    
+                    if (wouldAdd) {
+                        const newHasPlastic = hasPlastic || nftType.startsWith('Plastic');
+                        const newHasGradient = hasGradient || nftType.startsWith('Gradient');
+                        const newHasRobot = hasRobot || nftType.startsWith('Robot');
+                        
+                        if (newHasPlastic && newHasGradient && newHasRobot) {
+                            needed.push('multi_type_master');
+                        }
+                    }
+                }
+                
+                // Check yin_n_yang
+                if (!theirBadges['yin_n_yang']) {
+                    const hasGrayscale = theirTypes.some(t => t === 'Grayscale');
+                    const hasRainbow = theirTypes.some(t => t === 'Rainbow');
+                    
+                    if ((nftType === 'Grayscale' && hasRainbow && !hasGrayscale) ||
+                        (nftType === 'Rainbow' && hasGrayscale && !hasRainbow)) {
+                        needed.push('yin_n_yang');
+                    }
+                }
+                
+                // Check power_duo (2 of same type)
+                if (!theirBadges['power_duo']) {
+                    if (theirTypes.includes(nftType)) {
+                        needed.push('power_duo');
+                    }
+                }
+                
+                // Check chris_favorite (2 Grayscale)
+                if (!theirBadges['chris_favorite'] && nftType === 'Grayscale') {
+                    const grayscaleCount = theirTypes.filter(t => t === 'Grayscale').length;
+                    if (grayscaleCount >= 1) {
+                        needed.push('chris_favorite');
+                    }
+                }
+            }
+            
+            return needed;
         }
         
         function buildTradeNftPicker(pickerId, nfts, side) {
@@ -5659,15 +5869,16 @@
             
             // Determine which badges the OTHER party needs
             const theirBadges = side === 'yours' ? compareWalletData.badges : walletBadges;
+            const theirNfts = side === 'yours' ? compareWalletData.nfts : walletNFTs;
             
             // Categorize NFTs
             const valuableNfts = [];
             const otherNfts = [];
             
             nfts.forEach(function(tokenId) {
-                const badgesTheyNeed = getNftBadgesTheyNeed(tokenId, theirBadges);
+                const badgesTheyNeed = getNftBadgesTheyNeed(tokenId, theirBadges, theirNfts);
                 if (badgesTheyNeed.length > 0) {
-                    valuableNfts.push({ tokenId, badgeCount: badgesTheyNeed.length });
+                    valuableNfts.push({ tokenId, badgeCount: badgesTheyNeed.length, badges: badgesTheyNeed });
                 } else {
                     otherNfts.push({ tokenId, badgeCount: 0 });
                 }
@@ -5916,6 +6127,161 @@
                 theirEthDisplay.style.display = 'inline-block';
             } else {
                 theirEthDisplay.style.display = 'none';
+            }
+            
+            // Update trade simulator
+            updateTradeSimulator();
+        }
+        
+        // ========================================
+        // TRADE SIMULATOR - Badge Impact Analysis
+        // ========================================
+        
+        function calculateBadgesForTokens(tokenIds) {
+            // Calculate all badges for a given set of token IDs
+            // Returns an object with badge names as keys
+            const badges = {};
+            
+            // 1. Get trait badges from tokenToBadges
+            if (window.tokenToBadges) {
+                tokenIds.forEach(tokenId => {
+                    const tokenBadges = window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || [];
+                    tokenBadges.forEach(badge => {
+                        if (!badges[badge]) {
+                            badges[badge] = [];
+                        }
+                        badges[badge].push(tokenId);
+                    });
+                });
+            } else {
+                // Fallback: check each badge's token list
+                tokenIds.forEach(tokenId => {
+                    Object.entries(badgeData).forEach(([badge, tokens]) => {
+                        let tokenList = Array.isArray(tokens) ? tokens : Object.values(tokens);
+                        const hasToken = tokenList.some(t => 
+                            String(t) === String(tokenId) || parseInt(t) === parseInt(tokenId)
+                        );
+                        
+                        if (hasToken) {
+                            if (!badges[badge]) {
+                                badges[badge] = [];
+                            }
+                            badges[badge].push(tokenId);
+                        }
+                    });
+                });
+            }
+            
+            // 2. Calculate combo badges (type-based)
+            const types = tokenIds.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+            
+            COMBO_BADGES.forEach(combo => {
+                if (combo.check(types, tokenIds)) {
+                    badges[combo.name] = ['combo'];
+                }
+            });
+            
+            // 3. Calculate collection badges (based on total badge count)
+            let badgeCount = Object.keys(badges).length;
+            COLLECTION_BADGE_THRESHOLDS.forEach(threshold => {
+                const badgeName = `collection_${threshold}`;
+                if (badgeCount >= threshold) {
+                    badges[badgeName] = ['collection'];
+                    badgeCount++; // Cascading
+                }
+            });
+            
+            return badges;
+        }
+        
+        function updateTradeSimulator() {
+            const simulator = document.getElementById('tradeSimulator');
+            const gainSection = document.getElementById('tradeSimGain');
+            const loseSection = document.getElementById('tradeSimLose');
+            const gainBadges = document.getElementById('tradeSimGainBadges');
+            const loseBadges = document.getElementById('tradeSimLoseBadges');
+            const netDisplay = document.getElementById('tradeSimNet');
+            
+            // Only show if there are NFTs selected on both sides
+            if (tradeOfferData.yourNfts.length === 0 && tradeOfferData.theirNfts.length === 0) {
+                simulator.style.display = 'none';
+                return;
+            }
+            
+            simulator.style.display = 'block';
+            
+            // Calculate current badges
+            const currentBadges = calculateBadgesForTokens(walletNFTs);
+            const currentBadgeSet = new Set(Object.keys(currentBadges));
+            
+            // Simulate the trade: remove your offered NFTs, add their NFTs
+            const simulatedTokens = walletNFTs
+                .filter(id => !tradeOfferData.yourNfts.includes(String(id)))
+                .concat(tradeOfferData.theirNfts.map(id => String(id)));
+            
+            // Calculate badges after trade
+            const afterBadges = calculateBadgesForTokens(simulatedTokens);
+            const afterBadgeSet = new Set(Object.keys(afterBadges));
+            
+            // Find gained badges (in after but not in current)
+            const gained = [...afterBadgeSet].filter(b => !currentBadgeSet.has(b));
+            
+            // Find lost badges (in current but not in after)
+            const lost = [...currentBadgeSet].filter(b => !afterBadgeSet.has(b));
+            
+            // Render gained badges
+            if (gained.length > 0) {
+                gainSection.style.display = 'block';
+                gainBadges.innerHTML = gained.map(badge => {
+                    const imgUrl = getBadgeImage(badge);
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    
+                    return '<div class="trade-sim-badge gain">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '') +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '</div>';
+                }).join('');
+            } else {
+                gainSection.style.display = 'block';
+                gainBadges.innerHTML = '<span class="trade-sim-empty">No new badges</span>';
+            }
+            
+            // Render lost badges
+            if (lost.length > 0) {
+                loseSection.style.display = 'block';
+                loseBadges.innerHTML = lost.map(badge => {
+                    const imgUrl = getBadgeImage(badge);
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    
+                    return '<div class="trade-sim-badge lose">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="">' : '') +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '</div>';
+                }).join('');
+            } else {
+                loseSection.style.display = 'block';
+                loseBadges.innerHTML = '<span class="trade-sim-empty">No badges lost - you have duplicates! ✓</span>';
+            }
+            
+            // Update net change
+            const netChange = gained.length - lost.length;
+            if (netChange > 0) {
+                netDisplay.textContent = '+' + netChange + ' badges';
+                netDisplay.className = 'trade-sim-net positive';
+            } else if (netChange < 0) {
+                netDisplay.textContent = netChange + ' badges';
+                netDisplay.className = 'trade-sim-net negative';
+            } else {
+                netDisplay.textContent = '±0 badges';
+                netDisplay.className = 'trade-sim-net neutral';
             }
         }
         
