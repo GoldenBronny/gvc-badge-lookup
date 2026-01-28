@@ -1267,6 +1267,638 @@
             color: #000;
         }
         
+        .compare-trade-btn.create-offer {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+            color: #000;
+        }
+        
+        /* Trade Offer Builder */
+        .trade-offer-modal {
+            max-width: 800px;
+        }
+        
+        .trade-builder {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .trade-side {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .trade-side.yours {
+            border-color: var(--accent-cyan);
+        }
+        
+        .trade-side.theirs {
+            border-color: var(--accent-gold);
+        }
+        
+        .trade-side-header {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .trade-side.yours .trade-side-header {
+            color: var(--accent-cyan);
+        }
+        
+        .trade-side.theirs .trade-side-header {
+            color: var(--accent-gold);
+        }
+        
+        .trade-nft-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        
+        .trade-nft-option {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .trade-nft-option:hover {
+            border-color: var(--accent-purple);
+        }
+        
+        .trade-nft-option.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .trade-nft-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--accent-green);
+            color: #000;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .trade-nft-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .trade-selected-nfts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 60px;
+            padding: 8px;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .trade-selected-nft {
+            width: 52px;
+            text-align: center;
+        }
+        
+        .trade-selected-nft img {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        
+        .trade-selected-nft span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .trade-eth-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .trade-eth-input label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .trade-eth-input input {
+            width: 80px;
+            padding: 8px 10px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+        }
+        
+        .trade-eth-input input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+        
+        .trade-middle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .trade-arrow {
+            font-size: 32px;
+            color: var(--accent-purple);
+        }
+        
+        .trade-label {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+        }
+        
+        /* Trade Preview */
+        .trade-preview-container {
+            background: var(--bg-hover);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .trade-preview-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .trade-preview {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0f1020 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .trade-preview-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .trade-preview-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .trade-preview-content {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .trade-preview-side {
+            text-align: center;
+        }
+        
+        .trade-preview-side-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .trade-preview-side.yours .trade-preview-side-label {
+            color: var(--accent-cyan);
+        }
+        
+        .trade-preview-side.theirs .trade-preview-side-label {
+            color: var(--accent-gold);
+        }
+        
+        .trade-preview-nfts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .trade-preview-nft {
+            text-align: center;
+        }
+        
+        .trade-preview-nft img {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .trade-preview-side.yours .trade-preview-nft img {
+            border: 2px solid var(--accent-cyan);
+        }
+        
+        .trade-preview-side.theirs .trade-preview-nft img {
+            border: 2px solid var(--accent-gold);
+        }
+        
+        .trade-preview-nft span {
+            display: block;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+        }
+        
+        .trade-preview-side.yours .trade-preview-nft span {
+            color: var(--accent-cyan);
+        }
+        
+        .trade-preview-side.theirs .trade-preview-nft span {
+            color: var(--accent-gold);
+        }
+        
+        .trade-preview-eth {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .trade-preview-middle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .trade-preview-arrows {
+            font-size: 24px;
+            color: var(--accent-purple);
+        }
+        
+        .trade-preview-for {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .trade-preview-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--accent-cyan);
+        }
+        
+        .trade-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .trade-action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+        
+        .trade-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .trade-action-btn.copy-img {
+            background: var(--accent-purple);
+            color: #fff;
+        }
+        
+        .trade-action-btn.download {
+            background: var(--accent-green);
+            color: #000;
+        }
+        
+        /* NFT Lookup Section */
+        .nft-lookup-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .nft-lookup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .nft-lookup-header h3 {
+            font-size: 18px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nft-lookup-input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .nft-lookup-input-row input {
+            flex: 1;
+            max-width: 200px;
+            padding: 12px 16px;
+            background: var(--bg-hover);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .nft-lookup-input-row input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .nft-lookup-input-row button {
+            padding: 12px 24px;
+            background: var(--accent-cyan);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .nft-lookup-input-row button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .nft-lookup-result {
+            display: none;
+        }
+        
+        .nft-lookup-result.active {
+            display: block;
+        }
+        
+        .nft-lookup-card {
+            display: flex;
+            gap: 24px;
+            background: var(--bg-hover);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .nft-lookup-image {
+            flex-shrink: 0;
+        }
+        
+        .nft-lookup-image img {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid var(--accent-cyan);
+        }
+        
+        .nft-lookup-info {
+            flex: 1;
+        }
+        
+        .nft-lookup-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+        }
+        
+        .nft-lookup-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .nft-lookup-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nft-lookup-stat strong {
+            color: var(--text-primary);
+        }
+        
+        .nft-lookup-badges-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .nft-lookup-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .nft-lookup-badge {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nft-lookup-badge-rarity {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .nft-lookup-badge-rarity.rare {
+            color: var(--accent-gold);
+        }
+        
+        .nft-lookup-no-badges {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .nft-lookup-opensea {
+            margin-top: 16px;
+        }
+        
+        .nft-lookup-opensea a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 13px;
+        }
+        
+        .nft-lookup-opensea a:hover {
+            text-decoration: underline;
+        }
+        
+        .nft-lookup-whatif {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .nft-lookup-whatif-title {
+            font-size: 14px;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nft-lookup-whatif-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .nft-lookup-whatif-badge {
+            padding: 6px 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .nft-lookup-whatif-none {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        /* High Value Target Cards */
+        .target-nft-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        
+        .target-nft-card {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .target-nft-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-pink));
+        }
+        
+        .target-nft-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid var(--accent-gold);
+            flex-shrink: 0;
+        }
+        
+        .target-nft-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .target-nft-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .target-nft-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+        
+        .target-nft-count {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+            color: #000;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .target-nft-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .target-badge-tag {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--bg-hover);
+        }
+        
         /* Responsive */
         @media (max-width: 600px) {
             .header h1 { font-size: 1.8rem; }
@@ -1294,6 +1926,21 @@
                 <button onclick="lookupWallet()">Look Up</button>
             </div>
             <p class="search-hint">Supports multiple wallets! Separate with commas: 0x123..., name.eth, 0x456...</p>
+        </section>
+        
+        <!-- NFT Lookup Section -->
+        <section class="nft-lookup-section" id="nftLookupSection">
+            <div class="nft-lookup-header">
+                <h3>🔍 NFT Badge Lookup</h3>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                Enter a GVC token ID to see all its badges - useful for evaluating NFTs before buying!
+            </p>
+            <div class="nft-lookup-input-row">
+                <input type="number" id="nftLookupInput" placeholder="Token ID (1-10000)" min="1" max="10000">
+                <button onclick="lookupNFT()">Look Up NFT</button>
+            </div>
+            <div class="nft-lookup-result" id="nftLookupResult"></div>
         </section>
         
         <section class="results" id="results">
@@ -1499,6 +2146,23 @@
                         </div>
                     </div>
                     
+                    <!-- High Value Targets -->
+                    <div class="compare-section" id="sectionTargets">
+                        <div class="compare-section-header" onclick="toggleCompareSection('targets')">
+                            <div class="compare-section-title" style="color: var(--accent-gold);">
+                                🎯 High Value Targets
+                                <span class="compare-section-count" id="countTargets">0</span>
+                            </div>
+                            <div class="compare-section-toggle" id="toggleTargets">▼</div>
+                        </div>
+                        <div class="compare-section-content expanded" id="contentTargets">
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+                                Their NFTs that have multiple badges you need - best trade targets!
+                            </p>
+                            <div class="target-nft-grid" id="gridTargets"></div>
+                        </div>
+                    </div>
+                    
                     <!-- They Have, You Need -->
                     <div class="compare-section" id="sectionTheyHave">
                         <div class="compare-section-header" onclick="toggleCompareSection('theyHave')">
@@ -1544,7 +2208,90 @@
                     <!-- Trade Summary Actions -->
                     <div class="compare-trade-summary">
                         <button class="compare-trade-btn copy" onclick="copyTradeSummary()">📋 Copy Trade Summary</button>
+                        <button class="compare-trade-btn create-offer" onclick="showTradeOfferBuilder()">🎨 Create Trade Offer</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trade Offer Builder Modal -->
+    <div class="modal-overlay" id="tradeOfferModal" onclick="closeTradeOfferModal(event)">
+        <div class="modal trade-offer-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>🎨 Create Trade Offer</h2>
+                <button class="modal-close" onclick="closeTradeOfferModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="trade-builder">
+                    <!-- Your Side -->
+                    <div class="trade-side yours">
+                        <div class="trade-side-header">📤 You're Offering</div>
+                        <div class="trade-selected-nfts" id="tradeYourSelected">
+                            <span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>
+                        </div>
+                        <div class="trade-nft-picker" id="tradeYourPicker"></div>
+                        <div class="trade-eth-input">
+                            <label>+ ETH:</label>
+                            <input type="number" id="tradeYourEth" placeholder="0.00" step="0.01" min="0" onchange="updateTradePreview()">
+                        </div>
+                    </div>
+                    
+                    <!-- Middle -->
+                    <div class="trade-middle">
+                        <span class="trade-arrow">⇄</span>
+                        <span class="trade-label">TRADE</span>
+                    </div>
+                    
+                    <!-- Their Side -->
+                    <div class="trade-side theirs">
+                        <div class="trade-side-header">📥 You're Requesting</div>
+                        <div class="trade-selected-nfts" id="tradeTheirSelected">
+                            <span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>
+                        </div>
+                        <div class="trade-nft-picker" id="tradeTheirPicker"></div>
+                        <div class="trade-eth-input">
+                            <label>+ ETH:</label>
+                            <input type="number" id="tradeTheirEth" placeholder="0.00" step="0.01" min="0" onchange="updateTradePreview()">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview -->
+                <div class="trade-preview-container">
+                    <div class="trade-preview-label">Preview</div>
+                    <div class="trade-preview" id="tradePreview">
+                        <div class="trade-preview-header">
+                            <div class="trade-preview-title">🤝 Trade Offer</div>
+                        </div>
+                        <div class="trade-preview-content">
+                            <div class="trade-preview-side yours">
+                                <div class="trade-preview-side-label">I Give</div>
+                                <div class="trade-preview-nfts" id="previewYourNfts">
+                                    <span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>
+                                </div>
+                                <div class="trade-preview-eth" id="previewYourEth" style="display: none;"></div>
+                            </div>
+                            <div class="trade-preview-middle">
+                                <div class="trade-preview-arrows">⟷</div>
+                                <div class="trade-preview-for">FOR</div>
+                            </div>
+                            <div class="trade-preview-side theirs">
+                                <div class="trade-preview-side-label">I Get</div>
+                                <div class="trade-preview-nfts" id="previewTheirNfts">
+                                    <span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>
+                                </div>
+                                <div class="trade-preview-eth" id="previewTheirEth" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <div class="trade-preview-footer">gvcbadges.com</div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="trade-actions">
+                    <button class="trade-action-btn copy-img" onclick="copyTradeOfferImage()">🖼️ Copy Image</button>
+                    <button class="trade-action-btn download" onclick="downloadTradeOfferImage()">📥 Save Image</button>
                 </div>
             </div>
         </div>
@@ -1573,6 +2320,14 @@
             nfts: [],
             badges: {},
             tokenToBadges: {}
+        };
+        
+        // Trade offer state
+        let tradeOfferData = {
+            yourNfts: [],
+            theirNfts: [],
+            yourEth: 0,
+            theirEth: 0
         };
         
         // VIBE Bounty Hunter self-report state
@@ -3597,10 +4352,41 @@
             youHaveTheyNeed.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
             sharedBadges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
             
+            // === HIGH VALUE TARGETS ===
+            // Analyze their NFTs for ones with multiple badges you need
+            const badgesYouNeedSet = new Set(theyHaveYouNeed);
+            const highValueTargets = [];
+            
+            compareWalletData.nfts.forEach(function(tokenId) {
+                const theirTokenBadges = compareWalletData.tokenToBadges[tokenId] || [];
+                const badgesYouNeedFromThis = theirTokenBadges.filter(b => badgesYouNeedSet.has(b));
+                
+                if (badgesYouNeedFromThis.length >= 2) {
+                    highValueTargets.push({
+                        tokenId: tokenId,
+                        badges: badgesYouNeedFromThis,
+                        count: badgesYouNeedFromThis.length
+                    });
+                }
+            });
+            
+            // Sort by badge count (most valuable first)
+            highValueTargets.sort((a, b) => b.count - a.count);
+            
             // Update counts
+            document.getElementById('countTargets').textContent = highValueTargets.length;
             document.getElementById('countTheyHave').textContent = theyHaveYouNeed.length;
             document.getElementById('countYouHave').textContent = youHaveTheyNeed.length;
             document.getElementById('countShared').textContent = sharedBadges.length;
+            
+            // Show/hide targets section based on results
+            const targetsSection = document.getElementById('sectionTargets');
+            if (highValueTargets.length === 0) {
+                targetsSection.style.display = 'none';
+            } else {
+                targetsSection.style.display = 'block';
+                renderHighValueTargets(highValueTargets);
+            }
             
             // Render badge grids
             renderCompareGrid('gridTheyHave', theyHaveYouNeed, 'them');
@@ -3609,6 +4395,33 @@
             
             // Show results
             document.getElementById('compareResults').classList.add('active');
+        }
+        
+        function renderHighValueTargets(targets) {
+            const grid = document.getElementById('gridTargets');
+            
+            grid.innerHTML = targets.map(function(target) {
+                const imgUrl = imageData[target.tokenId] || imageData[String(target.tokenId)];
+                
+                const badgeTags = target.badges.map(function(badge) {
+                    const color = getBadgeColor(badge);
+                    const style = color.includes('gradient') 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    return '<span class="target-badge-tag" style="' + style + '">' + formatBadgeName(badge) + '</span>';
+                }).join('');
+                
+                return '<div class="target-nft-card">' +
+                    (imgUrl ? '<img class="target-nft-img" src="' + imgUrl + '" alt="#' + target.tokenId + '">' : '<div class="target-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#' + target.tokenId + '</div>') +
+                    '<div class="target-nft-info">' +
+                        '<div class="target-nft-header">' +
+                            '<span class="target-nft-id">GVC #' + target.tokenId + '</span>' +
+                            '<span class="target-nft-count">' + target.count + ' badges you need!</span>' +
+                        '</div>' +
+                        '<div class="target-nft-badges">' + badgeTags + '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
         }
         
         function renderCompareGrid(gridId, badges, owner) {
@@ -3698,20 +4511,47 @@
             theyHaveYouNeed.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
             youHaveTheyNeed.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
             
+            // Find high value targets
+            const badgesYouNeedSet = new Set(theyHaveYouNeed);
+            const highValueTargets = [];
+            
+            compareWalletData.nfts.forEach(function(tokenId) {
+                const theirTokenBadges = compareWalletData.tokenToBadges[tokenId] || [];
+                const badgesYouNeedFromThis = theirTokenBadges.filter(b => badgesYouNeedSet.has(b));
+                
+                if (badgesYouNeedFromThis.length >= 2) {
+                    highValueTargets.push({
+                        tokenId: tokenId,
+                        badges: badgesYouNeedFromThis,
+                        count: badgesYouNeedFromThis.length
+                    });
+                }
+            });
+            highValueTargets.sort((a, b) => b.count - a.count);
+            
             let text = '🔄 GVC Badge Trade Comparison\n\n';
             text += '👤 ' + yourAddr + ' ←→ ' + theirAddr + '\n\n';
             
+            // High value targets
+            if (highValueTargets.length > 0) {
+                text += '🎯 HIGH VALUE TARGETS:\n';
+                highValueTargets.slice(0, 5).forEach(function(t) {
+                    text += '• GVC #' + t.tokenId + ' (' + t.count + ' badges): ' + t.badges.map(b => formatBadgeName(b)).join(', ') + '\n';
+                });
+                text += '\n';
+            }
+            
             text += '🎯 They have, I need (' + theyHaveYouNeed.length + '):\n';
-            theyHaveYouNeed.slice(0, 8).forEach(function(b) {
+            theyHaveYouNeed.slice(0, 6).forEach(function(b) {
                 text += '• ' + formatBadgeName(b) + '\n';
             });
-            if (theyHaveYouNeed.length > 8) text += '...and ' + (theyHaveYouNeed.length - 8) + ' more\n';
+            if (theyHaveYouNeed.length > 6) text += '...and ' + (theyHaveYouNeed.length - 6) + ' more\n';
             
             text += '\n💎 I have, they need (' + youHaveTheyNeed.length + '):\n';
-            youHaveTheyNeed.slice(0, 8).forEach(function(b) {
+            youHaveTheyNeed.slice(0, 6).forEach(function(b) {
                 text += '• ' + formatBadgeName(b) + '\n';
             });
-            if (youHaveTheyNeed.length > 8) text += '...and ' + (youHaveTheyNeed.length - 8) + ' more\n';
+            if (youHaveTheyNeed.length > 6) text += '...and ' + (youHaveTheyNeed.length - 6) + ' more\n';
             
             text += '\nGenerated at gvcbadges.com';
             
@@ -3719,6 +4559,490 @@
                 const btn = document.querySelector('.compare-trade-btn.copy');
                 const originalText = btn.textContent;
                 btn.textContent = '✓ Copied!';
+                setTimeout(function() {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+        
+        // ========================================
+        // NFT LOOKUP
+        // ========================================
+        function lookupNFT() {
+            const input = document.getElementById('nftLookupInput');
+            const tokenId = parseInt(input.value);
+            
+            if (!tokenId || tokenId < 1 || tokenId > 10000) {
+                alert('Please enter a valid token ID (1-10000)');
+                return;
+            }
+            
+            // Get badges for this NFT
+            const badges = [];
+            Object.entries(badgeData).forEach(function([badge, tokens]) {
+                const tokenList = Array.isArray(tokens) ? tokens : Object.keys(tokens).map(Number);
+                if (tokenList.includes(tokenId) || tokenList.includes(String(tokenId))) {
+                    badges.push(badge);
+                }
+            });
+            
+            // Sort by rarity
+            badges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
+            
+            // Get image
+            const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+            
+            // Calculate what-if badges (if user has looked up a wallet)
+            let whatIfBadges = [];
+            if (Object.keys(walletBadges).length > 0) {
+                whatIfBadges = badges.filter(b => !walletBadges[b]);
+            }
+            
+            // Render result
+            renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges);
+        }
+        
+        function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges) {
+            const container = document.getElementById('nftLookupResult');
+            
+            const badgesHtml = badges.length > 0 
+                ? badges.map(function(badge) {
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    const rarity = getBadgeRarity(badge);
+                    const rarityClass = rarity < 50 ? 'rare' : '';
+                    
+                    return '<div class="nft-lookup-badge">' +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '<span class="nft-lookup-badge-rarity ' + rarityClass + '">(' + rarity + ' NFTs)</span>' +
+                        '</div>';
+                }).join('')
+                : '<span class="nft-lookup-no-badges">No trait badges found for this NFT</span>';
+            
+            let whatIfHtml = '';
+            if (Object.keys(walletBadges).length > 0) {
+                if (whatIfBadges.length > 0) {
+                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                        '<div class="nft-lookup-whatif-title">✨ New badges you\'d gain:</div>' +
+                        '<div class="nft-lookup-whatif-badges">' +
+                        whatIfBadges.map(function(badge) {
+                            const color = getBadgeColor(badge);
+                            const style = color.includes('gradient') 
+                                ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                                : 'color: ' + color + ';';
+                            return '<span class="nft-lookup-whatif-badge" style="' + style + '">' + formatBadgeName(badge) + '</span>';
+                        }).join('') +
+                        '</div></div>';
+                } else if (badges.length > 0) {
+                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                        '<div class="nft-lookup-whatif-none">✓ You already have all badges from this NFT</div>' +
+                        '</div>';
+                }
+            }
+            
+            container.innerHTML = '<div class="nft-lookup-card">' +
+                '<div class="nft-lookup-image">' +
+                (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
+                '</div>' +
+                '<div class="nft-lookup-info">' +
+                '<div class="nft-lookup-title">GVC #' + tokenId + '</div>' +
+                '<div class="nft-lookup-stats">' +
+                '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
+                (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
+                '</div>' +
+                '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
+                '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
+                whatIfHtml +
+                '<div class="nft-lookup-opensea">' +
+                '<a href="https://opensea.io/assets/ethereum/0xb8ea78fcacef50d41375e44e6814ebba36bb33c4/' + tokenId + '" target="_blank">View on OpenSea →</a>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            
+            container.classList.add('active');
+        }
+        
+        // Add Enter key support for NFT lookup
+        document.addEventListener('DOMContentLoaded', function() {
+            const nftInput = document.getElementById('nftLookupInput');
+            if (nftInput) {
+                nftInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        lookupNFT();
+                    }
+                });
+            }
+        });
+        
+        // ========================================
+        // TRADE OFFER BUILDER
+        // ========================================
+        function showTradeOfferBuilder() {
+            // Reset state
+            tradeOfferData = {
+                yourNfts: [],
+                theirNfts: [],
+                yourEth: 0,
+                theirEth: 0
+            };
+            
+            // Reset inputs
+            document.getElementById('tradeYourEth').value = '';
+            document.getElementById('tradeTheirEth').value = '';
+            
+            // Build NFT pickers
+            buildTradeNftPicker('tradeYourPicker', walletNFTs, 'yours');
+            buildTradeNftPicker('tradeTheirPicker', compareWalletData.nfts, 'theirs');
+            
+            // Update selected displays
+            updateTradeSelectedDisplay('yours');
+            updateTradeSelectedDisplay('theirs');
+            
+            // Update preview
+            updateTradePreview();
+            
+            // Show modal
+            document.getElementById('tradeOfferModal').classList.add('active');
+        }
+        
+        function closeTradeOfferModal(event) {
+            if (!event || event.target === document.getElementById('tradeOfferModal')) {
+                document.getElementById('tradeOfferModal').classList.remove('active');
+            }
+        }
+        
+        function buildTradeNftPicker(pickerId, nfts, side) {
+            const picker = document.getElementById(pickerId);
+            
+            picker.innerHTML = nfts.map(function(tokenId) {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                const selected = side === 'yours' 
+                    ? tradeOfferData.yourNfts.includes(String(tokenId))
+                    : tradeOfferData.theirNfts.includes(String(tokenId));
+                
+                return '<div class="trade-nft-option ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + tokenId + '\', \'' + side + '\')" title="GVC #' + tokenId + '">' +
+                    (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + tokenId + '</div>') +
+                    '</div>';
+            }).join('');
+        }
+        
+        function toggleTradeNft(tokenId, side) {
+            const arr = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
+            const idx = arr.indexOf(String(tokenId));
+            
+            if (idx > -1) {
+                arr.splice(idx, 1);
+            } else {
+                arr.push(String(tokenId));
+            }
+            
+            // Rebuild picker to update selection state
+            if (side === 'yours') {
+                buildTradeNftPicker('tradeYourPicker', walletNFTs, 'yours');
+            } else {
+                buildTradeNftPicker('tradeTheirPicker', compareWalletData.nfts, 'theirs');
+            }
+            
+            updateTradeSelectedDisplay(side);
+            updateTradePreview();
+        }
+        
+        function updateTradeSelectedDisplay(side) {
+            const container = document.getElementById(side === 'yours' ? 'tradeYourSelected' : 'tradeTheirSelected');
+            const nfts = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
+            
+            if (nfts.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>';
+                return;
+            }
+            
+            container.innerHTML = nfts.map(function(tokenId) {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                return '<div class="trade-selected-nft">' +
+                    (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:48px;height:48px;background:var(--bg-card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;">#' + tokenId + '</div>') +
+                    '<span>#' + tokenId + '</span>' +
+                    '</div>';
+            }).join('');
+        }
+        
+        function updateTradePreview() {
+            // Get ETH values
+            tradeOfferData.yourEth = parseFloat(document.getElementById('tradeYourEth').value) || 0;
+            tradeOfferData.theirEth = parseFloat(document.getElementById('tradeTheirEth').value) || 0;
+            
+            // Update your NFTs preview
+            const yourNftsPreview = document.getElementById('previewYourNfts');
+            if (tradeOfferData.yourNfts.length === 0) {
+                yourNftsPreview.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>';
+            } else {
+                yourNftsPreview.innerHTML = tradeOfferData.yourNfts.map(function(tokenId) {
+                    const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                    return '<div class="trade-preview-nft">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:64px;height:64px;background:var(--bg-card);border-radius:8px;border:2px solid var(--accent-cyan);display:flex;align-items:center;justify-content:center;font-size:11px;">#' + tokenId + '</div>') +
+                        '<span>#' + tokenId + '</span>' +
+                        '</div>';
+                }).join('');
+            }
+            
+            // Update their NFTs preview
+            const theirNftsPreview = document.getElementById('previewTheirNfts');
+            if (tradeOfferData.theirNfts.length === 0) {
+                theirNftsPreview.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>';
+            } else {
+                theirNftsPreview.innerHTML = tradeOfferData.theirNfts.map(function(tokenId) {
+                    const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                    return '<div class="trade-preview-nft">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:64px;height:64px;background:var(--bg-card);border-radius:8px;border:2px solid var(--accent-gold);display:flex;align-items:center;justify-content:center;font-size:11px;">#' + tokenId + '</div>') +
+                        '<span>#' + tokenId + '</span>' +
+                        '</div>';
+                }).join('');
+            }
+            
+            // Update ETH displays
+            const yourEthDisplay = document.getElementById('previewYourEth');
+            const theirEthDisplay = document.getElementById('previewTheirEth');
+            
+            if (tradeOfferData.yourEth > 0) {
+                yourEthDisplay.textContent = '+ ' + tradeOfferData.yourEth + ' ETH';
+                yourEthDisplay.style.display = 'inline-block';
+            } else {
+                yourEthDisplay.style.display = 'none';
+            }
+            
+            if (tradeOfferData.theirEth > 0) {
+                theirEthDisplay.textContent = '+ ' + tradeOfferData.theirEth + ' ETH';
+                theirEthDisplay.style.display = 'inline-block';
+            } else {
+                theirEthDisplay.style.display = 'none';
+            }
+        }
+        
+        function generateTradeOfferCanvas(callback) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Calculate canvas size based on NFT count
+            const maxNfts = Math.max(tradeOfferData.yourNfts.length, tradeOfferData.theirNfts.length, 1);
+            const nftSize = 100;
+            const nftGap = 12;
+            const sideWidth = Math.max(200, maxNfts * (nftSize + nftGap));
+            
+            canvas.width = sideWidth * 2 + 100;
+            canvas.height = 350;
+            
+            // Draw background gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#0a0a0f');
+            gradient.addColorStop(0.5, '#1a1025');
+            gradient.addColorStop(1, '#0f1020');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw border
+            ctx.strokeStyle = '#2a2a3a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+            
+            // Draw title
+            ctx.font = 'bold 28px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText('🤝 Trade Offer', canvas.width / 2, 45);
+            
+            // Draw column headers
+            ctx.font = '14px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillText('I Give', canvas.width / 4, 80);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillText('I Get', (canvas.width / 4) * 3, 80);
+            
+            // Draw middle divider and arrows
+            ctx.fillStyle = '#a855f7';
+            ctx.font = '32px Arial';
+            ctx.fillText('⟷', canvas.width / 2, 180);
+            ctx.font = '12px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#888899';
+            ctx.fillText('FOR', canvas.width / 2, 205);
+            
+            // Draw footer
+            ctx.font = '12px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillText('gvcbadges.com', canvas.width / 2, canvas.height - 20);
+            
+            // Load and draw NFT images
+            const imagesToLoad = [];
+            
+            tradeOfferData.yourNfts.forEach(function(tokenId, i) {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    imagesToLoad.push({
+                        url: imgUrl,
+                        tokenId: tokenId,
+                        side: 'yours',
+                        index: i
+                    });
+                }
+            });
+            
+            tradeOfferData.theirNfts.forEach(function(tokenId, i) {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                if (imgUrl) {
+                    imagesToLoad.push({
+                        url: imgUrl,
+                        tokenId: tokenId,
+                        side: 'theirs',
+                        index: i
+                    });
+                }
+            });
+            
+            let loadedCount = 0;
+            const totalImages = imagesToLoad.length;
+            
+            function drawNft(img, tokenId, side, index) {
+                const nftSize = 80;
+                const startY = 100;
+                
+                let x, y;
+                if (side === 'yours') {
+                    const totalWidth = tradeOfferData.yourNfts.length * (nftSize + 10);
+                    const startX = (canvas.width / 4) - (totalWidth / 2) + 5;
+                    x = startX + index * (nftSize + 10);
+                    y = startY;
+                } else {
+                    const totalWidth = tradeOfferData.theirNfts.length * (nftSize + 10);
+                    const startX = (canvas.width / 4) * 3 - (totalWidth / 2) + 5;
+                    x = startX + index * (nftSize + 10);
+                    y = startY;
+                }
+                
+                // Draw rounded image
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(x, y, nftSize, nftSize, 10);
+                ctx.closePath();
+                ctx.clip();
+                ctx.drawImage(img, x, y, nftSize, nftSize);
+                ctx.restore();
+                
+                // Draw border
+                ctx.strokeStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(x, y, nftSize, nftSize, 10);
+                ctx.stroke();
+                
+                // Draw token ID
+                ctx.font = '11px JetBrains Mono, monospace';
+                ctx.fillStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
+                ctx.textAlign = 'center';
+                ctx.fillText('#' + tokenId, x + nftSize / 2, y + nftSize + 16);
+            }
+            
+            function finishDrawing() {
+                // Draw ETH amounts
+                ctx.font = '14px JetBrains Mono, monospace';
+                ctx.textAlign = 'center';
+                
+                const ethY = 260;
+                
+                if (tradeOfferData.yourEth > 0) {
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.fillText('+ ' + tradeOfferData.yourEth + ' ETH', canvas.width / 4, ethY);
+                }
+                
+                if (tradeOfferData.theirEth > 0) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillText('+ ' + tradeOfferData.theirEth + ' ETH', (canvas.width / 4) * 3, ethY);
+                }
+                
+                // Draw placeholder if no NFTs
+                ctx.font = '12px Inter, Arial, sans-serif';
+                ctx.fillStyle = '#666677';
+                if (tradeOfferData.yourNfts.length === 0) {
+                    ctx.fillText('No NFTs selected', canvas.width / 4, 160);
+                }
+                if (tradeOfferData.theirNfts.length === 0) {
+                    ctx.fillText('No NFTs selected', (canvas.width / 4) * 3, 160);
+                }
+                
+                callback(canvas);
+            }
+            
+            if (totalImages === 0) {
+                finishDrawing();
+                return;
+            }
+            
+            imagesToLoad.forEach(function(imgData) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    drawNft(img, imgData.tokenId, imgData.side, imgData.index);
+                    loadedCount++;
+                    if (loadedCount >= totalImages) {
+                        finishDrawing();
+                    }
+                };
+                img.onerror = function() {
+                    loadedCount++;
+                    if (loadedCount >= totalImages) {
+                        finishDrawing();
+                    }
+                };
+                img.src = imgData.url;
+            });
+        }
+        
+        function copyTradeOfferImage() {
+            const btn = document.querySelector('.trade-action-btn.copy-img');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Creating...';
+            
+            generateTradeOfferCanvas(function(canvas) {
+                canvas.toBlob(function(blob) {
+                    try {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]).then(function() {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(function() {
+                                btn.textContent = originalText;
+                            }, 2000);
+                        }).catch(function(err) {
+                            console.error('Failed to copy image:', err);
+                            btn.textContent = '❌ Failed';
+                            setTimeout(function() {
+                                btn.textContent = originalText;
+                            }, 2000);
+                            alert('Could not copy to clipboard. Try the "Save Image" button instead.');
+                        });
+                    } catch (err) {
+                        btn.textContent = '❌ Not supported';
+                        setTimeout(function() {
+                            btn.textContent = originalText;
+                        }, 2000);
+                        alert('Your browser does not support copying images. Try "Save Image" instead.');
+                    }
+                }, 'image/png');
+            });
+        }
+        
+        function downloadTradeOfferImage() {
+            const btn = document.querySelector('.trade-action-btn.download');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Creating...';
+            
+            generateTradeOfferCanvas(function(canvas) {
+                const link = document.createElement('a');
+                link.download = 'gvc-trade-offer.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                btn.textContent = '✓ Saved!';
                 setTimeout(function() {
                     btn.textContent = originalText;
                 }, 2000);
