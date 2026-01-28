@@ -1335,11 +1335,46 @@
         
         .trade-nft-picker {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            max-height: 200px;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 240px;
             overflow-y: auto;
             margin-bottom: 12px;
+        }
+        
+        .trade-picker-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .trade-picker-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .trade-picker-section-label.valuable {
+            color: var(--accent-gold);
+        }
+        
+        .trade-picker-section-label .badge-count {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+        
+        .trade-picker-nfts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
         .trade-nft-option {
@@ -1360,6 +1395,28 @@
         .trade-nft-option.selected {
             border-color: var(--accent-green);
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .trade-nft-option.valuable {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+        
+        .trade-nft-option.valuable.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .trade-nft-option .badge-indicator {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            background: var(--accent-gold);
+            color: #000;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: bold;
         }
         
         .trade-nft-option.selected::after {
@@ -1383,6 +1440,104 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        
+        /* Custom image upload */
+        .trade-custom-images {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+        }
+        
+        .trade-custom-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .trade-custom-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .trade-custom-add {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            font-size: 24px;
+        }
+        
+        .trade-custom-add:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+        
+        .trade-custom-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid var(--accent-purple);
+            position: relative;
+        }
+        
+        .trade-custom-img.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+        
+        .trade-custom-img.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--accent-green);
+            color: #000;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .trade-custom-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .trade-custom-img .remove-btn {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: var(--accent-pink);
+            color: #fff;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .trade-custom-img:hover .remove-btn {
+            opacity: 1;
         }
         
         .trade-selected-nfts {
@@ -2605,6 +2760,13 @@
                             <span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>
                         </div>
                         <div class="trade-nft-picker" id="tradeYourPicker"></div>
+                        <div class="trade-custom-images">
+                            <div class="trade-custom-label">Add other NFTs:</div>
+                            <div class="trade-custom-grid" id="tradeYourCustom">
+                                <div class="trade-custom-add" onclick="addCustomImage('yours')" title="Add custom NFT image">+</div>
+                            </div>
+                            <input type="file" id="customImageInputYours" accept="image/*" style="display:none" onchange="handleCustomImageUpload(event, 'yours')">
+                        </div>
                         <div class="trade-eth-input">
                             <label>+ ETH:</label>
                             <input type="number" id="tradeYourEth" placeholder="0.00" step="0.01" min="0" onchange="updateTradePreview()">
@@ -2624,6 +2786,13 @@
                             <span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>
                         </div>
                         <div class="trade-nft-picker" id="tradeTheirPicker"></div>
+                        <div class="trade-custom-images">
+                            <div class="trade-custom-label">Add other NFTs:</div>
+                            <div class="trade-custom-grid" id="tradeTheirCustom">
+                                <div class="trade-custom-add" onclick="addCustomImage('theirs')" title="Add custom NFT image">+</div>
+                            </div>
+                            <input type="file" id="customImageInputTheirs" accept="image/*" style="display:none" onchange="handleCustomImageUpload(event, 'theirs')">
+                        </div>
                         <div class="trade-eth-input">
                             <label>+ ETH:</label>
                             <input type="number" id="tradeTheirEth" placeholder="0.00" step="0.01" min="0" onchange="updateTradePreview()">
@@ -5444,14 +5613,20 @@
                 yourNfts: [],
                 theirNfts: [],
                 yourEth: 0,
-                theirEth: 0
+                theirEth: 0,
+                yourCustomImages: [],
+                theirCustomImages: []
             };
             
             // Reset inputs
             document.getElementById('tradeYourEth').value = '';
             document.getElementById('tradeTheirEth').value = '';
             
-            // Build NFT pickers
+            // Reset custom image grids
+            renderCustomImages('yours');
+            renderCustomImages('theirs');
+            
+            // Build NFT pickers with badge analysis
             buildTradeNftPicker('tradeYourPicker', walletNFTs, 'yours');
             buildTradeNftPicker('tradeTheirPicker', compareWalletData.nfts, 'theirs');
             
@@ -5472,19 +5647,82 @@
             }
         }
         
+        // Get badges that the other party needs from an NFT
+        function getNftBadgesTheyNeed(tokenId, theirBadges) {
+            const nftBadges = window.tokenToBadges ? window.tokenToBadges[String(tokenId)] : [];
+            if (!nftBadges) return [];
+            return nftBadges.filter(badge => !theirBadges[badge]);
+        }
+        
         function buildTradeNftPicker(pickerId, nfts, side) {
             const picker = document.getElementById(pickerId);
             
-            picker.innerHTML = nfts.map(function(tokenId) {
-                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
-                const selected = side === 'yours' 
-                    ? tradeOfferData.yourNfts.includes(String(tokenId))
-                    : tradeOfferData.theirNfts.includes(String(tokenId));
+            // Determine which badges the OTHER party needs
+            const theirBadges = side === 'yours' ? compareWalletData.badges : walletBadges;
+            
+            // Categorize NFTs
+            const valuableNfts = [];
+            const otherNfts = [];
+            
+            nfts.forEach(function(tokenId) {
+                const badgesTheyNeed = getNftBadgesTheyNeed(tokenId, theirBadges);
+                if (badgesTheyNeed.length > 0) {
+                    valuableNfts.push({ tokenId, badgeCount: badgesTheyNeed.length });
+                } else {
+                    otherNfts.push({ tokenId, badgeCount: 0 });
+                }
+            });
+            
+            // Sort valuable NFTs by badge count (most valuable first)
+            valuableNfts.sort((a, b) => b.badgeCount - a.badgeCount);
+            
+            let html = '';
+            
+            // Valuable section
+            if (valuableNfts.length > 0) {
+                const label = side === 'yours' ? 'Has badges they need' : 'Has badges you need';
+                html += '<div class="trade-picker-section">' +
+                    '<div class="trade-picker-section-label valuable">⭐ ' + label + ' <span class="badge-count">' + valuableNfts.length + '</span></div>' +
+                    '<div class="trade-picker-nfts">';
                 
-                return '<div class="trade-nft-option ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + tokenId + '\', \'' + side + '\')" title="GVC #' + tokenId + '">' +
-                    (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + tokenId + '</div>') +
-                    '</div>';
-            }).join('');
+                valuableNfts.forEach(function(item) {
+                    const imgUrl = imageData[item.tokenId] || imageData[String(item.tokenId)];
+                    const selectedArr = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
+                    const selected = selectedArr.includes(String(item.tokenId));
+                    
+                    html += '<div class="trade-nft-option valuable ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + ' - ' + item.badgeCount + ' badge(s)">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="#' + item.tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + item.tokenId + '</div>') +
+                        '<span class="badge-indicator">' + item.badgeCount + '</span>' +
+                        '</div>';
+                });
+                
+                html += '</div></div>';
+            }
+            
+            // Other NFTs section
+            if (otherNfts.length > 0) {
+                html += '<div class="trade-picker-section">' +
+                    '<div class="trade-picker-section-label">Other NFTs</div>' +
+                    '<div class="trade-picker-nfts">';
+                
+                otherNfts.forEach(function(item) {
+                    const imgUrl = imageData[item.tokenId] || imageData[String(item.tokenId)];
+                    const selectedArr = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
+                    const selected = selectedArr.includes(String(item.tokenId));
+                    
+                    html += '<div class="trade-nft-option ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + '">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="#' + item.tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + item.tokenId + '</div>') +
+                        '</div>';
+                });
+                
+                html += '</div></div>';
+            }
+            
+            if (valuableNfts.length === 0 && otherNfts.length === 0) {
+                html = '<div style="color: var(--text-secondary); font-size: 12px; padding: 12px;">No NFTs available</div>';
+            }
+            
+            picker.innerHTML = html;
         }
         
         function toggleTradeNft(tokenId, side) {
@@ -5511,19 +5749,98 @@
         function updateTradeSelectedDisplay(side) {
             const container = document.getElementById(side === 'yours' ? 'tradeYourSelected' : 'tradeTheirSelected');
             const nfts = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
+            const customImages = side === 'yours' ? tradeOfferData.yourCustomImages : tradeOfferData.theirCustomImages;
+            const selectedCustom = customImages.filter(img => img.selected);
             
-            if (nfts.length === 0) {
+            if (nfts.length === 0 && selectedCustom.length === 0) {
                 container.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Click NFTs below to add</span>';
                 return;
             }
             
-            container.innerHTML = nfts.map(function(tokenId) {
+            let html = nfts.map(function(tokenId) {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 return '<div class="trade-selected-nft">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:48px;height:48px;background:var(--bg-card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;">#' + tokenId + '</div>') +
                     '<span>#' + tokenId + '</span>' +
                     '</div>';
             }).join('');
+            
+            // Add selected custom images
+            selectedCustom.forEach(function(img, idx) {
+                html += '<div class="trade-selected-nft">' +
+                    '<img src="' + img.dataUrl + '" alt="Custom">' +
+                    '<span>Custom</span>' +
+                    '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Custom image upload functions
+        function addCustomImage(side) {
+            const inputId = side === 'yours' ? 'customImageInputYours' : 'customImageInputTheirs';
+            document.getElementById(inputId).click();
+        }
+        
+        function handleCustomImageUpload(event, side) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const customImages = side === 'yours' ? tradeOfferData.yourCustomImages : tradeOfferData.theirCustomImages;
+                customImages.push({
+                    dataUrl: e.target.result,
+                    selected: true,  // Auto-select when added
+                    id: Date.now()
+                });
+                
+                renderCustomImages(side);
+                updateTradeSelectedDisplay(side);
+                updateTradePreview();
+            };
+            reader.readAsDataURL(file);
+            
+            // Reset input so same file can be added again
+            event.target.value = '';
+        }
+        
+        function renderCustomImages(side) {
+            const containerId = side === 'yours' ? 'tradeYourCustom' : 'tradeTheirCustom';
+            const container = document.getElementById(containerId);
+            const customImages = side === 'yours' ? tradeOfferData.yourCustomImages : tradeOfferData.theirCustomImages;
+            
+            let html = '';
+            
+            customImages.forEach(function(img, idx) {
+                html += '<div class="trade-custom-img ' + (img.selected ? 'selected' : '') + '" onclick="toggleCustomImage(\'' + side + '\', ' + idx + ')">' +
+                    '<img src="' + img.dataUrl + '" alt="Custom NFT">' +
+                    '<div class="remove-btn" onclick="event.stopPropagation(); removeCustomImage(\'' + side + '\', ' + idx + ')">×</div>' +
+                    '</div>';
+            });
+            
+            // Always add the + button at the end
+            html += '<div class="trade-custom-add" onclick="addCustomImage(\'' + side + '\')" title="Add custom NFT image">+</div>';
+            
+            container.innerHTML = html;
+        }
+        
+        function toggleCustomImage(side, idx) {
+            const customImages = side === 'yours' ? tradeOfferData.yourCustomImages : tradeOfferData.theirCustomImages;
+            customImages[idx].selected = !customImages[idx].selected;
+            
+            renderCustomImages(side);
+            updateTradeSelectedDisplay(side);
+            updateTradePreview();
+        }
+        
+        function removeCustomImage(side, idx) {
+            const customImages = side === 'yours' ? tradeOfferData.yourCustomImages : tradeOfferData.theirCustomImages;
+            customImages.splice(idx, 1);
+            
+            renderCustomImages(side);
+            updateTradeSelectedDisplay(side);
+            updateTradePreview();
         }
         
         function updateTradePreview() {
@@ -5531,32 +5848,56 @@
             tradeOfferData.yourEth = parseFloat(document.getElementById('tradeYourEth').value) || 0;
             tradeOfferData.theirEth = parseFloat(document.getElementById('tradeTheirEth').value) || 0;
             
+            // Get selected custom images
+            const yourSelectedCustom = tradeOfferData.yourCustomImages.filter(img => img.selected);
+            const theirSelectedCustom = tradeOfferData.theirCustomImages.filter(img => img.selected);
+            
             // Update your NFTs preview
             const yourNftsPreview = document.getElementById('previewYourNfts');
-            if (tradeOfferData.yourNfts.length === 0) {
+            if (tradeOfferData.yourNfts.length === 0 && yourSelectedCustom.length === 0) {
                 yourNftsPreview.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>';
             } else {
-                yourNftsPreview.innerHTML = tradeOfferData.yourNfts.map(function(tokenId) {
+                let html = tradeOfferData.yourNfts.map(function(tokenId) {
                     const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                     return '<div class="trade-preview-nft">' +
                         (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:64px;height:64px;background:var(--bg-card);border-radius:8px;border:2px solid var(--accent-cyan);display:flex;align-items:center;justify-content:center;font-size:11px;">#' + tokenId + '</div>') +
                         '<span>#' + tokenId + '</span>' +
                         '</div>';
                 }).join('');
+                
+                // Add custom images
+                yourSelectedCustom.forEach(function(img) {
+                    html += '<div class="trade-preview-nft">' +
+                        '<img src="' + img.dataUrl + '" alt="Custom" style="border-color: var(--accent-purple);">' +
+                        '<span>Custom</span>' +
+                        '</div>';
+                });
+                
+                yourNftsPreview.innerHTML = html;
             }
             
             // Update their NFTs preview
             const theirNftsPreview = document.getElementById('previewTheirNfts');
-            if (tradeOfferData.theirNfts.length === 0) {
+            if (tradeOfferData.theirNfts.length === 0 && theirSelectedCustom.length === 0) {
                 theirNftsPreview.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Select NFTs</span>';
             } else {
-                theirNftsPreview.innerHTML = tradeOfferData.theirNfts.map(function(tokenId) {
+                let html = tradeOfferData.theirNfts.map(function(tokenId) {
                     const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                     return '<div class="trade-preview-nft">' +
                         (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '">' : '<div style="width:64px;height:64px;background:var(--bg-card);border-radius:8px;border:2px solid var(--accent-gold);display:flex;align-items:center;justify-content:center;font-size:11px;">#' + tokenId + '</div>') +
                         '<span>#' + tokenId + '</span>' +
                         '</div>';
                 }).join('');
+                
+                // Add custom images
+                theirSelectedCustom.forEach(function(img) {
+                    html += '<div class="trade-preview-nft">' +
+                        '<img src="' + img.dataUrl + '" alt="Custom" style="border-color: var(--accent-purple);">' +
+                        '<span>Custom</span>' +
+                        '</div>';
+                });
+                
+                theirNftsPreview.innerHTML = html;
             }
             
             // Update ETH displays
@@ -5582,8 +5923,16 @@
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
+            // Get selected custom images
+            const yourSelectedCustom = tradeOfferData.yourCustomImages.filter(img => img.selected);
+            const theirSelectedCustom = tradeOfferData.theirCustomImages.filter(img => img.selected);
+            
+            // Total items per side (GVC NFTs + custom images)
+            const yourTotalItems = tradeOfferData.yourNfts.length + yourSelectedCustom.length;
+            const theirTotalItems = tradeOfferData.theirNfts.length + theirSelectedCustom.length;
+            
             // Calculate NFT size based on count (bigger when fewer)
-            const maxNfts = Math.max(tradeOfferData.yourNfts.length, tradeOfferData.theirNfts.length, 1);
+            const maxNfts = Math.max(yourTotalItems, theirTotalItems, 1);
             let nftSize, nftGap;
             
             if (maxNfts === 1) {
@@ -5658,9 +6007,21 @@
                         url: imgUrl,
                         tokenId: tokenId,
                         side: 'yours',
-                        index: i
+                        index: i,
+                        isCustom: false
                     });
                 }
+            });
+            
+            // Add custom images for yours
+            yourSelectedCustom.forEach(function(img, i) {
+                imagesToLoad.push({
+                    url: img.dataUrl,
+                    tokenId: 'Custom',
+                    side: 'yours',
+                    index: tradeOfferData.yourNfts.length + i,
+                    isCustom: true
+                });
             });
             
             tradeOfferData.theirNfts.forEach(function(tokenId, i) {
@@ -5670,25 +6031,37 @@
                         url: imgUrl,
                         tokenId: tokenId,
                         side: 'theirs',
-                        index: i
+                        index: i,
+                        isCustom: false
                     });
                 }
+            });
+            
+            // Add custom images for theirs
+            theirSelectedCustom.forEach(function(img, i) {
+                imagesToLoad.push({
+                    url: img.dataUrl,
+                    tokenId: 'Custom',
+                    side: 'theirs',
+                    index: tradeOfferData.theirNfts.length + i,
+                    isCustom: true
+                });
             });
             
             let loadedCount = 0;
             const totalImages = imagesToLoad.length;
             
-            function drawNft(img, tokenId, side, index) {
+            function drawNft(img, tokenId, side, index, isCustom) {
                 const startY = 105;
                 
                 let x, y;
                 if (side === 'yours') {
-                    const totalWidth = tradeOfferData.yourNfts.length * currentNftSize + (tradeOfferData.yourNfts.length - 1) * currentNftGap;
+                    const totalWidth = yourTotalItems * currentNftSize + (yourTotalItems - 1) * currentNftGap;
                     const startX = (canvas.width / 4) - (totalWidth / 2);
                     x = startX + index * (currentNftSize + currentNftGap);
                     y = startY;
                 } else {
-                    const totalWidth = tradeOfferData.theirNfts.length * currentNftSize + (tradeOfferData.theirNfts.length - 1) * currentNftGap;
+                    const totalWidth = theirTotalItems * currentNftSize + (theirTotalItems - 1) * currentNftGap;
                     const startX = (canvas.width / 4) * 3 - (totalWidth / 2);
                     x = startX + index * (currentNftSize + currentNftGap);
                     y = startY;
@@ -5703,19 +6076,29 @@
                 ctx.drawImage(img, x, y, currentNftSize, currentNftSize);
                 ctx.restore();
                 
-                // Draw border
-                ctx.strokeStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
+                // Draw border - purple for custom, cyan/gold for GVC
+                if (isCustom) {
+                    ctx.strokeStyle = '#a855f7';
+                } else {
+                    ctx.strokeStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
+                }
                 ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.roundRect(x, y, currentNftSize, currentNftSize, 12);
                 ctx.stroke();
                 
-                // Draw token ID
+                // Draw token ID (or "Custom" for custom images)
                 const fontSize = currentNftSize >= 140 ? 16 : (currentNftSize >= 100 ? 14 : 12);
                 ctx.font = 'bold ' + fontSize + 'px JetBrains Mono, monospace';
-                ctx.fillStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
-                ctx.textAlign = 'center';
-                ctx.fillText('#' + tokenId, x + currentNftSize / 2, y + currentNftSize + 22);
+                if (isCustom) {
+                    ctx.fillStyle = '#a855f7';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Custom', x + currentNftSize / 2, y + currentNftSize + 22);
+                } else {
+                    ctx.fillStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('#' + tokenId, x + currentNftSize / 2, y + currentNftSize + 22);
+                }
             }
             
             function finishDrawing() {
@@ -5767,10 +6150,10 @@
                 // Draw placeholder if no NFTs
                 ctx.font = '14px Inter, Arial, sans-serif';
                 ctx.fillStyle = '#666677';
-                if (tradeOfferData.yourNfts.length === 0) {
+                if (yourTotalItems === 0) {
                     ctx.fillText('No NFTs selected', canvas.width / 4, 200);
                 }
-                if (tradeOfferData.theirNfts.length === 0) {
+                if (theirTotalItems === 0) {
                     ctx.fillText('No NFTs selected', (canvas.width / 4) * 3, 200);
                 }
                 
@@ -5784,9 +6167,12 @@
             
             imagesToLoad.forEach(function(imgData) {
                 const img = new Image();
-                img.crossOrigin = 'anonymous';
+                // Don't set crossOrigin for data URLs (custom images)
+                if (!imgData.isCustom) {
+                    img.crossOrigin = 'anonymous';
+                }
                 img.onload = function() {
-                    drawNft(img, imgData.tokenId, imgData.side, imgData.index);
+                    drawNft(img, imgData.tokenId, imgData.side, imgData.index, imgData.isCustom);
                     loadedCount++;
                     if (loadedCount >= totalImages) {
                         finishDrawing();
