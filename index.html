@@ -4824,14 +4824,28 @@
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Calculate canvas size based on NFT count
+            // Calculate NFT size based on count (bigger when fewer)
             const maxNfts = Math.max(tradeOfferData.yourNfts.length, tradeOfferData.theirNfts.length, 1);
-            const nftSize = 100;
-            const nftGap = 12;
-            const sideWidth = Math.max(200, maxNfts * (nftSize + nftGap));
+            let nftSize, nftGap;
             
-            canvas.width = sideWidth * 2 + 100;
-            canvas.height = 350;
+            if (maxNfts === 1) {
+                nftSize = 180;
+                nftGap = 0;
+            } else if (maxNfts === 2) {
+                nftSize = 140;
+                nftGap = 16;
+            } else if (maxNfts === 3) {
+                nftSize = 110;
+                nftGap = 12;
+            } else {
+                nftSize = 85;
+                nftGap = 10;
+            }
+            
+            // Canvas sizing
+            const sideWidth = Math.max(250, maxNfts * (nftSize + nftGap) + 40);
+            canvas.width = sideWidth * 2 + 80;
+            canvas.height = Math.max(420, nftSize + 220);
             
             // Draw background gradient
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -4847,30 +4861,34 @@
             ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
             
             // Draw title
-            ctx.font = 'bold 28px Inter, Arial, sans-serif';
+            ctx.font = 'bold 32px Inter, Arial, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText('🤝 Trade Offer', canvas.width / 2, 45);
+            ctx.fillText('🤝 Trade Offer', canvas.width / 2, 50);
             
             // Draw column headers
-            ctx.font = '14px Inter, Arial, sans-serif';
+            ctx.font = 'bold 18px Inter, Arial, sans-serif';
             ctx.fillStyle = '#00d4ff';
-            ctx.fillText('I Give', canvas.width / 4, 80);
+            ctx.fillText('I Give', canvas.width / 4, 85);
             ctx.fillStyle = '#ffd700';
-            ctx.fillText('I Get', (canvas.width / 4) * 3, 80);
+            ctx.fillText('I Get', (canvas.width / 4) * 3, 85);
             
             // Draw middle divider and arrows
             ctx.fillStyle = '#a855f7';
-            ctx.font = '32px Arial';
-            ctx.fillText('⟷', canvas.width / 2, 180);
-            ctx.font = '12px Inter, Arial, sans-serif';
+            ctx.font = '40px Arial';
+            ctx.fillText('⟷', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.font = 'bold 14px Inter, Arial, sans-serif';
             ctx.fillStyle = '#888899';
-            ctx.fillText('FOR', canvas.width / 2, 205);
+            ctx.fillText('FOR', canvas.width / 2, canvas.height / 2 + 20);
             
             // Draw footer
-            ctx.font = '12px Inter, Arial, sans-serif';
+            ctx.font = 'bold 14px Inter, Arial, sans-serif';
             ctx.fillStyle = '#00d4ff';
             ctx.fillText('gvcbadges.com', canvas.width / 2, canvas.height - 20);
+            
+            // Store nftSize for use in drawNft
+            const currentNftSize = nftSize;
+            const currentNftGap = nftGap;
             
             // Load and draw NFT images
             const imagesToLoad = [];
@@ -4903,70 +4921,99 @@
             const totalImages = imagesToLoad.length;
             
             function drawNft(img, tokenId, side, index) {
-                const nftSize = 80;
-                const startY = 100;
+                const startY = 105;
                 
                 let x, y;
                 if (side === 'yours') {
-                    const totalWidth = tradeOfferData.yourNfts.length * (nftSize + 10);
-                    const startX = (canvas.width / 4) - (totalWidth / 2) + 5;
-                    x = startX + index * (nftSize + 10);
+                    const totalWidth = tradeOfferData.yourNfts.length * currentNftSize + (tradeOfferData.yourNfts.length - 1) * currentNftGap;
+                    const startX = (canvas.width / 4) - (totalWidth / 2);
+                    x = startX + index * (currentNftSize + currentNftGap);
                     y = startY;
                 } else {
-                    const totalWidth = tradeOfferData.theirNfts.length * (nftSize + 10);
-                    const startX = (canvas.width / 4) * 3 - (totalWidth / 2) + 5;
-                    x = startX + index * (nftSize + 10);
+                    const totalWidth = tradeOfferData.theirNfts.length * currentNftSize + (tradeOfferData.theirNfts.length - 1) * currentNftGap;
+                    const startX = (canvas.width / 4) * 3 - (totalWidth / 2);
+                    x = startX + index * (currentNftSize + currentNftGap);
                     y = startY;
                 }
                 
                 // Draw rounded image
                 ctx.save();
                 ctx.beginPath();
-                ctx.roundRect(x, y, nftSize, nftSize, 10);
+                ctx.roundRect(x, y, currentNftSize, currentNftSize, 12);
                 ctx.closePath();
                 ctx.clip();
-                ctx.drawImage(img, x, y, nftSize, nftSize);
+                ctx.drawImage(img, x, y, currentNftSize, currentNftSize);
                 ctx.restore();
                 
                 // Draw border
                 ctx.strokeStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 4;
                 ctx.beginPath();
-                ctx.roundRect(x, y, nftSize, nftSize, 10);
+                ctx.roundRect(x, y, currentNftSize, currentNftSize, 12);
                 ctx.stroke();
                 
                 // Draw token ID
-                ctx.font = '11px JetBrains Mono, monospace';
+                const fontSize = currentNftSize >= 140 ? 16 : (currentNftSize >= 100 ? 14 : 12);
+                ctx.font = 'bold ' + fontSize + 'px JetBrains Mono, monospace';
                 ctx.fillStyle = side === 'yours' ? '#00d4ff' : '#ffd700';
                 ctx.textAlign = 'center';
-                ctx.fillText('#' + tokenId, x + nftSize / 2, y + nftSize + 16);
+                ctx.fillText('#' + tokenId, x + currentNftSize / 2, y + currentNftSize + 22);
             }
             
             function finishDrawing() {
-                // Draw ETH amounts
-                ctx.font = '14px JetBrains Mono, monospace';
-                ctx.textAlign = 'center';
-                
-                const ethY = 260;
+                // Draw ETH amounts with Ξ symbol
+                const ethY = canvas.height - 70;
                 
                 if (tradeOfferData.yourEth > 0) {
+                    // Draw ETH box
+                    const ethText = '+ ' + tradeOfferData.yourEth + ' Ξ ETH';
+                    ctx.font = 'bold 20px JetBrains Mono, monospace';
+                    const textWidth = ctx.measureText(ethText).width;
+                    const boxX = (canvas.width / 4) - (textWidth / 2) - 15;
+                    const boxY = ethY - 22;
+                    
+                    ctx.fillStyle = 'rgba(0, 212, 255, 0.15)';
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, boxY, textWidth + 30, 36, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = '#00d4ff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
                     ctx.fillStyle = '#00d4ff';
-                    ctx.fillText('+ ' + tradeOfferData.yourEth + ' ETH', canvas.width / 4, ethY);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(ethText, canvas.width / 4, ethY);
                 }
                 
                 if (tradeOfferData.theirEth > 0) {
+                    // Draw ETH box
+                    const ethText = '+ ' + tradeOfferData.theirEth + ' Ξ ETH';
+                    ctx.font = 'bold 20px JetBrains Mono, monospace';
+                    const textWidth = ctx.measureText(ethText).width;
+                    const boxX = ((canvas.width / 4) * 3) - (textWidth / 2) - 15;
+                    const boxY = ethY - 22;
+                    
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, boxY, textWidth + 30, 36, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
                     ctx.fillStyle = '#ffd700';
-                    ctx.fillText('+ ' + tradeOfferData.theirEth + ' ETH', (canvas.width / 4) * 3, ethY);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(ethText, (canvas.width / 4) * 3, ethY);
                 }
                 
                 // Draw placeholder if no NFTs
-                ctx.font = '12px Inter, Arial, sans-serif';
+                ctx.font = '14px Inter, Arial, sans-serif';
                 ctx.fillStyle = '#666677';
                 if (tradeOfferData.yourNfts.length === 0) {
-                    ctx.fillText('No NFTs selected', canvas.width / 4, 160);
+                    ctx.fillText('No NFTs selected', canvas.width / 4, 200);
                 }
                 if (tradeOfferData.theirNfts.length === 0) {
-                    ctx.fillText('No NFTs selected', (canvas.width / 4) * 3, 160);
+                    ctx.fillText('No NFTs selected', (canvas.width / 4) * 3, 200);
                 }
                 
                 callback(canvas);
