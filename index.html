@@ -3682,6 +3682,9 @@
             // Refresh badge explorer to show owned status
             filterBadgeExplorer();
             
+            // Move badge explorer to bottom so user sees their results first
+            moveBadgeExplorerToBottom();
+            
             // Store for modal use
             walletNFTs = tokenIds;
         }
@@ -5116,6 +5119,17 @@
         function initBadgeExplorer() {
             if (Object.keys(badgeData).length > 0) {
                 renderBadgeExplorer();
+            }
+        }
+        
+        // Move badge explorer to bottom after wallet lookup
+        function moveBadgeExplorerToBottom() {
+            const explorer = document.getElementById('badgeExplorerSection');
+            const results = document.getElementById('results');
+            
+            // Only move if it's currently before the results section
+            if (explorer && results && explorer.nextElementSibling === results) {
+                results.parentNode.insertBefore(explorer, results.nextElementSibling);
             }
         }
         
