@@ -7348,7 +7348,7 @@
             let whatIfHtml = '';
             if (Object.keys(walletBadges).length > 0) {
                 if (whatIfBadges.length > 0) {
-                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                    whatIfHtml = '<div class="nft-lookup-whatif" style="margin-bottom: 20px;">' +
                         '<div class="nft-lookup-whatif-title">✨ New badges you\'d gain:</div>' +
                         '<div class="nft-lookup-whatif-badges">' +
                         whatIfBadges.map(function(badge) {
@@ -7360,7 +7360,7 @@
                         }).join('') +
                         '</div></div>';
                 } else if (badges.length > 0) {
-                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                    whatIfHtml = '<div class="nft-lookup-whatif" style="margin-bottom: 20px;">' +
                         '<div class="nft-lookup-whatif-none">✓ You already have all badges from this NFT</div>' +
                         '</div>';
                 }
@@ -7400,13 +7400,22 @@
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             const openSeaUrl = `https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}`;
             
-            // Build owner display for title area
+            // Build owner display for title area - show both X and wallet if available
             let ownerTitleDisplay = '';
-            if (ownerTwitter) {
+            if (ownerTwitter && ownerENS) {
+                // Both X and ENS - show both
+                ownerTitleDisplay = `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none; font-weight: 500;">@${ownerTwitter}</a> <span style="color: var(--text-secondary);">·</span> <a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 500;">${ownerENS}</a>`;
+            } else if (ownerTwitter && ownerAddress) {
+                // X and address (no ENS) - show both
+                ownerTitleDisplay = `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none; font-weight: 500;">@${ownerTwitter}</a> <span style="color: var(--text-secondary);">·</span> <a href="#" onclick="document.getElementById('walletInput').value='${ownerAddress}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--text-secondary); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 12px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</a>`;
+            } else if (ownerTwitter) {
+                // Only X
                 ownerTitleDisplay = `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none; font-weight: 500;">@${ownerTwitter}</a>`;
             } else if (ownerENS) {
+                // Only ENS
                 ownerTitleDisplay = `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 500;">${ownerENS}</a>`;
             } else if (ownerAddress) {
+                // Only address
                 ownerTitleDisplay = `<a href="#" onclick="document.getElementById('walletInput').value='${ownerAddress}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--text-secondary); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 14px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</a>`;
             }
             
