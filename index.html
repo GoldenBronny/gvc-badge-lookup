@@ -169,6 +169,22 @@
             padding: 1px 4px;
         }
         
+        .nft-strategy-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 149, 0, 0.95);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+        
         /* Search Section */
         .search-section {
             max-width: 600px;
@@ -2252,6 +2268,18 @@
             box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
         }
         
+        .badge-hunt-img-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .badge-hunt-img-wrapper .nft-strategy-tag {
+            top: 3px;
+            left: 3px;
+            font-size: 8px;
+            padding: 1px 4px;
+        }
+        
         .badge-hunt-nft-img {
             width: 80px;
             height: 80px;
@@ -3700,6 +3728,33 @@
             }
         }
         
+        // Strategy Wallet NFTs
+        const STRATEGY_WALLET = '0xd0cc2b0efb168bfe1f94a948d8df70fa10257196';
+        let strategyWalletNFTs = new Set();
+        
+        async function loadStrategyWalletNFTs() {
+            try {
+                // Use Alchemy to fetch Strategy Wallet's NFTs
+                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${STRATEGY_WALLET}&contractAddresses[]=0xb8ea78fcacef50d41375e44e6814ebba36bb33c4&withMetadata=false`;
+                const response = await fetch(alchemyUrl);
+                const data = await response.json();
+                
+                if (data.ownedNfts) {
+                    data.ownedNfts.forEach(nft => {
+                        const tokenId = nft.tokenId;
+                        strategyWalletNFTs.add(String(tokenId));
+                    });
+                    console.log(`Loaded ${strategyWalletNFTs.size} Strategy Wallet NFTs`);
+                }
+            } catch (error) {
+                console.error('Failed to load Strategy Wallet NFTs:', error);
+            }
+        }
+        
+        function isStrategyWalletNFT(tokenId) {
+            return strategyWalletNFTs.has(String(tokenId));
+        }
+        
         // ===========================================
         // OPENSEA PRICE FUNCTIONS
         // ===========================================
@@ -3799,6 +3854,7 @@
         loadImageData();
         loadTypeData();
         loadSpecialTraitsData();
+        loadStrategyWalletNFTs();
         fetchFloorPrice();
         fetchListings();
         
@@ -4714,6 +4770,7 @@
             nftGrid.innerHTML = nftData.map(({tokenId, listingPrice}) => {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 const priceTag = listingPrice ? `<div class="nft-listing-price">${formatEthPrice(listingPrice)}</div>` : '';
+                const strTag = isStrategyWalletNFT(tokenId) ? '<div class="nft-strategy-tag" title="Strategy Wallet">STR</div>' : '';
                 
                 if (imgUrl) {
                     return `
@@ -4722,6 +4779,7 @@
                             <div style="display:none; padding: 20px; text-align: center;">
                                 <div style="font-size: 16px; font-weight: 600;">#${tokenId}</div>
                             </div>
+                            ${strTag}
                             ${priceTag}
                             <div class="nft-id">#${tokenId}</div>
                         </a>
@@ -4730,6 +4788,7 @@
                     return `
                         <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card" style="text-decoration: none;">
                             <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 20px;">#${tokenId}</div>
+                            ${strTag}
                             ${priceTag}
                             <div style="font-size: 11px; color: var(--accent-cyan);">View on OpenSea →</div>
                         </a>
@@ -4975,10 +5034,15 @@
                 // Show up to 4 badges, then "+X more"
                 const displayBadges = opp.newBadges.slice(0, 4);
                 const moreBadges = opp.newBadges.length > 4 ? '+' + (opp.newBadges.length - 4) + ' more' : '';
+                const isStrategy = isStrategyWalletNFT(opp.tokenId);
+                const strTag = isStrategy ? '<div class="nft-strategy-tag" title="Strategy Wallet">STR</div>' : '';
                 
                 return `
                     <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${opp.tokenId}" target="_blank" class="badge-hunt-card${isBestValue ? ' best-value' : ''}">
-                        ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
+                        <div class="badge-hunt-img-wrapper">
+                            ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
+                            ${strTag}
+                        </div>
                         <div class="badge-hunt-info">
                             <div class="badge-hunt-nft-id">#${opp.tokenId}</div>
                             <div class="badge-hunt-price">${formatEthPrice(opp.price)}</div>
