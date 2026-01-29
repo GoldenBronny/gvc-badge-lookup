@@ -5162,8 +5162,22 @@
                     }
                 } else {
                     const tokens = badgeData[badge];
-                    const rarity = tokens ? (Array.isArray(tokens) ? tokens.length : Object.keys(tokens).length) : 0;
-                    requirement = `${rarity} NFTs have this`;
+                    const tokenList = tokens ? (Array.isArray(tokens) ? tokens : Object.keys(tokens)) : [];
+                    const rarity = tokenList.length;
+                    
+                    // Count how many are listed (OpenSea + Gondi)
+                    let listedCount = 0;
+                    tokenList.forEach(tokenId => {
+                        if (getListingPrice(tokenId)) {
+                            listedCount++;
+                        }
+                    });
+                    
+                    const listedText = listedCount > 0 
+                        ? ` <span style="color: var(--accent-green);">(${listedCount} listed)</span>`
+                        : ' <span style="color: var(--text-secondary); opacity: 0.6;">(0 listed)</span>';
+                    
+                    requirement = `${rarity} NFTs have this${listedText}`;
                 }
                 
                 const clickHandler = (isMeta || isSpecial) ? '' : `onclick="showBadgeNFTs('${badge}', false)"`;
