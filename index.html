@@ -4327,6 +4327,33 @@
             return null;
         }
         
+        // Cache for NFT metadata
+        const nftMetadataCache = {};
+        
+        // Fetch full NFT metadata from Alchemy
+        async function fetchNFTMetadata(tokenId) {
+            // Check cache first
+            if (nftMetadataCache[tokenId]) {
+                return nftMetadataCache[tokenId];
+            }
+            
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            try {
+                const url = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTMetadata?contractAddress=${CONTRACT}&tokenId=${tokenId}&refreshCache=false`;
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    nftMetadataCache[tokenId] = data;
+                    return data;
+                }
+            } catch (e) {
+                console.log('Failed to fetch NFT metadata:', e);
+            }
+            
+            return null;
+        }
+        
         // Update wallet display name in results section
         function updateWalletDisplayName() {
             const displayEl = document.getElementById('walletDisplayName');
@@ -7268,17 +7295,23 @@
             // Combine trait badges and combo badges
             const allNewBadges = [...whatIfBadges, ...comboBadgesGained];
             
-            // Get owner info
+            // Get owner info and NFT metadata in parallel
             const ownerAddress = await getNFTOwner(tokenId);
             let ownerENS = null;
             let ownerTwitter = null;
+            let nftTraits = [];
             
-            if (ownerAddress) {
-                const [ensResult, profileResult] = await Promise.all([
+            // Fetch owner info and metadata in parallel
+            const [ownerInfo, metadata] = await Promise.all([
+                ownerAddress ? Promise.all([
                     resolveAddressToENS(ownerAddress),
                     getOpenSeaProfile(ownerAddress)
-                ]);
-                
+                ]) : Promise.resolve([null, null]),
+                fetchNFTMetadata(tokenId)
+            ]);
+            
+            if (ownerAddress && ownerInfo) {
+                const [ensResult, profileResult] = ownerInfo;
                 ownerENS = ensResult;
                 
                 if (profileResult && profileResult.social_media_accounts) {
@@ -7294,11 +7327,16 @@
                 }
             }
             
+            // Extract traits from metadata
+            if (metadata && metadata.raw && metadata.raw.metadata && metadata.raw.metadata.attributes) {
+                nftTraits = metadata.raw.metadata.attributes;
+            }
+            
             // Render the content
-            renderNFTDetailContent(tokenId, badges, imgUrl, allNewBadges, ownerAddress, ownerENS, ownerTwitter, nftType, specialTraits);
+            renderNFTDetailContent(tokenId, badges, imgUrl, allNewBadges, ownerAddress, ownerENS, ownerTwitter, nftTraits);
         }
         
-        function renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter, nftType, specialTraits) {
+        function renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter, nftTraits) {
             const content = document.getElementById('nftDetailContent');
             const listingPrice = getListingPrice(tokenId);
             const listingInfo = getListingInfo(tokenId);
@@ -7323,23 +7361,25 @@
                 }).join('')
                 : '<span class="nft-lookup-no-badges">No trait badges found for this NFT</span>';
             
-            // Build traits section
+            // Build traits section from metadata
             let traitsHtml = '';
-            if (nftType || (specialTraits && specialTraits.length > 0)) {
-                const traitTags = [];
-                if (nftType) {
-                    traitTags.push(`<span style="background: var(--accent-purple); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">${nftType}</span>`);
-                }
-                if (specialTraits && specialTraits.length > 0) {
-                    specialTraits.forEach(trait => {
-                        traitTags.push(`<span style="background: var(--bg-hover); color: var(--text-primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">${trait}</span>`);
-                    });
-                }
+            if (nftTraits && nftTraits.length > 0) {
+                const traitItems = nftTraits.map(trait => {
+                    const traitType = trait.trait_type || 'Unknown';
+                    const traitValue = trait.value || 'None';
+                    return `
+                        <div style="background: var(--bg-hover); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);">
+                            <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">${traitType}</div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary);">${traitValue}</div>
+                        </div>
+                    `;
+                }).join('');
+                
                 traitsHtml = `
-                    <div style="margin-bottom: 16px;">
-                        <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">Type & Special Traits:</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                            ${traitTags.join('')}
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Traits</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">
+                            ${traitItems}
                         </div>
                     </div>
                 `;
@@ -7466,6 +7506,7 @@
                         </div>
                     </div>
                 </div>
+                ${traitsHtml}
             `;
         }
         
