@@ -7186,11 +7186,87 @@
             // Get image
             const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
             
-            // Calculate what-if badges
+            // Calculate what-if badges (trait badges)
             let whatIfBadges = [];
             if (Object.keys(walletBadges).length > 0) {
                 whatIfBadges = badges.filter(b => !walletBadges[b]);
             }
+            
+            // Get NFT type for traits display and combo badge calculation
+            const nftType = typeData[tokenId] || typeData[String(tokenId)];
+            const specialTraits = specialTraitsData[tokenId] || specialTraitsData[String(tokenId)] || [];
+            
+            // Calculate combo badges you'd gain
+            let comboBadgesGained = [];
+            if (Object.keys(walletBadges).length > 0 && nftType) {
+                // Get your current types
+                const yourTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+                
+                // Check hatrick/high five badges
+                const prefixes = ['Gradient', 'Plastic', 'Robot'];
+                prefixes.forEach(prefix => {
+                    if (nftType.startsWith(prefix)) {
+                        const yourUniqueColors = new Set(yourTypes.filter(t => t && t.startsWith(prefix)));
+                        
+                        if (!yourUniqueColors.has(nftType)) {
+                            const newCount = yourUniqueColors.size + 1;
+                            
+                            const hatrickBadge = prefix.toLowerCase() + '_hatrick';
+                            if (newCount >= 3 && yourUniqueColors.size < 3 && !walletBadges[hatrickBadge]) {
+                                comboBadgesGained.push(hatrickBadge);
+                            }
+                            
+                            const highFiveBadge = prefix.toLowerCase() + '_high_five';
+                            if (newCount >= 5 && yourUniqueColors.size < 5 && !walletBadges[highFiveBadge]) {
+                                comboBadgesGained.push(highFiveBadge);
+                            }
+                        }
+                    }
+                });
+                
+                // Check multi_type_master
+                if (!walletBadges['multi_type_master']) {
+                    const hasPlastic = yourTypes.some(t => t && t.startsWith('Plastic'));
+                    const hasGradient = yourTypes.some(t => t && t.startsWith('Gradient'));
+                    const hasRobot = yourTypes.some(t => t && t.startsWith('Robot'));
+                    
+                    const newHasPlastic = hasPlastic || nftType.startsWith('Plastic');
+                    const newHasGradient = hasGradient || nftType.startsWith('Gradient');
+                    const newHasRobot = hasRobot || nftType.startsWith('Robot');
+                    
+                    if (newHasPlastic && newHasGradient && newHasRobot && 
+                        !(hasPlastic && hasGradient && hasRobot)) {
+                        comboBadgesGained.push('multi_type_master');
+                    }
+                }
+                
+                // Check yin_n_yang
+                if (!walletBadges['yin_n_yang']) {
+                    const hasGrayscale = yourTypes.some(t => t === 'Grayscale');
+                    const hasRainbow = yourTypes.some(t => t === 'Rainbow');
+                    
+                    if ((nftType === 'Grayscale' && hasRainbow && !hasGrayscale) ||
+                        (nftType === 'Rainbow' && hasGrayscale && !hasRainbow)) {
+                        comboBadgesGained.push('yin_n_yang');
+                    }
+                }
+                
+                // Check power_duo
+                if (!walletBadges['power_duo'] && yourTypes.includes(nftType)) {
+                    comboBadgesGained.push('power_duo');
+                }
+                
+                // Check chris_favorite
+                if (!walletBadges['chris_favorite'] && nftType === 'Grayscale') {
+                    const grayscaleCount = yourTypes.filter(t => t === 'Grayscale').length;
+                    if (grayscaleCount >= 1) {
+                        comboBadgesGained.push('chris_favorite');
+                    }
+                }
+            }
+            
+            // Combine trait badges and combo badges
+            const allNewBadges = [...whatIfBadges, ...comboBadgesGained];
             
             // Get owner info
             const ownerAddress = await getNFTOwner(tokenId);
@@ -7219,10 +7295,10 @@
             }
             
             // Render the content
-            renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter);
+            renderNFTDetailContent(tokenId, badges, imgUrl, allNewBadges, ownerAddress, ownerENS, ownerTwitter, nftType, specialTraits);
         }
         
-        function renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter) {
+        function renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter, nftType, specialTraits) {
             const content = document.getElementById('nftDetailContent');
             const listingPrice = getListingPrice(tokenId);
             const listingInfo = getListingInfo(tokenId);
@@ -7246,6 +7322,28 @@
                         '</div>';
                 }).join('')
                 : '<span class="nft-lookup-no-badges">No trait badges found for this NFT</span>';
+            
+            // Build traits section
+            let traitsHtml = '';
+            if (nftType || (specialTraits && specialTraits.length > 0)) {
+                const traitTags = [];
+                if (nftType) {
+                    traitTags.push(`<span style="background: var(--accent-purple); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">${nftType}</span>`);
+                }
+                if (specialTraits && specialTraits.length > 0) {
+                    specialTraits.forEach(trait => {
+                        traitTags.push(`<span style="background: var(--bg-hover); color: var(--text-primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">${trait}</span>`);
+                    });
+                }
+                traitsHtml = `
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;">Type & Special Traits:</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            ${traitTags.join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             let whatIfHtml = '';
             if (Object.keys(walletBadges).length > 0) {
@@ -7343,6 +7441,8 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        ${traitsHtml}
                         
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">Badges on this NFT:</div>
