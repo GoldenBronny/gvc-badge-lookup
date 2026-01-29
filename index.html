@@ -120,6 +120,54 @@
             font-size: 1.1rem;
         }
         
+        .floor-price-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .floor-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .floor-value {
+            color: var(--accent-green);
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .floor-value.loading {
+            color: var(--text-secondary);
+        }
+        
+        /* Listing price tag on NFTs */
+        .nft-listing-price {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            right: 4px;
+            background: rgba(0, 255, 136, 0.9);
+            color: #000;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+        }
+        
+        .trade-nft-option .nft-listing-price {
+            font-size: 8px;
+            padding: 1px 4px;
+        }
+        
         /* Search Section */
         .search-section {
             max-width: 600px;
@@ -2480,6 +2528,10 @@
         <header class="header">
             <h1>🤙 GVC Badge Lookup</h1>
             <p>Check your badge collection and find what you're missing</p>
+            <div class="floor-price-display" id="floorPriceDisplay">
+                <span class="floor-label">Floor:</span>
+                <span class="floor-value" id="floorPriceValue">Loading...</span>
+            </div>
         </header>
         
         <section class="search-section">
@@ -2987,6 +3039,11 @@
         let missingBadgesList = [];
         let ownedTypesGlobal = [];
         
+        // OpenSea price data
+        const OPENSEA_PROXY = 'https://gvc-opensea-proxy.justinahertz.workers.dev';
+        let floorPrice = null;
+        let nftListings = {}; // tokenId -> listing price in ETH
+        
         // New state variables
         let currentSortMode = 'rarity';
         let sortDirection = 'asc'; // 'asc' or 'desc'
@@ -3469,6 +3526,83 @@
             }
         }
         
+        // ===========================================
+        // OPENSEA PRICE FUNCTIONS
+        // ===========================================
+        
+        async function fetchFloorPrice() {
+            try {
+                const response = await fetch(`${OPENSEA_PROXY}/floor`);
+                const data = await response.json();
+                
+                if (data.total && data.total.floor_price) {
+                    floorPrice = data.total.floor_price;
+                    updateFloorPriceDisplay();
+                }
+            } catch (error) {
+                console.error('Failed to fetch floor price:', error);
+                document.getElementById('floorPriceValue').textContent = 'N/A';
+            }
+        }
+        
+        function updateFloorPriceDisplay() {
+            const display = document.getElementById('floorPriceValue');
+            if (floorPrice !== null) {
+                display.textContent = `Ξ ${floorPrice.toFixed(3)}`;
+                display.classList.remove('loading');
+            }
+        }
+        
+        async function fetchListings() {
+            try {
+                const response = await fetch(`${OPENSEA_PROXY}/listings`);
+                const data = await response.json();
+                
+                if (data.listings && Array.isArray(data.listings)) {
+                    nftListings = {};
+                    
+                    data.listings.forEach(listing => {
+                        // Extract token ID from the listing
+                        const tokenId = listing.protocol_data?.parameters?.offer?.[0]?.identifierOrCriteria;
+                        
+                        // Extract price (in wei) from consideration
+                        const consideration = listing.protocol_data?.parameters?.consideration;
+                        if (tokenId && consideration && consideration.length > 0) {
+                            // Sum all consideration items for total price
+                            let totalWei = BigInt(0);
+                            consideration.forEach(c => {
+                                if (c.token && c.token === '0x0000000000000000000000000000000000000000') {
+                                    totalWei += BigInt(c.startAmount || 0);
+                                }
+                            });
+                            
+                            // Convert wei to ETH
+                            const ethPrice = Number(totalWei) / 1e18;
+                            if (ethPrice > 0) {
+                                nftListings[tokenId] = ethPrice;
+                            }
+                        }
+                    });
+                    
+                    console.log('Loaded ' + Object.keys(nftListings).length + ' listings');
+                }
+            } catch (error) {
+                console.error('Failed to fetch listings:', error);
+            }
+        }
+        
+        function getListingPrice(tokenId) {
+            return nftListings[String(tokenId)] || nftListings[tokenId] || null;
+        }
+        
+        function formatEthPrice(eth) {
+            if (eth >= 1) {
+                return `Ξ${eth.toFixed(2)}`;
+            } else {
+                return `Ξ${eth.toFixed(3)}`;
+            }
+        }
+        
         // Initialize on page load
         loadBadgeData().then(function() {
             initBadgeExplorer();
@@ -3476,6 +3610,8 @@
         loadImageData();
         loadTypeData();
         loadSpecialTraitsData();
+        fetchFloorPrice();
+        fetchListings();
         
         // Load last wallet from localStorage
         window.addEventListener('DOMContentLoaded', function() {
@@ -5895,10 +6031,11 @@
             
             nfts.forEach(function(tokenId) {
                 const badgesTheyNeed = getNftBadgesTheyNeed(tokenId, theirBadges, theirNfts);
+                const listingPrice = getListingPrice(tokenId);
                 if (badgesTheyNeed.length > 0) {
-                    valuableNfts.push({ tokenId, badgeCount: badgesTheyNeed.length, badges: badgesTheyNeed });
+                    valuableNfts.push({ tokenId, badgeCount: badgesTheyNeed.length, badges: badgesTheyNeed, listingPrice });
                 } else {
-                    otherNfts.push({ tokenId, badgeCount: 0 });
+                    otherNfts.push({ tokenId, badgeCount: 0, listingPrice });
                 }
             });
             
@@ -5918,10 +6055,12 @@
                     const imgUrl = imageData[item.tokenId] || imageData[String(item.tokenId)];
                     const selectedArr = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
                     const selected = selectedArr.includes(String(item.tokenId));
+                    const priceTag = item.listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(item.listingPrice) + '</div>' : '';
                     
-                    html += '<div class="trade-nft-option valuable ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + ' - ' + item.badgeCount + ' badge(s)">' +
+                    html += '<div class="trade-nft-option valuable ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + ' - ' + item.badgeCount + ' badge(s)' + (item.listingPrice ? ' - Listed: ' + formatEthPrice(item.listingPrice) : '') + '">' +
                         (imgUrl ? '<img src="' + imgUrl + '" alt="#' + item.tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + item.tokenId + '</div>') +
                         '<span class="badge-indicator">' + item.badgeCount + '</span>' +
+                        priceTag +
                         '</div>';
                 });
                 
@@ -5938,9 +6077,11 @@
                     const imgUrl = imageData[item.tokenId] || imageData[String(item.tokenId)];
                     const selectedArr = side === 'yours' ? tradeOfferData.yourNfts : tradeOfferData.theirNfts;
                     const selected = selectedArr.includes(String(item.tokenId));
+                    const priceTag = item.listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(item.listingPrice) + '</div>' : '';
                     
-                    html += '<div class="trade-nft-option ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + '">' +
+                    html += '<div class="trade-nft-option ' + (selected ? 'selected' : '') + '" onclick="toggleTradeNft(\'' + item.tokenId + '\', \'' + side + '\')" title="GVC #' + item.tokenId + (item.listingPrice ? ' - Listed: ' + formatEthPrice(item.listingPrice) : '') + '">' +
                         (imgUrl ? '<img src="' + imgUrl + '" alt="#' + item.tokenId + '">' : '<div style="width:100%;height:100%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;font-size:9px;">#' + item.tokenId + '</div>') +
+                        priceTag +
                         '</div>';
                 });
                 
