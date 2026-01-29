@@ -150,25 +150,22 @@
         /* Listing price tag on NFTs */
         .nft-listing-price {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(0, 255, 136, 0.95);
+            bottom: 4px;
+            left: 4px;
+            right: 4px;
+            background: rgba(0, 255, 136, 0.9);
             color: #000;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-family: 'JetBrains Mono', monospace;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            z-index: 10;
         }
         
         .trade-nft-option .nft-listing-price {
             font-size: 8px;
-            padding: 2px 5px;
-            top: 3px;
-            right: 3px;
+            padding: 1px 4px;
         }
         
         /* Search Section */
@@ -675,7 +672,6 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-            position: relative;
         }
         
         .nft-card:hover {
@@ -715,7 +711,6 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-            position: relative;
         }
         
         .nft-gallery-card:hover {
@@ -3563,8 +3558,10 @@
                 nftListings = {};
                 let cursor = null;
                 let totalFetched = 0;
-                const maxPages = 10; // Safety limit - 10 pages * ~50 = ~500 listings max
+                const maxPages = 15; // 15 pages * 100 = 1500 max (plenty for ~600 listings)
                 let pageCount = 0;
+                
+                console.log('Starting to fetch all listings...');
                 
                 do {
                     const url = cursor 
@@ -3608,11 +3605,12 @@
                     cursor = data.next || null;
                     pageCount++;
                     
-                    console.log(`Fetched page ${pageCount}: ${data.listings?.length || 0} listings (total: ${totalFetched})`);
+                    console.log(`Fetched page ${pageCount}: ${data.listings?.length || 0} listings (total: ${totalFetched}, unique: ${Object.keys(nftListings).length})`);
                     
                 } while (cursor && pageCount < maxPages);
                 
-                console.log('Loaded ' + Object.keys(nftListings).length + ' unique listings');
+                console.log(`✅ Finished! Loaded ${Object.keys(nftListings).length} unique listings from ${totalFetched} total`);
+                
             } catch (error) {
                 console.error('Failed to fetch listings:', error);
             }
@@ -4525,30 +4523,13 @@
             } else {
                 const tokens = badgeData[badge];
                 const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
-                tokenIds = allTokens.slice(0, 150); // Increased limit for better coverage
+                tokenIds = allTokens.slice(0, 50); // Limit to 50 for performance
             }
-            
-            // Build NFT data with listing prices
-            const nftData = tokenIds.map(tokenId => ({
-                tokenId: tokenId,
-                listingPrice: getListingPrice(tokenId)
-            }));
-            
-            // Sort: Listed NFTs first (lowest to highest price), then unlisted
-            nftData.sort((a, b) => {
-                if (a.listingPrice && b.listingPrice) {
-                    return a.listingPrice - b.listingPrice; // Both listed: sort by price
-                }
-                if (a.listingPrice && !b.listingPrice) return -1; // a listed, b not: a first
-                if (!a.listingPrice && b.listingPrice) return 1;  // b listed, a not: b first
-                return 0; // Neither listed: keep order
-            });
             
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
-            nftGrid.innerHTML = nftData.map(({tokenId, listingPrice}) => {
+            nftGrid.innerHTML = tokenIds.map(tokenId => {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
-                const priceTag = listingPrice ? `<div class="nft-listing-price">${formatEthPrice(listingPrice)}</div>` : '';
                 
                 if (imgUrl) {
                     return `
@@ -4557,7 +4538,6 @@
                             <div style="display:none; padding: 20px; text-align: center;">
                                 <div style="font-size: 16px; font-weight: 600;">#${tokenId}</div>
                             </div>
-                            ${priceTag}
                             <div class="nft-id">#${tokenId}</div>
                         </a>
                     `;
@@ -4565,7 +4545,6 @@
                     return `
                         <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card" style="text-decoration: none;">
                             <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 20px;">#${tokenId}</div>
-                            ${priceTag}
                             <div style="font-size: 11px; color: var(--accent-cyan);">View on OpenSea →</div>
                         </a>
                     `;
@@ -4717,12 +4696,9 @@
                 const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
                 const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
                 const moreBadges = badges.length > 3 ? '+' + (badges.length - 3) : '';
-                const listingPrice = getListingPrice(tokenId);
-                const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
                 
                 return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
-                    priceTag +
                     '<div class="nft-gallery-info">' +
                     '<div class="nft-gallery-id">#' + tokenId + '</div>' +
                     '<div class="nft-gallery-badges">' +
