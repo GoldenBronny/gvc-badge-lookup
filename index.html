@@ -5021,7 +5021,29 @@
                 
                 const isCombo = COMBO_BADGES.some(cb => cb.name === badge);
                 const isMeta = badge.startsWith('collection_') || badge.startsWith('vibestr_') || isCombo;
-                const countDisplay = isMeta ? '✓' : `×${tokens.length}`;
+                
+                // For non-meta badges, count total NFTs with this badge and how many are listed
+                let countDisplay = '✓';
+                if (!isMeta) {
+                    const allTokens = badgeData[badge];
+                    const tokenList = allTokens ? (Array.isArray(allTokens) ? allTokens : Object.keys(allTokens)) : [];
+                    const totalCount = tokenList.length;
+                    
+                    // Count how many are listed
+                    let listedCount = 0;
+                    tokenList.forEach(tokenId => {
+                        if (getListingPrice(tokenId)) {
+                            listedCount++;
+                        }
+                    });
+                    
+                    const listedText = listedCount > 0 
+                        ? ` <span style="color: var(--accent-green);">(${listedCount} listed)</span>`
+                        : ' <span style="color: var(--text-secondary); opacity: 0.6;">(0 listed)</span>';
+                    
+                    countDisplay = `${totalCount} NFTs have this${listedText}`;
+                }
+                
                 const clickHandler = isMeta ? '' : `onclick="showBadgeNFTs('${badge}', true)"`;
                 const cursorStyle = isMeta ? 'cursor: default;' : '';
                 const badgeImgUrl = getBadgeImage(badge);
