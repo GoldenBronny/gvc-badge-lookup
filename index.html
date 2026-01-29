@@ -243,7 +243,42 @@
             gap: 16px;
         }
         
-        /* Gondi toggle button styles */
+        /* Gondi toggle button styles - inline version for stat card */
+        .gondi-toggle-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 149, 0, 0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            font-size: 11px;
+        }
+        
+        .gondi-toggle-inline:hover {
+            background: rgba(255, 149, 0, 0.25);
+            border-color: #ff9500;
+        }
+        
+        .gondi-toggle-inline.active {
+            background: rgba(255, 149, 0, 0.3);
+            border-color: #ff9500;
+        }
+        
+        .gondi-toggle-inline .gondi-toggle-checkbox {
+            width: 14px;
+            height: 14px;
+            accent-color: #ff9500;
+            margin: 0;
+        }
+        
+        .gondi-toggle-inline .gondi-toggle-label {
+            color: #ff9500;
+            font-weight: 600;
+        }
+        
         .gondi-toggle {
             display: flex;
             align-items: center;
@@ -2899,6 +2934,13 @@
                     <div class="stat-card green">
                         <div class="value" id="ownedBadges">0</div>
                         <div class="label">Badges Owned</div>
+                        <!-- Gondi Toggle inside badges card -->
+                        <div id="gondiToggleContainer" style="display: none; margin-top: 8px;">
+                            <label class="gondi-toggle-inline" id="gondiToggle" onclick="toggleGondiInBadges(event)">
+                                <input type="checkbox" class="gondi-toggle-checkbox" id="gondiToggleCheckbox">
+                                <span class="gondi-toggle-label">+<span id="gondiLoanCount">0</span> on Gondi</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="stat-card pink">
                         <div class="value" id="missingBadges">0</div>
@@ -2909,14 +2951,6 @@
                         <img class="rarest-nft-img" id="rarestNftImg" src="" alt="Rarest NFT" style="display: none;">
                         <div class="rarest-badge-name" id="rarestBadge">-</div>
                     </div>
-                </div>
-                
-                <!-- Gondi Toggle -->
-                <div id="gondiToggleContainer" style="display: none; text-align: center;">
-                    <label class="gondi-toggle" id="gondiToggle" onclick="toggleGondiInBadges()">
-                        <input type="checkbox" class="gondi-toggle-checkbox" id="gondiToggleCheckbox">
-                        <span class="gondi-toggle-label">🔒 Include Gondi Loans in Badge Count (<span id="gondiLoanCount">0</span> NFTs)</span>
-                    </label>
                 </div>
                 
                 <div class="completion-section">
@@ -5611,7 +5645,9 @@
         // ========================================
         // GONDI TOGGLE FUNCTIONALITY
         // ========================================
-        function toggleGondiInBadges() {
+        function toggleGondiInBadges(event) {
+            if (event) event.stopPropagation();
+            
             includeGondiInBadges = !includeGondiInBadges;
             
             // Update toggle UI
