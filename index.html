@@ -150,22 +150,25 @@
         /* Listing price tag on NFTs */
         .nft-listing-price {
             position: absolute;
-            bottom: 4px;
-            left: 4px;
-            right: 4px;
-            background: rgba(0, 255, 136, 0.9);
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 255, 136, 0.95);
             color: #000;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-family: 'JetBrains Mono', monospace;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
         }
         
         .trade-nft-option .nft-listing-price {
             font-size: 8px;
-            padding: 1px 4px;
+            padding: 2px 5px;
+            top: 3px;
+            right: 3px;
         }
         
         /* Search Section */
@@ -675,20 +678,6 @@
             position: relative;
         }
         
-        .nft-card .nft-listing-price {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(0, 255, 136, 0.95);
-            color: #000;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-family: 'JetBrains Mono', monospace;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
         .nft-card:hover {
             transform: scale(1.05);
             border-color: var(--accent-cyan);
@@ -727,20 +716,6 @@
             transition: all 0.2s;
             text-decoration: none;
             position: relative;
-        }
-        
-        .nft-gallery-card .nft-listing-price {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(0, 255, 136, 0.95);
-            color: #000;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-family: 'JetBrains Mono', monospace;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
         .nft-gallery-card:hover {
@@ -3585,61 +3560,59 @@
         
         async function fetchListings() {
             try {
-                const response = await fetch(`${OPENSEA_PROXY}/listings`);
-                const data = await response.json();
+                nftListings = {};
+                let cursor = null;
+                let totalFetched = 0;
+                const maxPages = 10; // Safety limit - 10 pages * ~50 = ~500 listings max
+                let pageCount = 0;
                 
-                console.log('OpenSea listings response:', data);
-                
-                if (data.listings && Array.isArray(data.listings)) {
-                    nftListings = {};
+                do {
+                    const url = cursor 
+                        ? `${OPENSEA_PROXY}/listings?cursor=${encodeURIComponent(cursor)}`
+                        : `${OPENSEA_PROXY}/listings`;
                     
-                    data.listings.forEach((listing, index) => {
-                        // Log first few listings to debug structure
-                        if (index < 3) {
-                            console.log('Listing ' + index + ':', JSON.stringify(listing, null, 2).substring(0, 500));
-                        }
-                        
-                        // Try multiple possible paths for token ID
-                        let tokenId = listing.protocol_data?.parameters?.offer?.[0]?.identifierOrCriteria;
-                        
-                        // Alternative: check if there's a simpler path
-                        if (!tokenId && listing.token_id) {
-                            tokenId = listing.token_id;
-                        }
-                        if (!tokenId && listing.identifier) {
-                            tokenId = listing.identifier;
-                        }
-                        
-                        // Try to get price from multiple possible locations
-                        let ethPrice = 0;
-                        
-                        // Method 1: from consideration array (Seaport)
-                        const consideration = listing.protocol_data?.parameters?.consideration;
-                        if (consideration && consideration.length > 0) {
-                            let totalWei = BigInt(0);
-                            consideration.forEach(c => {
-                                if (c.token && c.token === '0x0000000000000000000000000000000000000000') {
-                                    totalWei += BigInt(c.startAmount || 0);
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.listings && Array.isArray(data.listings)) {
+                        data.listings.forEach(listing => {
+                            // Extract token ID from the listing
+                            const tokenId = listing.protocol_data?.parameters?.offer?.[0]?.identifierOrCriteria;
+                            
+                            // Extract price (in wei) from consideration
+                            const consideration = listing.protocol_data?.parameters?.consideration;
+                            if (tokenId && consideration && consideration.length > 0) {
+                                // Sum all consideration items for total price
+                                let totalWei = BigInt(0);
+                                consideration.forEach(c => {
+                                    if (c.token && c.token === '0x0000000000000000000000000000000000000000') {
+                                        totalWei += BigInt(c.startAmount || 0);
+                                    }
+                                });
+                                
+                                // Convert wei to ETH
+                                const ethPrice = Number(totalWei) / 1e18;
+                                if (ethPrice > 0) {
+                                    // Only store if we don't have this token yet, or if this price is lower
+                                    if (!nftListings[tokenId] || ethPrice < nftListings[tokenId]) {
+                                        nftListings[tokenId] = ethPrice;
+                                    }
                                 }
-                            });
-                            ethPrice = Number(totalWei) / 1e18;
-                        }
+                            }
+                        });
                         
-                        // Method 2: direct price fields
-                        if (ethPrice === 0 && listing.price?.current?.value) {
-                            ethPrice = Number(listing.price.current.value) / 1e18;
-                        }
-                        if (ethPrice === 0 && listing.current_price) {
-                            ethPrice = Number(listing.current_price) / 1e18;
-                        }
-                        
-                        if (tokenId && ethPrice > 0) {
-                            nftListings[tokenId] = ethPrice;
-                        }
-                    });
+                        totalFetched += data.listings.length;
+                    }
                     
-                    console.log('Loaded ' + Object.keys(nftListings).length + ' listings');
-                }
+                    // Get cursor for next page
+                    cursor = data.next || null;
+                    pageCount++;
+                    
+                    console.log(`Fetched page ${pageCount}: ${data.listings?.length || 0} listings (total: ${totalFetched})`);
+                    
+                } while (cursor && pageCount < maxPages);
+                
+                console.log('Loaded ' + Object.keys(nftListings).length + ' unique listings');
             } catch (error) {
                 console.error('Failed to fetch listings:', error);
             }
@@ -4552,7 +4525,7 @@
             } else {
                 const tokens = badgeData[badge];
                 const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
-                tokenIds = allTokens.slice(0, 100); // Limit to 100 for performance
+                tokenIds = allTokens.slice(0, 150); // Increased limit for better coverage
             }
             
             // Build NFT data with listing prices
@@ -5877,7 +5850,6 @@
         
         function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges) {
             const container = document.getElementById('nftLookupResult');
-            const listingPrice = getListingPrice(tokenId);
             
             const badgesHtml = badges.length > 0 
                 ? badges.map(function(badge) {
@@ -5920,11 +5892,6 @@
                 }
             }
             
-            // Price display for NFT lookup
-            const priceHtml = listingPrice 
-                ? '<div class="nft-lookup-stat" style="color: var(--accent-green);">🏷️ <strong>Listed: ' + formatEthPrice(listingPrice) + '</strong></div>'
-                : '<div class="nft-lookup-stat" style="color: var(--text-secondary);">🏷️ Not listed</div>';
-            
             container.innerHTML = '<div class="nft-lookup-card">' +
                 '<div class="nft-lookup-image">' +
                 (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
@@ -5934,7 +5901,6 @@
                 '<div class="nft-lookup-stats">' +
                 '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
                 (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
-                priceHtml +
                 '</div>' +
                 '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
                 '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
