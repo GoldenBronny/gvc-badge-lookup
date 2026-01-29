@@ -185,6 +185,114 @@
             z-index: 10;
         }
         
+        /* Gondi loan tag on NFTs */
+        .nft-gondi-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 149, 0, 0.95);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+        
+        /* STR tag on Strategy Wallet NFTs */
+        .nft-str-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 149, 0, 0.95);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+        
+        /* Handle multiple left-side tags */
+        .nft-gallery-card .nft-gondi-tag + .nft-str-tag,
+        .nft-gallery-card .nft-str-tag + .nft-gondi-tag {
+            top: 28px;
+        }
+        
+        /* Gallery section styles */
+        .gallery-section {
+            margin-bottom: 24px;
+        }
+        
+        .gallery-section-header {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 8px 0;
+            margin-bottom: 16px;
+        }
+        
+        .gallery-section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        
+        /* Gondi toggle button styles */
+        .gondi-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-hover);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            margin-top: 12px;
+        }
+        
+        .gondi-toggle:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-cyan);
+        }
+        
+        .gondi-toggle.active {
+            background: rgba(255, 149, 0, 0.15);
+            border-color: #ff9500;
+        }
+        
+        .gondi-toggle-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #ff9500;
+        }
+        
+        .gondi-toggle-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .gondi-toggle.active .gondi-toggle-label {
+            color: #ff9500;
+        }
+        
+        /* Gondi listing indicator */
+        .gondi-listing-indicator {
+            background: rgba(255, 149, 0, 0.95);
+            color: #000;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-left: 4px;
+        }
+        
         /* Search Section */
         .search-section {
             max-width: 600px;
@@ -2803,6 +2911,14 @@
                     </div>
                 </div>
                 
+                <!-- Gondi Toggle -->
+                <div id="gondiToggleContainer" style="display: none; text-align: center;">
+                    <label class="gondi-toggle" id="gondiToggle" onclick="toggleGondiInBadges()">
+                        <input type="checkbox" class="gondi-toggle-checkbox" id="gondiToggleCheckbox">
+                        <span class="gondi-toggle-label">🔒 Include Gondi Loans in Badge Count (<span id="gondiLoanCount">0</span> NFTs)</span>
+                    </label>
+                </div>
+                
                 <div class="completion-section">
                     <div class="completion-header">
                         <h3>Badge Completion</h3>
@@ -3270,6 +3386,15 @@
         
         // VIBE Bounty Hunter self-report state
         let vibeBountyHunterCount = 0;
+        
+        // Gondi Loan state
+        let gondiLoanedNFTs = []; // Token IDs currently on Gondi loan
+        let includeGondiInBadges = false; // Toggle for badge calculation
+        const GONDI_API = 'https://api.gondi.xyz/lending/graphql';
+        const GVC_CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+        
+        // Gondi Listings state
+        let gondiListings = {}; // tokenId -> { price, url }
         
         // ===========================================
         // BADGE IMAGE URLs (from GVC API)
@@ -3764,6 +3889,137 @@
         }
         
         // ===========================================
+        // GONDI LENDING API FUNCTIONS
+        // ===========================================
+        
+        async function fetchGondiLoans(addresses) {
+            if (!addresses || addresses.length === 0) return [];
+            
+            const loanedTokenIds = [];
+            
+            for (const address of addresses) {
+                try {
+                    const query = `{
+                        listLoans(
+                            borrowers: ["${address.toLowerCase()}"]
+                            statuses: [LOAN_INITIATED]
+                            first: 100
+                        ) {
+                            edges {
+                                node {
+                                    id
+                                    status
+                                    nft {
+                                        tokenId
+                                        collection {
+                                            slug
+                                            contractData {
+                                                contractAddress
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }`;
+                    
+                    const response = await fetch(GONDI_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.data && data.data.listLoans && data.data.listLoans.edges) {
+                        data.data.listLoans.edges.forEach(edge => {
+                            const loan = edge.node;
+                            const nft = loan.nft;
+                            if (nft && nft.collection) {
+                                const contractAddr = nft.collection.contractData?.contractAddress?.toLowerCase();
+                                // Check if this is a GVC NFT
+                                if (contractAddr === GVC_CONTRACT.toLowerCase() || 
+                                    nft.collection.slug === 'good-vibes-club') {
+                                    loanedTokenIds.push(String(nft.tokenId));
+                                }
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Gondi API error for', address, ':', error);
+                }
+            }
+            
+            console.log(`Found ${loanedTokenIds.length} GVC NFTs on Gondi loans`);
+            return loanedTokenIds;
+        }
+        
+        async function fetchGondiListings() {
+            try {
+                const query = `{
+                    listNfts(
+                        slugs: ["good-vibes-club"]
+                        withListed: true
+                        first: 100
+                    ) {
+                        edges {
+                            node {
+                                tokenId
+                                listed {
+                                    marketPlace
+                                    price {
+                                        amount
+                                        currency {
+                                            symbol
+                                        }
+                                    }
+                                    url
+                                }
+                            }
+                        }
+                    }
+                }`;
+                
+                const response = await fetch(GONDI_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                const data = await response.json();
+                
+                gondiListings = {};
+                if (data.data && data.data.listNfts && data.data.listNfts.edges) {
+                    data.data.listNfts.edges.forEach(edge => {
+                        const nft = edge.node;
+                        if (nft.listed && nft.listed.price) {
+                            const priceAmount = parseFloat(nft.listed.price.amount);
+                            // Convert to ETH if needed (assuming it's in wei or ETH)
+                            const priceInEth = priceAmount > 1000 ? priceAmount / 1e18 : priceAmount;
+                            gondiListings[String(nft.tokenId)] = {
+                                price: priceInEth,
+                                url: nft.listed.url || `https://gondi.xyz/collections/good-vibes-club/${nft.tokenId}`,
+                                marketplace: 'gondi'
+                            };
+                        }
+                    });
+                }
+                
+                console.log(`Found ${Object.keys(gondiListings).length} GVC NFTs listed on Gondi`);
+            } catch (error) {
+                console.error('Failed to fetch Gondi listings:', error);
+            }
+        }
+        
+        function isGondiLoanedNFT(tokenId) {
+            return gondiLoanedNFTs.includes(String(tokenId));
+        }
+        
+        function getGondiListing(tokenId) {
+            return gondiListings[String(tokenId)] || null;
+        }
+        
+        // ===========================================
         // OPENSEA PRICE FUNCTIONS
         // ===========================================
         
@@ -3844,7 +4100,39 @@
         }
         
         function getListingPrice(tokenId) {
-            return nftListings[String(tokenId)] || nftListings[tokenId] || null;
+            const osPrice = nftListings[String(tokenId)] || nftListings[tokenId] || null;
+            const gondiListing = gondiListings[String(tokenId)] || gondiListings[tokenId] || null;
+            
+            // If both have listings, return the cheaper one
+            if (osPrice && gondiListing) {
+                return Math.min(osPrice, gondiListing.price);
+            }
+            // Return whichever one exists
+            return osPrice || (gondiListing ? gondiListing.price : null);
+        }
+        
+        // Get listing info including source (for displaying GONDI tag)
+        function getListingInfo(tokenId) {
+            const osPrice = nftListings[String(tokenId)] || nftListings[tokenId] || null;
+            const gondiListing = gondiListings[String(tokenId)] || gondiListings[tokenId] || null;
+            
+            if (!osPrice && !gondiListing) return null;
+            
+            // If only OpenSea
+            if (osPrice && !gondiListing) {
+                return { price: osPrice, source: 'opensea', url: null };
+            }
+            
+            // If only Gondi
+            if (!osPrice && gondiListing) {
+                return { price: gondiListing.price, source: 'gondi', url: gondiListing.url };
+            }
+            
+            // Both exist - return cheaper one
+            if (gondiListing.price <= osPrice) {
+                return { price: gondiListing.price, source: 'gondi', url: gondiListing.url };
+            }
+            return { price: osPrice, source: 'opensea', url: null };
         }
         
         function formatEthPrice(eth) {
@@ -3938,14 +4226,32 @@
                     if (resolvedAddresses.length > 0) {
                         vibestrBalance = await fetchVibestrBalance(resolvedAddresses);
                         console.log('Total VIBESTR balance: ' + vibestrBalance);
+                        
+                        // Fetch Gondi loans for wallet addresses
+                        gondiLoanedNFTs = await fetchGondiLoans(resolvedAddresses);
                     }
                 }
                 
-                if (tokenIds.length === 0) {
+                // Also fetch Gondi listings
+                await fetchGondiListings();
+                
+                // Reset Gondi toggle to default (not included)
+                includeGondiInBadges = false;
+                
+                // For badge calculation, determine which NFTs to use
+                const tokenIdsForBadges = includeGondiInBadges 
+                    ? [...new Set([...tokenIds, ...gondiLoanedNFTs])]
+                    : tokenIds;
+                
+                if (tokenIds.length === 0 && gondiLoanedNFTs.length === 0) {
                     throw new Error('No NFTs found');
                 }
                 
-                processResults(tokenIds, vibestrBalance);
+                // Store wallet NFTs (in-wallet only) and all owned (wallet + Gondi)
+                walletNFTs = tokenIds;
+                const allOwnedNFTs = [...new Set([...tokenIds, ...gondiLoanedNFTs])];
+                
+                processResults(tokenIdsForBadges, vibestrBalance, allOwnedNFTs);
                 loading.style.display = 'none';
                 content.style.display = 'block';
                 
@@ -4305,9 +4611,19 @@
         // Total badge count constant (for completion calculation)
         const TOTAL_BADGES = 89;
         
-        function processResults(tokenIds, vibestrBalance = 0) {
+        // Store all owned NFTs (wallet + Gondi)
+        let allOwnedNFTsGlobal = [];
+        let currentVibestrBalance = 0;
+        
+        function processResults(tokenIds, vibestrBalance = 0, allOwnedNFTs = null) {
+            // Store for recalculation when toggling Gondi
+            currentVibestrBalance = vibestrBalance;
+            if (allOwnedNFTs) {
+                allOwnedNFTsGlobal = allOwnedNFTs;
+            }
+            
             // Get badges for these tokens
-            walletBadges = {};
+            walletBadges = {};;
             let totalBadgeCount = 0;
             
             // Use tokenToBadges if available (faster)
@@ -4445,7 +4761,14 @@
             
             rarestBadgeData = { badge: rarestBadgeKey, badgeName: rarestBadge, tokenId: rarestTokenId };
             
-            document.getElementById('nftCount').textContent = tokenIds.length;
+            // Show total owned (wallet + Gondi) but note if any are on loan
+            const totalOwned = allOwnedNFTsGlobal.length || tokenIds.length;
+            const gondiCount = gondiLoanedNFTs.length;
+            if (gondiCount > 0) {
+                document.getElementById('nftCount').innerHTML = `${totalOwned} <span style="font-size:12px;opacity:0.7">(${gondiCount} on Gondi)</span>`;
+            } else {
+                document.getElementById('nftCount').textContent = totalOwned;
+            }
             document.getElementById('ownedBadges').textContent = ownedCount;
             document.getElementById('missingBadges').textContent = TOTAL_BADGES - ownedCount;
             document.getElementById('rarestBadge').textContent = rarestBadge;
@@ -4464,6 +4787,9 @@
             document.getElementById('ownedTabCount').textContent = ownedCount;
             document.getElementById('missingTabCount').textContent = TOTAL_BADGES - ownedCount;
             
+            // Update Gondi toggle visibility
+            updateGondiToggleVisibility();
+            
             // Render badge grids
             renderOwnedBadges();
             renderMissingBadges();
@@ -4471,8 +4797,8 @@
             // Hide badge explorer section and show button instead
             hideBadgeExplorerShowButton();
             
-            // Store for modal use
-            walletNFTs = tokenIds;
+            // walletNFTs is already set in lookupWallet
+            // Don't overwrite it here
             
             // Show and render Badge Hunt section
             showBadgeHunt();
@@ -5017,23 +5343,46 @@
                 return;
             }
             
+            // Badge Hunt ALWAYS includes Gondi loans - you own those NFTs
+            const allOwnedForHunt = [...new Set([...walletNFTs, ...gondiLoanedNFTs])];
+            
             // Get all missing badges (non-meta only - ones you can actually buy)
+            // Need to temporarily calculate badges with ALL owned NFTs
+            const tempWalletBadges = {};
+            if (window.tokenToBadges) {
+                allOwnedForHunt.forEach(tokenId => {
+                    const badges = window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || [];
+                    badges.forEach(badge => {
+                        if (!tempWalletBadges[badge]) tempWalletBadges[badge] = [];
+                        tempWalletBadges[badge].push(tokenId);
+                    });
+                });
+            }
+            
             const missingBadges = new Set();
             Object.keys(badgeData).forEach(badge => {
-                if (!walletBadges[badge]) {
+                if (!tempWalletBadges[badge]) {
                     missingBadges.add(badge);
                 }
             });
             
-            // Get current owned types for combo badge checking
-            const ownedTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+            // Get current owned types for combo badge checking (including Gondi)
+            const ownedTypes = allOwnedForHunt.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
             
             // Find all listed NFTs that would give at least 1 new badge
             const huntOpportunities = [];
             
-            Object.entries(nftListings).forEach(([tokenId, price]) => {
-                // Skip if we already own this NFT
-                if (walletNFTs.includes(tokenId) || walletNFTs.includes(String(tokenId))) {
+            // Combine OpenSea and Gondi listings, preferring cheaper price
+            const combinedListings = { ...nftListings };
+            Object.entries(gondiListings).forEach(([tokenId, listing]) => {
+                if (!combinedListings[tokenId] || listing.price < combinedListings[tokenId]) {
+                    combinedListings[tokenId] = listing.price;
+                }
+            });
+            
+            Object.entries(combinedListings).forEach(([tokenId, price]) => {
+                // Skip if we already own this NFT (wallet or Gondi)
+                if (allOwnedForHunt.includes(tokenId) || allOwnedForHunt.includes(String(tokenId))) {
                     return;
                 }
                 
@@ -5056,11 +5405,11 @@
                     
                     COMBO_BADGES.forEach(combo => {
                         // Skip if we already have this combo badge
-                        if (walletBadges[combo.name]) return;
+                        if (tempWalletBadges[combo.name]) return;
                         
                         // Check if we'd earn it with this new NFT
-                        const wouldEarn = combo.check(simulatedTypes, [...walletNFTs, tokenId]);
-                        const currentlyHave = combo.check(ownedTypes, walletNFTs);
+                        const wouldEarn = combo.check(simulatedTypes, [...allOwnedForHunt, tokenId]);
+                        const currentlyHave = combo.check(ownedTypes, allOwnedForHunt);
                         
                         if (wouldEarn && !currentlyHave) {
                             newBadges.push(combo.name);
@@ -5069,12 +5418,18 @@
                 }
                 
                 if (newBadges.length > 0) {
+                    // Check if this is a Gondi listing
+                    const isGondiListing = gondiListings[tokenId] && 
+                        (!nftListings[tokenId] || gondiListings[tokenId].price <= nftListings[tokenId]);
+                    
                     huntOpportunities.push({
                         tokenId: tokenId,
                         price: price,
                         newBadges: newBadges,
                         badgeCount: newBadges.length,
-                        valueScore: newBadges.length / price // badges per ETH
+                        valueScore: newBadges.length / price, // badges per ETH
+                        isGondi: isGondiListing,
+                        gondiUrl: isGondiListing ? gondiListings[tokenId].url : null
                     });
                 }
             });
@@ -5108,12 +5463,18 @@
                 const moreBadges = opp.newBadges.length > 4 ? '+' + (opp.newBadges.length - 4) + ' more' : '';
                 const isStrategy = isStrategyWalletNFT(opp.tokenId);
                 const strTag = isStrategy ? '<span class="badge-hunt-str-tag" title="Strategy Wallet">STR</span>' : '';
+                const gondiTag = opp.isGondi ? '<span class="gondi-listing-indicator" title="Listed on Gondi">GONDI</span>' : '';
+                
+                // Link to Gondi if it's a Gondi listing, otherwise OpenSea
+                const linkUrl = opp.isGondi && opp.gondiUrl 
+                    ? opp.gondiUrl 
+                    : `https://opensea.io/assets/ethereum/${CONTRACT}/${opp.tokenId}`;
                 
                 return `
-                    <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${opp.tokenId}" target="_blank" class="badge-hunt-card${isBestValue ? ' best-value' : ''}">
+                    <a href="${linkUrl}" target="_blank" class="badge-hunt-card${isBestValue ? ' best-value' : ''}">
                         ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
                         <div class="badge-hunt-info">
-                            <div class="badge-hunt-nft-id">#${opp.tokenId} ${strTag}</div>
+                            <div class="badge-hunt-nft-id">#${opp.tokenId} ${strTag} ${gondiTag}</div>
                             <div class="badge-hunt-price">${formatEthPrice(opp.price)}</div>
                             <div class="badge-hunt-badges">
                                 ${displayBadges.map(b => `<span class="badge-hunt-badge-tag">${formatBadgeName(b)}</span>`).join('')}
@@ -5137,78 +5498,102 @@
             const grid = document.getElementById('galleryNFTs');
             const title = document.getElementById('galleryTitle');
             
-            title.textContent = 'Your GVC Collection (' + walletNFTs.length + ' NFTs)';
-            
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            const totalOwned = allOwnedNFTsGlobal.length || walletNFTs.length;
+            const gondiCount = gondiLoanedNFTs.length;
+            
+            title.textContent = 'Your GVC Collection (' + totalOwned + ' NFTs)';
             
             // Build a map of badge -> count of NFTs that have it (for "would lose" calculation)
+            // Use all owned NFTs for this calculation
+            const allOwned = allOwnedNFTsGlobal.length > 0 ? allOwnedNFTsGlobal : walletNFTs;
             const badgeNftCount = {};
-            walletNFTs.forEach(tid => {
+            allOwned.forEach(tid => {
                 const b = window.tokenToBadges ? (window.tokenToBadges[tid] || window.tokenToBadges[String(tid)] || []) : [];
                 b.forEach(badge => {
                     badgeNftCount[badge] = (badgeNftCount[badge] || 0) + 1;
                 });
             });
             
-            // Build NFT data with prices and rarity
-            const nftData = walletNFTs.map(tokenId => {
-                const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
-                // Filter out "Official Citizen of Vibetown" (any_gvc) - all NFTs have it
-                const filteredBadges = badges.filter(b => b !== 'any_gvc');
-                
-                // Calculate badges you'd LOSE if you sold this NFT (badges where count === 1)
-                const wouldLoseBadges = filteredBadges.filter(b => badgeNftCount[b] === 1);
-                
-                // Get rarest badge (lowest rarity number = most rare)
-                let rarestBadgeRarity = 99999;
-                filteredBadges.forEach(b => {
-                    const rarity = getBadgeRarity(b);
-                    if (rarity < rarestBadgeRarity) rarestBadgeRarity = rarity;
+            // Helper to build NFT data
+            const buildNftData = (tokenIds, isOnLoan = false) => {
+                return tokenIds.map(tokenId => {
+                    const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                    const filteredBadges = badges.filter(b => b !== 'any_gvc');
+                    const wouldLoseBadges = filteredBadges.filter(b => badgeNftCount[b] === 1);
+                    let rarestBadgeRarity = 99999;
+                    filteredBadges.forEach(b => {
+                        const rarity = getBadgeRarity(b);
+                        if (rarity < rarestBadgeRarity) rarestBadgeRarity = rarity;
+                    });
+                    return {
+                        tokenId: tokenId,
+                        listingPrice: getListingPrice(tokenId),
+                        rarestBadgeRarity: rarestBadgeRarity,
+                        badges: filteredBadges,
+                        wouldLose: wouldLoseBadges.length,
+                        wouldLoseBadges: wouldLoseBadges,
+                        isOnLoan: isOnLoan
+                    };
                 });
-                return {
-                    tokenId: tokenId,
-                    listingPrice: getListingPrice(tokenId),
-                    rarestBadgeRarity: rarestBadgeRarity,
-                    badges: filteredBadges,
-                    wouldLose: wouldLoseBadges.length,
-                    wouldLoseBadges: wouldLoseBadges
-                };
-            });
+            };
             
-            // Sort: Listed first (lowest to highest price), then by rarest badge
-            nftData.sort((a, b) => {
-                // Listed NFTs come first
+            // Helper to render NFT cards
+            const renderNftCards = (nftDataList) => {
+                return nftDataList.map(({tokenId, listingPrice, badges, wouldLose, wouldLoseBadges, isOnLoan}) => {
+                    const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+                    const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
+                    const extraBadges = badges.slice(3);
+                    const moreBadgesCount = extraBadges.length;
+                    const moreBadgesTooltip = extraBadges.map(b => formatBadgeName(b)).join(', ');
+                    const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
+                    const loseBadgesTooltip = wouldLoseBadges.map(b => formatBadgeName(b)).join(', ');
+                    const loseWarning = wouldLose > 0 ? '<span class="nft-badge-tag" style="background:#ff4444;color:#fff;" title="Would lose: ' + loseBadgesTooltip + '">⚠️ -' + wouldLose + '</span>' : '';
+                    const gondiTag = isOnLoan ? '<div class="nft-gondi-tag">🔒 GONDI</div>' : '';
+                    const strTag = isStrategyWalletNFT(tokenId) ? '<div class="nft-str-tag">STR</div>' : '';
+                    
+                    return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
+                        (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
+                        priceTag + gondiTag + strTag +
+                        '<div class="nft-gallery-info">' +
+                        '<div class="nft-gallery-id">#' + tokenId + '</div>' +
+                        '<div class="nft-gallery-badges">' +
+                        displayBadges.map(b => '<span class="nft-badge-tag">' + b + '</span>').join('') +
+                        (moreBadgesCount > 0 ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;" title="' + moreBadgesTooltip + '">+' + moreBadgesCount + '</span>' : '') +
+                        loseWarning +
+                        '</div></div></a>';
+                }).join('');
+            };
+            
+            // Build wallet NFT data
+            const walletNftData = buildNftData(walletNFTs, false);
+            walletNftData.sort((a, b) => {
                 if (a.listingPrice && !b.listingPrice) return -1;
                 if (!a.listingPrice && b.listingPrice) return 1;
-                // Both listed: sort by price
-                if (a.listingPrice && b.listingPrice) {
-                    return a.listingPrice - b.listingPrice;
-                }
-                // Neither listed: sort by rarest badge
+                if (a.listingPrice && b.listingPrice) return a.listingPrice - b.listingPrice;
                 return a.rarestBadgeRarity - b.rarestBadgeRarity;
             });
             
-            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges, wouldLose, wouldLoseBadges}) => {
-                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
-                const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
-                const extraBadges = badges.slice(3);
-                const moreBadgesCount = extraBadges.length;
-                const moreBadgesTooltip = extraBadges.map(b => formatBadgeName(b)).join(', ');
-                const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
-                const loseBadgesTooltip = wouldLoseBadges.map(b => formatBadgeName(b)).join(', ');
-                const loseWarning = wouldLose > 0 ? '<span class="nft-badge-tag" style="background:#ff4444;color:#fff;" title="Would lose: ' + loseBadgesTooltip + '">⚠️ -' + wouldLose + '</span>' : '';
+            let html = '';
+            
+            // In Wallet section
+            html += '<div class="gallery-section">';
+            html += '<div class="gallery-section-header" style="color:#00ff88;border-bottom:2px solid #00ff88;">✓ In Wallet (' + walletNFTs.length + ')</div>';
+            html += '<div class="gallery-section-grid">' + renderNftCards(walletNftData) + '</div>';
+            html += '</div>';
+            
+            // On Gondi Loan section (if any)
+            if (gondiCount > 0) {
+                const gondiNftData = buildNftData(gondiLoanedNFTs, true);
+                gondiNftData.sort((a, b) => a.rarestBadgeRarity - b.rarestBadgeRarity);
                 
-                return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
-                    (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
-                    priceTag +
-                    '<div class="nft-gallery-info">' +
-                    '<div class="nft-gallery-id">#' + tokenId + '</div>' +
-                    '<div class="nft-gallery-badges">' +
-                    displayBadges.map(b => '<span class="nft-badge-tag">' + b + '</span>').join('') +
-                    (moreBadgesCount > 0 ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;" title="' + moreBadgesTooltip + '">+' + moreBadgesCount + '</span>' : '') +
-                    loseWarning +
-                    '</div></div></a>';
-            }).join('');
+                html += '<div class="gallery-section" style="margin-top:24px;">';
+                html += '<div class="gallery-section-header" style="color:#ff9500;border-bottom:2px solid #ff9500;">🔒 On Gondi Loan (' + gondiCount + ')</div>';
+                html += '<div class="gallery-section-grid">' + renderNftCards(gondiNftData) + '</div>';
+                html += '</div>';
+            }
+            
+            grid.innerHTML = html;
             
             modal.classList.add('active');
         }
@@ -5216,6 +5601,44 @@
         function closeGalleryModal(event) {
             if (!event || event.target === document.getElementById('galleryModal')) {
                 document.getElementById('galleryModal').classList.remove('active');
+            }
+        }
+        
+        // ========================================
+        // GONDI TOGGLE FUNCTIONALITY
+        // ========================================
+        function toggleGondiInBadges() {
+            includeGondiInBadges = !includeGondiInBadges;
+            
+            // Update toggle UI
+            const toggle = document.getElementById('gondiToggle');
+            const checkbox = document.getElementById('gondiToggleCheckbox');
+            
+            if (includeGondiInBadges) {
+                toggle.classList.add('active');
+                checkbox.checked = true;
+            } else {
+                toggle.classList.remove('active');
+                checkbox.checked = false;
+            }
+            
+            // Recalculate badges with the new setting
+            const tokenIdsForBadges = includeGondiInBadges 
+                ? [...new Set([...walletNFTs, ...gondiLoanedNFTs])]
+                : walletNFTs;
+            
+            processResults(tokenIdsForBadges, currentVibestrBalance, allOwnedNFTsGlobal);
+        }
+        
+        function updateGondiToggleVisibility() {
+            const container = document.getElementById('gondiToggleContainer');
+            const countSpan = document.getElementById('gondiLoanCount');
+            
+            if (gondiLoanedNFTs.length > 0) {
+                container.style.display = 'block';
+                countSpan.textContent = gondiLoanedNFTs.length;
+            } else {
+                container.style.display = 'none';
             }
         }
         
