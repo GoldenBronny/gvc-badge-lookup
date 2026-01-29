@@ -5359,7 +5359,7 @@
                     
                     if (imgUrl) {
                         return `
-                            <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card">
+                            <div class="nft-card" onclick="openNFTDetail(${tokenId})" style="cursor: pointer;">
                                 <img src="${imgUrl}" alt="#${tokenId}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                 <div style="display:none; padding: 20px; text-align: center;">
                                     <div style="font-size: 16px; font-weight: 600;">#${tokenId}</div>
@@ -5367,16 +5367,16 @@
                                 ${strTag}
                                 ${priceTag}
                                 <div class="nft-id">#${tokenId}</div>
-                            </a>
+                            </div>
                         `;
                     } else {
                         return `
-                            <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}" target="_blank" class="nft-card" style="text-decoration: none;">
+                            <div class="nft-card" onclick="openNFTDetail(${tokenId})" style="cursor: pointer; text-decoration: none;">
                                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-primary); padding: 20px;">#${tokenId}</div>
                                 ${strTag}
                                 ${priceTag}
-                                <div style="font-size: 11px; color: var(--accent-cyan);">View on OpenSea →</div>
-                            </a>
+                                <div style="font-size: 11px; color: var(--accent-cyan);">View Details →</div>
+                            </div>
                         `;
                     }
                 }).join('');
@@ -5724,13 +5724,8 @@
                 const strTag = isStrategy ? '<span class="badge-hunt-str-tag" title="Strategy Wallet">STR</span>' : '';
                 const gondiTag = opp.isGondi ? '<span class="gondi-listing-indicator" title="Listed on Gondi">GONDI</span>' : '';
                 
-                // Link to Gondi if it's a Gondi listing, otherwise OpenSea
-                const linkUrl = opp.isGondi && opp.gondiUrl 
-                    ? opp.gondiUrl 
-                    : `https://opensea.io/assets/ethereum/${CONTRACT}/${opp.tokenId}`;
-                
                 return `
-                    <a href="${linkUrl}" target="_blank" class="badge-hunt-card${isBestValue ? ' best-value' : ''}">
+                    <div class="badge-hunt-card${isBestValue ? ' best-value' : ''}" onclick="openNFTDetail(${opp.tokenId})" style="cursor: pointer;">
                         ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
                         <div class="badge-hunt-info">
                             <div class="badge-hunt-nft-id">#${opp.tokenId} ${strTag} ${gondiTag}</div>
@@ -5744,7 +5739,7 @@
                                 ${isBestValue ? ' ⭐ Best Value!' : ''}
                             </div>
                         </div>
-                    </a>
+                    </div>
                 `;
             }).join('');
         }
@@ -5811,7 +5806,7 @@
                     const gondiTag = isOnLoan ? '<div class="nft-gondi-tag">🔒 GONDI</div>' : '';
                     const strTag = isStrategyWalletNFT(tokenId) ? '<div class="nft-str-tag">STR</div>' : '';
                     
-                    return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
+                    return '<div class="nft-gallery-card" onclick="openNFTDetail(' + tokenId + ')" style="cursor: pointer;">' +
                         (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
                         priceTag + gondiTag + strTag +
                         '<div class="nft-gallery-info">' +
@@ -5820,7 +5815,7 @@
                         displayBadges.map(b => '<span class="nft-badge-tag">' + b + '</span>').join('') +
                         (moreBadgesCount > 0 ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;" title="' + moreBadgesTooltip + '">+' + moreBadgesCount + '</span>' : '') +
                         loseWarning +
-                        '</div></div></a>';
+                        '</div></div></div>';
                 }).join('');
             };
             
@@ -7137,6 +7132,203 @@
                 '</div>';
             
             container.classList.add('active');
+        }
+        
+        // ========================================
+        // NFT DETAIL MODAL (opened when clicking NFT cards)
+        // ========================================
+        async function openNFTDetail(tokenId) {
+            // Create or get the NFT detail modal
+            let detailModal = document.getElementById('nftDetailModal');
+            if (!detailModal) {
+                // Create the modal if it doesn't exist
+                detailModal = document.createElement('div');
+                detailModal.id = 'nftDetailModal';
+                detailModal.className = 'modal-overlay';
+                detailModal.onclick = function(e) { if (e.target === detailModal) closeNFTDetailModal(); };
+                detailModal.innerHTML = `
+                    <div class="modal" style="max-width: 600px;" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h2 id="nftDetailTitle">NFT Details</h2>
+                            <button class="modal-close" onclick="closeNFTDetailModal()">&times;</button>
+                        </div>
+                        <div class="modal-body" id="nftDetailContent">
+                            <div style="text-align: center; padding: 40px;">
+                                <div class="spinner"></div>
+                                <p style="margin-top: 16px; color: var(--text-secondary);">Loading NFT details...</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(detailModal);
+            }
+            
+            // Show loading state
+            const content = document.getElementById('nftDetailContent');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 16px; color: var(--text-secondary);">Loading NFT details...</p>
+                </div>
+            `;
+            detailModal.classList.add('active');
+            
+            // Get badges for this NFT
+            const badges = [];
+            Object.entries(badgeData).forEach(function([badge, tokens]) {
+                const tokenList = Array.isArray(tokens) ? tokens : Object.keys(tokens).map(Number);
+                if (tokenList.includes(tokenId) || tokenList.includes(String(tokenId))) {
+                    badges.push(badge);
+                }
+            });
+            badges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
+            
+            // Get image
+            const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+            
+            // Calculate what-if badges
+            let whatIfBadges = [];
+            if (Object.keys(walletBadges).length > 0) {
+                whatIfBadges = badges.filter(b => !walletBadges[b]);
+            }
+            
+            // Get owner info
+            const ownerAddress = await getNFTOwner(tokenId);
+            let ownerENS = null;
+            let ownerTwitter = null;
+            
+            if (ownerAddress) {
+                const [ensResult, profileResult] = await Promise.all([
+                    resolveAddressToENS(ownerAddress),
+                    getOpenSeaProfile(ownerAddress)
+                ]);
+                
+                ownerENS = ensResult;
+                
+                if (profileResult && profileResult.social_media_accounts) {
+                    const twitterAccount = profileResult.social_media_accounts.find(
+                        acc => acc.platform === 'twitter'
+                    );
+                    if (twitterAccount && twitterAccount.username) {
+                        ownerTwitter = twitterAccount.username;
+                    }
+                }
+                if (!ownerTwitter && profileResult && profileResult.twitter_username) {
+                    ownerTwitter = profileResult.twitter_username;
+                }
+            }
+            
+            // Render the content
+            renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter);
+        }
+        
+        function renderNFTDetailContent(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter) {
+            const content = document.getElementById('nftDetailContent');
+            const listingPrice = getListingPrice(tokenId);
+            const listingInfo = getListingInfo(tokenId);
+            
+            const badgesHtml = badges.length > 0 
+                ? badges.map(function(badge) {
+                    const color = getBadgeColor(badge);
+                    const isGradient = color.includes('gradient');
+                    const nameStyle = isGradient 
+                        ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                        : 'color: ' + color + ';';
+                    const rarity = getBadgeRarity(badge);
+                    const rarityClass = rarity < 50 ? 'rare' : '';
+                    const badgeImgUrl = getBadgeImage(badge);
+                    const imgHtml = badgeImgUrl ? '<img class="badge-img small" src="' + badgeImgUrl + '" alt="">' : '';
+                    
+                    return '<div class="nft-lookup-badge">' +
+                        imgHtml +
+                        '<span style="' + nameStyle + '">' + formatBadgeName(badge) + '</span>' +
+                        '<span class="nft-lookup-badge-rarity ' + rarityClass + '">(' + rarity + ' NFTs)</span>' +
+                        '</div>';
+                }).join('')
+                : '<span class="nft-lookup-no-badges">No trait badges found for this NFT</span>';
+            
+            let whatIfHtml = '';
+            if (Object.keys(walletBadges).length > 0) {
+                if (whatIfBadges.length > 0) {
+                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                        '<div class="nft-lookup-whatif-title">✨ New badges you\'d gain:</div>' +
+                        '<div class="nft-lookup-whatif-badges">' +
+                        whatIfBadges.map(function(badge) {
+                            const color = getBadgeColor(badge);
+                            const style = color.includes('gradient') 
+                                ? 'background: ' + color + '; -webkit-background-clip: text; -webkit-text-fill-color: transparent;'
+                                : 'color: ' + color + ';';
+                            return '<span class="nft-lookup-whatif-badge" style="' + style + '">' + formatBadgeName(badge) + '</span>';
+                        }).join('') +
+                        '</div></div>';
+                } else if (badges.length > 0) {
+                    whatIfHtml = '<div class="nft-lookup-whatif">' +
+                        '<div class="nft-lookup-whatif-none">✓ You already have all badges from this NFT</div>' +
+                        '</div>';
+                }
+            }
+            
+            // Price display with marketplace info
+            let priceHtml = '';
+            if (listingPrice) {
+                const marketplaceTag = listingInfo && listingInfo.source === 'gondi' 
+                    ? ' <span class="gondi-listing-indicator">GONDI</span>' 
+                    : '';
+                priceHtml = '<div class="nft-lookup-stat" style="color: var(--accent-green);">🏷️ Listed: <strong>' + formatEthPrice(listingPrice) + '</strong>' + marketplaceTag + '</div>';
+            } else {
+                priceHtml = '<div class="nft-lookup-stat" style="color: var(--text-secondary);">🏷️ Not listed</div>';
+            }
+            
+            // Owner display with ENS and Twitter
+            let ownerHtml = '';
+            if (ownerAddress) {
+                let ownerDisplay = '';
+                
+                if (ownerTwitter) {
+                    ownerDisplay = `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none; font-weight: 600;">@${ownerTwitter}</a>`;
+                    if (ownerENS) {
+                        ownerDisplay += ` <span style="color: var(--text-secondary);">·</span> <a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">${ownerENS}</a>`;
+                    }
+                } else if (ownerENS) {
+                    ownerDisplay = `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">${ownerENS}</a>`;
+                } else {
+                    ownerDisplay = `<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</span>`;
+                }
+                
+                ownerHtml = `<div class="nft-lookup-stat">👤 Owner: ${ownerDisplay}</div>`;
+            }
+            
+            // OpenSea link
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            const openSeaUrl = `https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}`;
+            
+            content.innerHTML = '<div class="nft-lookup-card">' +
+                '<div class="nft-lookup-image">' +
+                (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
+                '</div>' +
+                '<div class="nft-lookup-info">' +
+                '<div class="nft-lookup-title">GVC #' + tokenId + '</div>' +
+                '<div class="nft-lookup-stats">' +
+                '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
+                (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
+                priceHtml +
+                ownerHtml +
+                '</div>' +
+                '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
+                '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
+                whatIfHtml +
+                '<div class="nft-lookup-opensea">' +
+                '<a href="' + openSeaUrl + '" target="_blank">View on OpenSea →</a>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        }
+        
+        function closeNFTDetailModal() {
+            const modal = document.getElementById('nftDetailModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
         
         // Add Enter key support for NFT lookup
