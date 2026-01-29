@@ -4985,12 +4985,27 @@
             
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
+            // Build a map of badge -> count of NFTs that have it (for "would lose" calculation)
+            const badgeNftCount = {};
+            walletNFTs.forEach(tid => {
+                const b = window.tokenToBadges ? (window.tokenToBadges[tid] || window.tokenToBadges[String(tid)] || []) : [];
+                b.forEach(badge => {
+                    badgeNftCount[badge] = (badgeNftCount[badge] || 0) + 1;
+                });
+            });
+            
             // Build NFT data with prices and rarity
             const nftData = walletNFTs.map(tokenId => {
                 const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                // Filter out "Official Citizen of Vibetown" (any_gvc) - all NFTs have it
+                const filteredBadges = badges.filter(b => b !== 'any_gvc');
+                
+                // Calculate badges you'd LOSE if you sold this NFT (badges where count === 1)
+                const wouldLoseBadges = filteredBadges.filter(b => badgeNftCount[b] === 1);
+                
                 // Get rarest badge (lowest rarity number = most rare)
                 let rarestBadgeRarity = 99999;
-                badges.forEach(b => {
+                filteredBadges.forEach(b => {
                     const rarity = getBadgeRarity(b);
                     if (rarity < rarestBadgeRarity) rarestBadgeRarity = rarity;
                 });
@@ -4998,7 +5013,8 @@
                     tokenId: tokenId,
                     listingPrice: getListingPrice(tokenId),
                     rarestBadgeRarity: rarestBadgeRarity,
-                    badges: badges
+                    badges: filteredBadges,
+                    wouldLose: wouldLoseBadges.length
                 };
             });
             
@@ -5015,11 +5031,12 @@
                 return a.rarestBadgeRarity - b.rarestBadgeRarity;
             });
             
-            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges}) => {
+            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges, wouldLose}) => {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
                 const moreBadges = badges.length > 3 ? '+' + (badges.length - 3) : '';
                 const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
+                const loseWarning = wouldLose > 0 ? '<span class="nft-badge-tag" style="background:#ff4444;color:#fff;" title="Selling this NFT would cost you ' + wouldLose + ' badge(s)">⚠️ -' + wouldLose + '</span>' : '';
                 
                 return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
@@ -5029,6 +5046,7 @@
                     '<div class="nft-gallery-badges">' +
                     displayBadges.map(b => '<span class="nft-badge-tag">' + b + '</span>').join('') +
                     (moreBadges ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;">' + moreBadges + '</span>' : '') +
+                    loseWarning +
                     '</div></div></a>';
             }).join('');
             
