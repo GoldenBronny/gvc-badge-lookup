@@ -4985,12 +4985,40 @@
             
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
-            grid.innerHTML = walletNFTs.map(tokenId => {
-                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
+            // Build NFT data with prices and rarity
+            const nftData = walletNFTs.map(tokenId => {
                 const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
+                // Get rarest badge (lowest rarity number = most rare)
+                let rarestBadgeRarity = 99999;
+                badges.forEach(b => {
+                    const rarity = getBadgeRarity(b);
+                    if (rarity < rarestBadgeRarity) rarestBadgeRarity = rarity;
+                });
+                return {
+                    tokenId: tokenId,
+                    listingPrice: getListingPrice(tokenId),
+                    rarestBadgeRarity: rarestBadgeRarity,
+                    badges: badges
+                };
+            });
+            
+            // Sort: Listed first (lowest to highest price), then by rarest badge
+            nftData.sort((a, b) => {
+                // Listed NFTs come first
+                if (a.listingPrice && !b.listingPrice) return -1;
+                if (!a.listingPrice && b.listingPrice) return 1;
+                // Both listed: sort by price
+                if (a.listingPrice && b.listingPrice) {
+                    return a.listingPrice - b.listingPrice;
+                }
+                // Neither listed: sort by rarest badge
+                return a.rarestBadgeRarity - b.rarestBadgeRarity;
+            });
+            
+            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges}) => {
+                const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
                 const moreBadges = badges.length > 3 ? '+' + (badges.length - 3) : '';
-                const listingPrice = getListingPrice(tokenId);
                 const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
                 
                 return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
