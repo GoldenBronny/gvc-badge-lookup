@@ -5014,7 +5014,8 @@
                     listingPrice: getListingPrice(tokenId),
                     rarestBadgeRarity: rarestBadgeRarity,
                     badges: filteredBadges,
-                    wouldLose: wouldLoseBadges.length
+                    wouldLose: wouldLoseBadges.length,
+                    wouldLoseBadges: wouldLoseBadges
                 };
             });
             
@@ -5031,12 +5032,15 @@
                 return a.rarestBadgeRarity - b.rarestBadgeRarity;
             });
             
-            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges, wouldLose}) => {
+            grid.innerHTML = nftData.map(({tokenId, listingPrice, badges, wouldLose, wouldLoseBadges}) => {
                 const imgUrl = imageData[tokenId] || imageData[String(tokenId)];
                 const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
-                const moreBadges = badges.length > 3 ? '+' + (badges.length - 3) : '';
+                const extraBadges = badges.slice(3);
+                const moreBadgesCount = extraBadges.length;
+                const moreBadgesTooltip = extraBadges.map(b => formatBadgeName(b)).join(', ');
                 const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
-                const loseWarning = wouldLose > 0 ? '<span class="nft-badge-tag" style="background:#ff4444;color:#fff;" title="Selling this NFT would cost you ' + wouldLose + ' badge(s)">⚠️ -' + wouldLose + '</span>' : '';
+                const loseBadgesTooltip = wouldLoseBadges.map(b => formatBadgeName(b)).join(', ');
+                const loseWarning = wouldLose > 0 ? '<span class="nft-badge-tag" style="background:#ff4444;color:#fff;" title="Would lose: ' + loseBadgesTooltip + '">⚠️ -' + wouldLose + '</span>' : '';
                 
                 return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
@@ -5045,7 +5049,7 @@
                     '<div class="nft-gallery-id">#' + tokenId + '</div>' +
                     '<div class="nft-gallery-badges">' +
                     displayBadges.map(b => '<span class="nft-badge-tag">' + b + '</span>').join('') +
-                    (moreBadges ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;">' + moreBadges + '</span>' : '') +
+                    (moreBadgesCount > 0 ? '<span class="nft-badge-tag" style="background:var(--accent-cyan);color:#000;" title="' + moreBadgesTooltip + '">+' + moreBadgesCount + '</span>' : '') +
                     loseWarning +
                     '</div></div></a>';
             }).join('');
