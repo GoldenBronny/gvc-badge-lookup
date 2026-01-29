@@ -3733,18 +3733,27 @@
         
         async function loadStrategyWalletNFTs() {
             try {
-                // Use Alchemy to fetch Strategy Wallet's NFTs
-                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${STRATEGY_WALLET}&contractAddresses[]=0xb8ea78fcacef50d41375e44e6814ebba36bb33c4&withMetadata=false`;
-                const response = await fetch(alchemyUrl);
-                const data = await response.json();
+                let pageKey = '';
+                let totalLoaded = 0;
                 
-                if (data.ownedNfts) {
-                    data.ownedNfts.forEach(nft => {
-                        const tokenId = nft.tokenId;
-                        strategyWalletNFTs.add(String(tokenId));
-                    });
-                    console.log(`Loaded ${strategyWalletNFTs.size} Strategy Wallet NFTs`);
-                }
+                // Paginate through all NFTs
+                do {
+                    const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${STRATEGY_WALLET}&contractAddresses[]=0xb8ea78fcacef50d41375e44e6814ebba36bb33c4&withMetadata=false&pageSize=100${pageKey ? '&pageKey=' + pageKey : ''}`;
+                    const response = await fetch(alchemyUrl);
+                    const data = await response.json();
+                    
+                    if (data.ownedNfts) {
+                        data.ownedNfts.forEach(nft => {
+                            const tokenId = nft.tokenId;
+                            strategyWalletNFTs.add(String(tokenId));
+                        });
+                        totalLoaded += data.ownedNfts.length;
+                    }
+                    
+                    pageKey = data.pageKey || '';
+                } while (pageKey);
+                
+                console.log(`Loaded ${strategyWalletNFTs.size} Strategy Wallet NFTs`);
             } catch (error) {
                 console.error('Failed to load Strategy Wallet NFTs:', error);
             }
@@ -4793,33 +4802,68 @@
                 const ownedTokenIds = walletBadges[badge] || [];
                 const ownedSet = new Set(ownedTokenIds.map(String));
                 
-                // Get all tokens for this badge (excluding owned)
+                // Get all tokens for this badge (excluding owned), sorted by listing price
                 const tokens = badgeData[badge];
                 const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
-                const otherTokenIds = allTokens.filter(id => !ownedSet.has(String(id))).slice(0, 100);
+                const otherTokensSorted = allTokens
+                    .filter(id => !ownedSet.has(String(id)))
+                    .map(tokenId => ({ tokenId, listingPrice: getListingPrice(tokenId) }))
+                    .sort((a, b) => {
+                        if (a.listingPrice && b.listingPrice) return a.listingPrice - b.listingPrice;
+                        if (a.listingPrice && !b.listingPrice) return -1;
+                        if (!a.listingPrice && b.listingPrice) return 1;
+                        return 0;
+                    })
+                    .slice(0, 100)
+                    .map(t => t.tokenId);
+                
+                // Clear the grid class and use a wrapper
+                nftGrid.className = '';
+                nftGrid.style.cssText = '';
                 
                 let html = '';
                 
                 // Your NFTs section
-                html += `<div class="modal-section-title" style="font-size: 14px; color: var(--accent-green); margin-bottom: 12px; font-weight: 600;">✓ Your NFTs with this badge (${ownedTokenIds.length})</div>`;
-                html += `<div class="nft-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">`;
+                html += `<div style="margin-bottom: 24px;">`;
+                html += `<div style="font-size: 14px; color: var(--accent-green); margin-bottom: 12px; font-weight: 600;">✓ Your NFTs with this badge (${ownedTokenIds.length})</div>`;
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px;">`;
                 html += renderNftCards(ownedTokenIds);
+                html += `</div>`;
                 html += `</div>`;
                 
                 // All other NFTs section
-                if (otherTokenIds.length > 0) {
-                    html += `<div class="modal-section-title" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600; border-top: 1px solid var(--border); padding-top: 16px;">All other NFTs with this badge (${otherTokenIds.length}${allTokens.length > otherTokenIds.length + ownedTokenIds.length ? '+' : ''})</div>`;
-                    html += `<div class="nft-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px;">`;
-                    html += renderNftCards(otherTokenIds);
+                if (otherTokensSorted.length > 0) {
+                    html += `<div style="border-top: 1px solid var(--border); padding-top: 16px;">`;
+                    html += `<div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600;">All other NFTs with this badge (${otherTokensSorted.length}${allTokens.length > otherTokensSorted.length + ownedTokenIds.length ? '+' : ''})</div>`;
+                    html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px;">`;
+                    html += renderNftCards(otherTokensSorted);
+                    html += `</div>`;
                     html += `</div>`;
                 }
                 
                 nftGrid.innerHTML = html;
             } else {
-                // Missing badge - just show all NFTs
+                // Missing badge - show all NFTs, sorted by listing price
+                // Restore the grid class
+                nftGrid.className = 'nft-grid';
+                nftGrid.style.cssText = '';
+                
                 const tokens = badgeData[badge];
                 const allTokens = Array.isArray(tokens) ? tokens : Object.values(tokens);
-                const tokenIds = allTokens.slice(0, 150);
+                
+                // Sort ALL tokens by listing price before slicing
+                const sortedTokens = allTokens.map(tokenId => ({
+                    tokenId: tokenId,
+                    listingPrice: getListingPrice(tokenId)
+                })).sort((a, b) => {
+                    if (a.listingPrice && b.listingPrice) return a.listingPrice - b.listingPrice;
+                    if (a.listingPrice && !b.listingPrice) return -1;
+                    if (!a.listingPrice && b.listingPrice) return 1;
+                    return 0;
+                });
+                
+                // Take first 150 after sorting
+                const tokenIds = sortedTokens.slice(0, 150).map(t => t.tokenId);
                 
                 nftGrid.innerHTML = renderNftCards(tokenIds);
             }
