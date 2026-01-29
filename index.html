@@ -328,6 +328,28 @@
             margin-left: 4px;
         }
         
+        /* Wallet Display Name (ENS) */
+        .wallet-display-name {
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .wallet-display-name .ens-name {
+            color: var(--accent-cyan);
+        }
+        
+        .wallet-display-name .wallet-address {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-family: 'JetBrains Mono', monospace;
+            display: block;
+            margin-top: 4px;
+        }
+        
         /* Search Section */
         .search-section {
             max-width: 600px;
@@ -2926,6 +2948,9 @@
             </div>
             
             <div id="resultsContent" style="display: none;">
+                <!-- Wallet Name Display -->
+                <div id="walletDisplayName" class="wallet-display-name" style="display: none;"></div>
+                
                 <div class="stats-grid">
                     <div class="stat-card cyan clickable" onclick="showNFTGallery()">
                         <div class="value" id="nftCount">0</div>
@@ -4177,6 +4202,126 @@
             }
         }
         
+        // ===========================================
+        // ENS RESOLUTION FUNCTIONS
+        // ===========================================
+        
+        // Cache for ENS lookups (address -> ENS name, and ENS name -> address)
+        const ensCache = {};
+        let currentWalletENS = null; // Store ENS for the currently looked up wallet
+        
+        // Resolve address to ENS name (reverse lookup)
+        async function resolveAddressToENS(address) {
+            if (!address || !address.startsWith('0x')) return null;
+            
+            const lowerAddr = address.toLowerCase();
+            
+            // Check cache first
+            if (ensCache[lowerAddr] !== undefined) {
+                return ensCache[lowerAddr];
+            }
+            
+            try {
+                // Use ENS API for reverse resolution
+                const response = await fetch(`https://api.ensideas.com/ens/resolve/${lowerAddr}`);
+                const data = await response.json();
+                
+                if (data.name) {
+                    ensCache[lowerAddr] = data.name;
+                    ensCache[data.name.toLowerCase()] = lowerAddr;
+                    console.log(`Resolved ${lowerAddr.slice(0,10)}... to ${data.name}`);
+                    return data.name;
+                }
+            } catch (e) {
+                console.log('ENS reverse resolution failed:', e);
+            }
+            
+            // Cache null result to avoid repeated lookups
+            ensCache[lowerAddr] = null;
+            return null;
+        }
+        
+        // Resolve ENS name to address
+        async function resolveENSToAddress(ensName) {
+            if (!ensName || !ensName.includes('.')) return null;
+            
+            const lowerName = ensName.toLowerCase();
+            
+            // Check cache first
+            if (ensCache[lowerName] !== undefined) {
+                return ensCache[lowerName];
+            }
+            
+            try {
+                const response = await fetch(`https://api.ensideas.com/ens/resolve/${ensName}`);
+                const data = await response.json();
+                
+                if (data.address) {
+                    ensCache[lowerName] = data.address.toLowerCase();
+                    ensCache[data.address.toLowerCase()] = ensName;
+                    return data.address;
+                }
+            } catch (e) {
+                console.log('ENS resolution failed:', e);
+            }
+            
+            ensCache[lowerName] = null;
+            return null;
+        }
+        
+        // Format address for display - shows ENS if available, otherwise truncated address
+        function formatAddressDisplay(address, ensName = null) {
+            if (ensName) {
+                return ensName;
+            }
+            if (!address) return 'Unknown';
+            return address.slice(0, 6) + '...' + address.slice(-4);
+        }
+        
+        // Get NFT owner address
+        async function getNFTOwner(tokenId) {
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            try {
+                // Use Alchemy to get owner
+                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getOwnersForNFT?contractAddress=${CONTRACT}&tokenId=${tokenId}`;
+                const response = await fetch(alchemyUrl);
+                const data = await response.json();
+                
+                if (data.owners && data.owners.length > 0) {
+                    return data.owners[0];
+                }
+            } catch (e) {
+                console.log('Failed to get NFT owner:', e);
+            }
+            
+            return null;
+        }
+        
+        // Update wallet display name in results section
+        function updateWalletDisplayName() {
+            const displayEl = document.getElementById('walletDisplayName');
+            
+            if (resolvedAddresses.length === 0) {
+                displayEl.style.display = 'none';
+                return;
+            }
+            
+            if (resolvedAddresses.length === 1) {
+                const address = resolvedAddresses[0];
+                if (currentWalletENS) {
+                    displayEl.innerHTML = `<span class="ens-name">${currentWalletENS}</span><span class="wallet-address">${address}</span>`;
+                } else {
+                    displayEl.innerHTML = `<span class="wallet-address" style="font-size:16px;">${address}</span>`;
+                }
+                displayEl.style.display = 'block';
+            } else {
+                // Multiple wallets
+                displayEl.innerHTML = `<span style="color: var(--text-primary);">${resolvedAddresses.length} Wallets Combined</span>`;
+                displayEl.style.display = 'block';
+            }
+        }
+        
         // Initialize on page load
         loadBadgeData().then(function() {
             initBadgeExplorer();
@@ -4284,6 +4429,21 @@
                 // Store wallet NFTs (in-wallet only) and all owned (wallet + Gondi)
                 walletNFTs = tokenIds;
                 const allOwnedNFTs = [...new Set([...tokenIds, ...gondiLoanedNFTs])];
+                
+                // Resolve ENS for the first wallet address (for display)
+                currentWalletENS = null;
+                if (resolvedAddresses.length === 1) {
+                    // Single wallet - try to resolve ENS
+                    const ensName = await resolveAddressToENS(resolvedAddresses[0]);
+                    if (ensName) {
+                        currentWalletENS = ensName;
+                        // Update the input to show ENS
+                        document.getElementById('walletInput').value = ensName;
+                    }
+                }
+                
+                // Update wallet display name
+                updateWalletDisplayName();
                 
                 processResults(tokenIdsForBadges, vibestrBalance, allOwnedNFTs);
                 loading.style.display = 'none';
@@ -6756,7 +6916,7 @@
         // ========================================
         // NFT LOOKUP
         // ========================================
-        function lookupNFT() {
+        async function lookupNFT() {
             const input = document.getElementById('nftLookupInput');
             const tokenId = parseInt(input.value);
             
@@ -6786,11 +6946,18 @@
                 whatIfBadges = badges.filter(b => !walletBadges[b]);
             }
             
+            // Get owner info (address and ENS)
+            const ownerAddress = await getNFTOwner(tokenId);
+            let ownerENS = null;
+            if (ownerAddress) {
+                ownerENS = await resolveAddressToENS(ownerAddress);
+            }
+            
             // Render result
-            renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges);
+            renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS);
         }
         
-        function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges) {
+        function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS) {
             const container = document.getElementById('nftLookupResult');
             const listingPrice = getListingPrice(tokenId);
             
@@ -6839,6 +7006,15 @@
                 ? '<div class="nft-lookup-stat" style="color: var(--accent-green);">🏷️ Listed: <strong>' + formatEthPrice(listingPrice) + '</strong></div>'
                 : '<div class="nft-lookup-stat" style="color: var(--text-secondary);">🏷️ Not listed</div>';
             
+            // Owner display with ENS
+            let ownerHtml = '';
+            if (ownerAddress) {
+                const ownerDisplay = ownerENS 
+                    ? `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">${ownerENS}</a>`
+                    : `<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</span>`;
+                ownerHtml = `<div class="nft-lookup-stat">👤 Owner: ${ownerDisplay}</div>`;
+            }
+            
             container.innerHTML = '<div class="nft-lookup-card">' +
                 '<div class="nft-lookup-image">' +
                 (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
@@ -6849,6 +7025,7 @@
                 '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
                 (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
                 priceHtml +
+                ownerHtml +
                 '</div>' +
                 '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
                 '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
