@@ -713,6 +713,7 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
+            position: relative;
         }
         
         .nft-gallery-card:hover {
@@ -4707,9 +4708,12 @@
                 const badges = window.tokenToBadges ? (window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || []) : [];
                 const displayBadges = badges.slice(0, 3).map(b => formatBadgeName(b));
                 const moreBadges = badges.length > 3 ? '+' + (badges.length - 3) : '';
+                const listingPrice = getListingPrice(tokenId);
+                const priceTag = listingPrice ? '<div class="nft-listing-price">' + formatEthPrice(listingPrice) + '</div>' : '';
                 
                 return '<a href="https://opensea.io/assets/ethereum/' + CONTRACT + '/' + tokenId + '" target="_blank" class="nft-gallery-card">' +
                     (imgUrl ? '<img src="' + imgUrl + '" alt="#' + tokenId + '" loading="lazy">' : '<div style="aspect-ratio:1;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">No Image</div>') +
+                    priceTag +
                     '<div class="nft-gallery-info">' +
                     '<div class="nft-gallery-id">#' + tokenId + '</div>' +
                     '<div class="nft-gallery-badges">' +
