@@ -2268,24 +2268,23 @@
             box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);
         }
         
-        .badge-hunt-img-wrapper {
-            position: relative;
-            flex-shrink: 0;
-        }
-        
-        .badge-hunt-img-wrapper .nft-strategy-tag {
-            top: 3px;
-            left: 3px;
-            font-size: 8px;
-            padding: 1px 4px;
-        }
-        
         .badge-hunt-nft-img {
             width: 80px;
             height: 80px;
             border-radius: 8px;
             object-fit: cover;
             flex-shrink: 0;
+        }
+        
+        .badge-hunt-str-tag {
+            background: rgba(255, 149, 0, 0.95);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
         }
         
         .badge-hunt-info {
@@ -5035,16 +5034,13 @@
                 const displayBadges = opp.newBadges.slice(0, 4);
                 const moreBadges = opp.newBadges.length > 4 ? '+' + (opp.newBadges.length - 4) + ' more' : '';
                 const isStrategy = isStrategyWalletNFT(opp.tokenId);
-                const strTag = isStrategy ? '<div class="nft-strategy-tag" title="Strategy Wallet">STR</div>' : '';
+                const strTag = isStrategy ? '<span class="badge-hunt-str-tag" title="Strategy Wallet">STR</span>' : '';
                 
                 return `
                     <a href="https://opensea.io/assets/ethereum/${CONTRACT}/${opp.tokenId}" target="_blank" class="badge-hunt-card${isBestValue ? ' best-value' : ''}">
-                        <div class="badge-hunt-img-wrapper">
-                            ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
-                            ${strTag}
-                        </div>
+                        ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${opp.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${opp.tokenId}</div>`}
                         <div class="badge-hunt-info">
-                            <div class="badge-hunt-nft-id">#${opp.tokenId}</div>
+                            <div class="badge-hunt-nft-id">#${opp.tokenId} ${strTag}</div>
                             <div class="badge-hunt-price">${formatEthPrice(opp.price)}</div>
                             <div class="badge-hunt-badges">
                                 ${displayBadges.map(b => `<span class="badge-hunt-badge-tag">${formatBadgeName(b)}</span>`).join('')}
