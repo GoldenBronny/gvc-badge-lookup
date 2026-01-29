@@ -7147,12 +7147,12 @@
                 detailModal.className = 'modal-overlay';
                 detailModal.onclick = function(e) { if (e.target === detailModal) closeNFTDetailModal(); };
                 detailModal.innerHTML = `
-                    <div class="modal" style="max-width: 600px;" onclick="event.stopPropagation()">
+                    <div class="modal" style="max-width: 800px; width: 90%;" onclick="event.stopPropagation()">
                         <div class="modal-header">
                             <h2 id="nftDetailTitle">NFT Details</h2>
                             <button class="modal-close" onclick="closeNFTDetailModal()">&times;</button>
                         </div>
-                        <div class="modal-body" id="nftDetailContent">
+                        <div class="modal-body" id="nftDetailContent" style="padding: 24px;">
                             <div style="text-align: center; padding: 40px;">
                                 <div class="spinner"></div>
                                 <p style="margin-top: 16px; color: var(--text-secondary);">Loading NFT details...</p>
@@ -7302,26 +7302,65 @@
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             const openSeaUrl = `https://opensea.io/assets/ethereum/${CONTRACT}/${tokenId}`;
             
-            content.innerHTML = '<div class="nft-lookup-card">' +
-                '<div class="nft-lookup-image">' +
-                (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
-                '</div>' +
-                '<div class="nft-lookup-info">' +
-                '<div class="nft-lookup-title">GVC #' + tokenId + '</div>' +
-                '<div class="nft-lookup-stats">' +
-                '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
-                (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
-                priceHtml +
-                ownerHtml +
-                '</div>' +
-                '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
-                '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
-                whatIfHtml +
-                '<div class="nft-lookup-opensea">' +
-                '<a href="' + openSeaUrl + '" target="_blank">View on OpenSea →</a>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
+            content.innerHTML = `
+                <div style="display: flex; gap: 32px; align-items: flex-start;">
+                    <div style="flex-shrink: 0;">
+                        ${imgUrl 
+                            ? `<img src="${imgUrl}" alt="GVC #${tokenId}" style="width: 280px; height: 280px; border-radius: 16px; border: 3px solid var(--accent-cyan); object-fit: cover;">` 
+                            : `<div style="width: 280px; height: 280px; background: var(--bg-card); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent-cyan); font-size: 24px; color: var(--text-secondary);">No Image</div>`
+                        }
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 28px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 16px;">GVC #${tokenId}</div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">🏅 Badges</div>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">${badges.length}</div>
+                            </div>
+                            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">💎 Rarest</div>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--accent-pink);">${badges.length > 0 ? getBadgeRarity(badges[0]) + ' NFTs' : '—'}</div>
+                            </div>
+                            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">🏷️ Price</div>
+                                <div style="font-size: 20px; font-weight: 700; color: ${listingPrice ? 'var(--accent-green)' : 'var(--text-secondary)'};">
+                                    ${listingPrice ? formatEthPrice(listingPrice) : 'Not listed'}
+                                    ${listingInfo && listingInfo.source === 'gondi' ? '<span class="gondi-listing-indicator" style="margin-left: 8px;">GONDI</span>' : ''}
+                                </div>
+                            </div>
+                            <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 10px;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">👤 Owner</div>
+                                <div style="font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${ownerTwitter 
+                                        ? `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none;">@${ownerTwitter}</a>` 
+                                        : ownerENS 
+                                            ? `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; closeNFTDetailModal(); lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none;">${ownerENS}</a>`
+                                            : ownerAddress 
+                                                ? `<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</span>`
+                                                : '—'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">Badges on this NFT:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${badgesHtml}
+                            </div>
+                        </div>
+                        
+                        ${whatIfHtml}
+                        
+                        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                            <a href="${openSeaUrl}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: var(--accent-cyan); color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s;">
+                                View on OpenSea →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
         function closeNFTDetailModal() {
