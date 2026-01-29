@@ -4298,6 +4298,35 @@
             return null;
         }
         
+        // Cache for OpenSea profile data (address -> profile)
+        const openSeaProfileCache = {};
+        
+        // Fetch OpenSea account profile (includes X/Twitter username)
+        async function getOpenSeaProfile(address) {
+            if (!address) return null;
+            
+            const lowerAddr = address.toLowerCase();
+            
+            // Check cache first
+            if (openSeaProfileCache[lowerAddr] !== undefined) {
+                return openSeaProfileCache[lowerAddr];
+            }
+            
+            try {
+                const response = await fetch(`${OPENSEA_PROXY}/account/${lowerAddr}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    openSeaProfileCache[lowerAddr] = data;
+                    return data;
+                }
+            } catch (e) {
+                console.log('Failed to fetch OpenSea profile:', e);
+            }
+            
+            openSeaProfileCache[lowerAddr] = null;
+            return null;
+        }
+        
         // Update wallet display name in results section
         function updateWalletDisplayName() {
             const displayEl = document.getElementById('walletDisplayName');
@@ -6985,15 +7014,37 @@
             // Get owner info (address and ENS)
             const ownerAddress = await getNFTOwner(tokenId);
             let ownerENS = null;
+            let ownerTwitter = null;
+            
             if (ownerAddress) {
-                ownerENS = await resolveAddressToENS(ownerAddress);
+                // Fetch ENS and OpenSea profile in parallel
+                const [ensResult, profileResult] = await Promise.all([
+                    resolveAddressToENS(ownerAddress),
+                    getOpenSeaProfile(ownerAddress)
+                ]);
+                
+                ownerENS = ensResult;
+                
+                // Extract Twitter username from OpenSea profile
+                if (profileResult && profileResult.social_media_accounts) {
+                    const twitterAccount = profileResult.social_media_accounts.find(
+                        acc => acc.platform === 'twitter'
+                    );
+                    if (twitterAccount && twitterAccount.username) {
+                        ownerTwitter = twitterAccount.username;
+                    }
+                }
+                // Also check twitter_username field (older API format)
+                if (!ownerTwitter && profileResult && profileResult.twitter_username) {
+                    ownerTwitter = profileResult.twitter_username;
+                }
             }
             
             // Render result
-            renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS);
+            renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter);
         }
         
-        function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS) {
+        function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges, ownerAddress, ownerENS, ownerTwitter) {
             const container = document.getElementById('nftLookupResult');
             const listingPrice = getListingPrice(tokenId);
             
@@ -7042,12 +7093,25 @@
                 ? '<div class="nft-lookup-stat" style="color: var(--accent-green);">🏷️ Listed: <strong>' + formatEthPrice(listingPrice) + '</strong></div>'
                 : '<div class="nft-lookup-stat" style="color: var(--text-secondary);">🏷️ Not listed</div>';
             
-            // Owner display with ENS
+            // Owner display with ENS and Twitter
             let ownerHtml = '';
             if (ownerAddress) {
-                const ownerDisplay = ownerENS 
-                    ? `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">${ownerENS}</a>`
-                    : `<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</span>`;
+                // Build owner identity display
+                let ownerDisplay = '';
+                
+                // Twitter/X link (primary if available)
+                if (ownerTwitter) {
+                    ownerDisplay = `<a href="https://x.com/${ownerTwitter}" target="_blank" style="color: #1DA1F2; text-decoration: none; font-weight: 600;">@${ownerTwitter}</a>`;
+                    // Add ENS as secondary
+                    if (ownerENS) {
+                        ownerDisplay += ` <span style="color: var(--text-secondary);">·</span> <a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">${ownerENS}</a>`;
+                    }
+                } else if (ownerENS) {
+                    ownerDisplay = `<a href="#" onclick="document.getElementById('walletInput').value='${ownerENS}'; lookupWallet(); return false;" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">${ownerENS}</a>`;
+                } else {
+                    ownerDisplay = `<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">${ownerAddress.slice(0,6)}...${ownerAddress.slice(-4)}</span>`;
+                }
+                
                 ownerHtml = `<div class="nft-lookup-stat">👤 Owner: ${ownerDisplay}</div>`;
             }
             
