@@ -6123,6 +6123,7 @@
         
         function renderNFTLookupResult(tokenId, badges, imgUrl, whatIfBadges) {
             const container = document.getElementById('nftLookupResult');
+            const listingPrice = getListingPrice(tokenId);
             
             const badgesHtml = badges.length > 0 
                 ? badges.map(function(badge) {
@@ -6165,6 +6166,10 @@
                 }
             }
             
+            const priceHtml = listingPrice 
+                ? '<div class="nft-lookup-stat" style="color: var(--accent-green);">🏷️ Listed: <strong>' + formatEthPrice(listingPrice) + '</strong></div>'
+                : '<div class="nft-lookup-stat" style="color: var(--text-secondary);">🏷️ Not listed</div>';
+            
             container.innerHTML = '<div class="nft-lookup-card">' +
                 '<div class="nft-lookup-image">' +
                 (imgUrl ? '<img src="' + imgUrl + '" alt="GVC #' + tokenId + '">' : '<div style="width:160px;height:160px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;border:3px solid var(--accent-cyan);">No Image</div>') +
@@ -6174,6 +6179,7 @@
                 '<div class="nft-lookup-stats">' +
                 '<div class="nft-lookup-stat">🏅 <strong>' + badges.length + '</strong> badges</div>' +
                 (badges.length > 0 ? '<div class="nft-lookup-stat">💎 Rarest: <strong>' + getBadgeRarity(badges[0]) + '</strong> NFTs</div>' : '') +
+                priceHtml +
                 '</div>' +
                 '<div class="nft-lookup-badges-title">Badges on this NFT:</div>' +
                 '<div class="nft-lookup-badges">' + badgesHtml + '</div>' +
