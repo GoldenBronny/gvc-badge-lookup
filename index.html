@@ -3306,7 +3306,10 @@
                         
                         <!-- Their impact -->
                         <div style="border-top: 1px dashed var(--border); padding-top: 12px;">
-                            <div style="font-size: 11px; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;">📥 THEIR IMPACT:</div>
+                            <div style="font-size: 11px; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <span>📥 THEIR IMPACT:</span>
+                                <span class="trade-sim-net" id="tradeSimNetTheirs" style="display: none;">Select NFTs</span>
+                            </div>
                             <div class="trade-sim-section" id="tradeSimTheirGain">
                                 <div class="trade-sim-section-title gain">🟢 They'd GAIN:</div>
                                 <div class="trade-sim-badges" id="tradeSimTheirGainBadges"><span class="trade-sim-empty">Select NFTs to analyze</span></div>
@@ -8245,6 +8248,21 @@
             } else {
                 netDisplay.textContent = '±0 badges';
                 netDisplay.className = 'trade-sim-net neutral';
+            }
+            
+            // Update net change (their perspective)
+            const theirNetDisplay = document.getElementById('tradeSimNetTheirs');
+            const theirNetChange = theirGained.length - theirLost.length;
+            theirNetDisplay.style.display = 'inline';
+            if (theirNetChange > 0) {
+                theirNetDisplay.textContent = '+' + theirNetChange + ' badges';
+                theirNetDisplay.className = 'trade-sim-net positive';
+            } else if (theirNetChange < 0) {
+                theirNetDisplay.textContent = theirNetChange + ' badges';
+                theirNetDisplay.className = 'trade-sim-net negative';
+            } else {
+                theirNetDisplay.textContent = '±0 badges';
+                theirNetDisplay.className = 'trade-sim-net neutral';
             }
         }
         
