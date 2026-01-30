@@ -1878,31 +1878,31 @@
         .trade-selected-nfts {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            min-height: 60px;
-            padding: 8px;
+            gap: 12px;
+            min-height: 120px;
+            padding: 12px;
             background: var(--bg-hover);
             border-radius: 8px;
             margin-bottom: 12px;
         }
         
         .trade-selected-nft {
-            width: 52px;
+            width: 100px;
             text-align: center;
         }
         
         .trade-selected-nft img {
-            width: 48px;
-            height: 48px;
-            border-radius: 6px;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
             object-fit: cover;
         }
         
         .trade-selected-nft span {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-secondary);
             display: block;
-            margin-top: 2px;
+            margin-top: 4px;
         }
         
         .trade-eth-input {
@@ -3170,6 +3170,12 @@
                         </div>
                     </div>
                     
+                    <!-- Trade Summary Actions -->
+                    <div class="compare-trade-summary">
+                        <button class="compare-trade-btn copy" onclick="copyTradeSummary()">📋 Copy Trade Summary</button>
+                        <button class="compare-trade-btn create-offer" onclick="showTradeOfferBuilder()">🎨 Create Trade Offer</button>
+                    </div>
+                    
                     <!-- High Value Targets -->
                     <div class="compare-section" id="sectionTargets">
                         <div class="compare-section-header" onclick="toggleCompareSection('targets')">
@@ -3227,12 +3233,6 @@
                         <div class="compare-section-content" id="contentShared">
                             <div class="compare-badge-grid" id="gridShared"></div>
                         </div>
-                    </div>
-                    
-                    <!-- Trade Summary Actions -->
-                    <div class="compare-trade-summary">
-                        <button class="compare-trade-btn copy" onclick="copyTradeSummary()">📋 Copy Trade Summary</button>
-                        <button class="compare-trade-btn create-offer" onclick="showTradeOfferBuilder()">🎨 Create Trade Offer</button>
                     </div>
                 </div>
             </div>
