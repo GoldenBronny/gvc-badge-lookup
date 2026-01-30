@@ -7226,8 +7226,9 @@
             // Calculate combo badges you'd gain
             let comboBadgesGained = [];
             if (Object.keys(walletBadges).length > 0 && nftType) {
-                // Get your current types
-                const yourTypes = walletNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
+                // Get your current types - include Gondi loans since you still own them
+                const allYourNFTs = allOwnedNFTsGlobal.length > 0 ? allOwnedNFTsGlobal : walletNFTs;
+                const yourTypes = allYourNFTs.map(id => typeData[id] || typeData[String(id)]).filter(t => t);
                 
                 // Check hatrick/high five badges
                 const prefixes = ['Gradient', 'Plastic', 'Robot'];
