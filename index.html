@@ -6404,9 +6404,17 @@
             
             try {
                 // Fetch their NFTs using same method as main lookup
-                const theirNFTs = await fetchWalletNFTsForCompare(address);
+                const result = await fetchWalletNFTsForCompare(address);
+                const resolvedAddress = result.address;
+                let theirNFTs = result.tokens;
                 
-                if (!theirNFTs || theirNFTs.length === 0) {
+                // Also fetch their Gondi loans
+                const theirGondiLoans = await fetchGondiLoansForCompare(resolvedAddress);
+                
+                // Combine wallet NFTs + Gondi loans (removing duplicates)
+                const allTheirNFTs = [...new Set([...theirNFTs, ...theirGondiLoans])];
+                
+                if (!allTheirNFTs || allTheirNFTs.length === 0) {
                     throw new Error('No GVC NFTs found for this wallet');
                 }
                 
@@ -6415,7 +6423,7 @@
                 const theirTokenToBadges = {};
                 
                 // Build their badge ownership
-                theirNFTs.forEach(function(tokenId) {
+                allTheirNFTs.forEach(function(tokenId) {
                     theirTokenToBadges[tokenId] = [];
                     
                     Object.entries(badgeData).forEach(function([badge, tokens]) {
@@ -6431,9 +6439,10 @@
                 // Store comparison data
                 compareWalletData = {
                     address: address,
-                    nfts: theirNFTs,
+                    nfts: allTheirNFTs,
                     badges: theirBadges,
-                    tokenToBadges: theirTokenToBadges
+                    tokenToBadges: theirTokenToBadges,
+                    gondiLoans: theirGondiLoans
                 };
                 
                 // Render comparison
@@ -6477,7 +6486,7 @@
                 if (data.tokens && data.tokens.length > 0) {
                     const tokens = data.tokens.map(t => t.token.tokenId);
                     console.log('Compare - Found ' + tokens.length + ' NFTs via Reservoir');
-                    return tokens;
+                    return { tokens, address };
                 }
             } catch (e) {
                 console.log('Compare - Reservoir failed:', e);
@@ -6493,10 +6502,31 @@
                 if (data.ownedNfts && data.ownedNfts.length > 0) {
                     const tokens = data.ownedNfts.map(nft => nft.tokenId);
                     console.log('Compare - Found ' + tokens.length + ' NFTs via Alchemy');
-                    return tokens;
+                    return { tokens, address };
                 }
             } catch (e) {
                 console.log('Compare - Alchemy failed:', e);
+            }
+            
+            return { tokens: [], address };
+        }
+        
+        // Fetch Gondi loans for comparison wallet
+        async function fetchGondiLoansForCompare(address) {
+            const GONDI_PROXY = 'https://gvc-gondi-proxy.justinahertz.workers.dev';
+            
+            try {
+                const response = await fetch(`${GONDI_PROXY}/loans/${address}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.loans && data.loans.length > 0) {
+                        const loanedTokens = data.loans.map(loan => loan.tokenId);
+                        console.log('Compare - Found ' + loanedTokens.length + ' Gondi loans');
+                        return loanedTokens;
+                    }
+                }
+            } catch (e) {
+                console.log('Compare - Gondi fetch failed:', e);
             }
             
             return [];
