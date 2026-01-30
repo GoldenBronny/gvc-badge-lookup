@@ -6513,23 +6513,67 @@
         
         // Fetch Gondi loans for comparison wallet
         async function fetchGondiLoansForCompare(address) {
-            const GONDI_PROXY = 'https://gvc-gondi-proxy.justinahertz.workers.dev';
+            if (!address) return [];
+            
+            const loanedTokenIds = [];
             
             try {
-                const response = await fetch(`${GONDI_PROXY}/loans/${address}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.loans && data.loans.length > 0) {
-                        const loanedTokens = data.loans.map(loan => loan.tokenId);
-                        console.log('Compare - Found ' + loanedTokens.length + ' Gondi loans');
-                        return loanedTokens;
+                const query = `{
+                    listLoans(
+                        borrowers: ["${address.toLowerCase()}"]
+                        statuses: [LOAN_INITIATED]
+                        first: 100
+                    ) {
+                        edges {
+                            node {
+                                id
+                                status
+                                nft {
+                                    tokenId
+                                    collection {
+                                        slug
+                                        contractData {
+                                            contractAddress
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                }`;
+                
+                const response = await fetch(GONDI_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                const data = await response.json();
+                
+                if (data.data && data.data.listLoans && data.data.listLoans.edges) {
+                    const GVC_CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+                    data.data.listLoans.edges.forEach(edge => {
+                        const loan = edge.node;
+                        const nft = loan.nft;
+                        if (nft && nft.collection) {
+                            const contractAddr = nft.collection.contractData?.contractAddress?.toLowerCase();
+                            // Check if this is a GVC NFT
+                            if (contractAddr === GVC_CONTRACT.toLowerCase() || 
+                                nft.collection.slug === 'good-vibes-club') {
+                                loanedTokenIds.push(String(nft.tokenId));
+                            }
+                        }
+                    });
+                }
+                
+                if (loanedTokenIds.length > 0) {
+                    console.log('Compare - Found ' + loanedTokenIds.length + ' Gondi loans');
                 }
             } catch (e) {
                 console.log('Compare - Gondi fetch failed:', e);
             }
             
-            return [];
+            return loanedTokenIds;
         }
         
         function renderComparison() {
