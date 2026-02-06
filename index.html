@@ -2534,6 +2534,65 @@
             color: var(--text-secondary);
         }
         
+        /* Listing Mode Toggle */
+        .listing-mode-toggle {
+            display: flex;
+            gap: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .listing-mode-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .listing-mode-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        .listing-mode-btn.active {
+            background: var(--accent-orange);
+            color: #000;
+        }
+        .listing-mode-btn.active.all-mode {
+            background: var(--accent-cyan);
+        }
+        
+        /* All Listings mode styling */
+        .badge-hunt-section.all-listings-mode {
+            border-color: var(--accent-cyan);
+        }
+        .badge-hunt-section.all-listings-mode .badge-hunt-title {
+            color: var(--accent-cyan);
+        }
+        
+        /* New badge highlight in All Listings */
+        .badge-hunt-badge-tag.new-badge {
+            background: var(--accent-green);
+            color: #000;
+        }
+        
+        /* Owned indicator */
+        .badge-hunt-owned-tag {
+            background: var(--accent-purple);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+        
+        .badge-hunt-card.owned-nft {
+            opacity: 0.5;
+        }
+        
         /* Badge Explorer */
         .badge-explorer-section {
             background: var(--bg-card);
@@ -3042,11 +3101,15 @@
                 <div class="badge-hunt-section" id="badgeHuntSection">
                     <div class="badge-hunt-header">
                         <div>
-                            <div class="badge-hunt-title">🎯 Badge Hunt</div>
-                            <div class="badge-hunt-subtitle">NFTs for sale that give you new badges</div>
+                            <div class="badge-hunt-title" id="badgeHuntTitle">🎯 Badge Hunt</div>
+                            <div class="badge-hunt-subtitle" id="badgeHuntSubtitle">NFTs for sale that give you new badges</div>
                         </div>
                         <div class="badge-hunt-controls">
-                            <select class="badge-hunt-sort" id="badgeHuntSort" onchange="renderBadgeHunt()">
+                            <div class="listing-mode-toggle">
+                                <button class="listing-mode-btn active" id="modeHuntBtn" onclick="setListingMode('hunt')">🎯 Badge Hunt</button>
+                                <button class="listing-mode-btn" id="modeAllBtn" onclick="setListingMode('all')">📋 All Listings</button>
+                            </div>
+                            <select class="badge-hunt-sort" id="badgeHuntSort" onchange="renderCurrentMode()">
                                 <option value="value">Best Value (badges/ETH)</option>
                                 <option value="badges">Most Badges</option>
                                 <option value="price">Cheapest First</option>
@@ -5795,6 +5858,200 @@
                     </div>
                 `;
             }).join('');
+        }
+        
+        // ========================================
+        // LISTING MODE TOGGLE
+        // ========================================
+        let currentListingMode = 'hunt';
+        
+        function setListingMode(mode) {
+            currentListingMode = mode;
+            const section = document.getElementById('badgeHuntSection');
+            const huntBtn = document.getElementById('modeHuntBtn');
+            const allBtn = document.getElementById('modeAllBtn');
+            const sortSelect = document.getElementById('badgeHuntSort');
+            const titleEl = document.getElementById('badgeHuntTitle');
+            const subtitleEl = document.getElementById('badgeHuntSubtitle');
+            
+            if (mode === 'hunt') {
+                // Badge Hunt mode
+                section.classList.remove('all-listings-mode');
+                huntBtn.classList.add('active');
+                huntBtn.classList.remove('all-mode');
+                allBtn.classList.remove('active', 'all-mode');
+                titleEl.textContent = '🎯 Badge Hunt';
+                subtitleEl.textContent = 'NFTs for sale that give you new badges';
+                
+                // Reset sort options for hunt mode
+                sortSelect.innerHTML = `
+                    <option value="value">Best Value (badges/ETH)</option>
+                    <option value="badges">Most Badges</option>
+                    <option value="price">Cheapest First</option>
+                `;
+            } else {
+                // All Listings mode
+                section.classList.add('all-listings-mode');
+                huntBtn.classList.remove('active');
+                allBtn.classList.add('active', 'all-mode');
+                titleEl.textContent = '📋 All Listings';
+                subtitleEl.textContent = 'Loading...';
+                
+                // Change sort options for all listings mode
+                sortSelect.innerHTML = `
+                    <option value="price">Cheapest First</option>
+                    <option value="price_desc">Most Expensive</option>
+                    <option value="badges">Most Badges</option>
+                    <option value="id">Token ID</option>
+                `;
+            }
+            
+            renderCurrentMode();
+        }
+        
+        function renderCurrentMode() {
+            if (currentListingMode === 'hunt') {
+                renderBadgeHunt();
+            } else {
+                renderAllListings();
+            }
+        }
+        
+        function renderAllListings() {
+            const grid = document.getElementById('badgeHuntGrid');
+            const sortMode = document.getElementById('badgeHuntSort').value;
+            const subtitleEl = document.getElementById('badgeHuntSubtitle');
+            
+            // Check if listings are loaded
+            if (Object.keys(nftListings).length === 0) {
+                grid.innerHTML = '<div class="badge-hunt-loading">Waiting for listings to load...</div>';
+                setTimeout(renderAllListings, 1000);
+                return;
+            }
+            
+            // Combine OpenSea and Gondi listings
+            const combinedListings = { ...nftListings };
+            Object.entries(gondiListings).forEach(([tokenId, listing]) => {
+                if (!combinedListings[tokenId] || listing.price < combinedListings[tokenId]) {
+                    combinedListings[tokenId] = listing.price;
+                }
+            });
+            
+            // Update subtitle with count
+            const count = Object.keys(combinedListings).length;
+            subtitleEl.textContent = `${count} NFTs currently listed`;
+            
+            // Get missing badges for "new badge" calculation
+            const allOwnedForCalc = [...new Set([...walletNFTs, ...gondiLoanedNFTs])];
+            const tempWalletBadges = {};
+            if (window.tokenToBadges) {
+                allOwnedForCalc.forEach(tokenId => {
+                    const badges = window.tokenToBadges[tokenId] || window.tokenToBadges[String(tokenId)] || [];
+                    badges.forEach(badge => {
+                        if (!tempWalletBadges[badge]) tempWalletBadges[badge] = [];
+                        tempWalletBadges[badge].push(tokenId);
+                    });
+                });
+            }
+            
+            // Build listing array with badge info
+            let allItems = Object.entries(combinedListings).map(([tokenId, price]) => {
+                // Get all badges for this NFT
+                const nftBadges = [];
+                Object.entries(badgeData).forEach(([badge, tokens]) => {
+                    const tokenList = Array.isArray(tokens) ? tokens.map(String) : Object.keys(tokens);
+                    if (tokenList.includes(String(tokenId))) {
+                        nftBadges.push(badge);
+                    }
+                });
+                
+                // Sort by rarity
+                nftBadges.sort((a, b) => getBadgeRarity(a) - getBadgeRarity(b));
+                
+                // Find which would be NEW badges
+                const newBadges = Object.keys(walletBadges).length > 0 
+                    ? nftBadges.filter(b => !tempWalletBadges[b])
+                    : [];
+                
+                // Check if owned
+                const isOwned = allOwnedForCalc.includes(tokenId) || allOwnedForCalc.includes(String(tokenId)) ||
+                               allOwnedForCalc.includes(Number(tokenId));
+                
+                // Check if Gondi listing
+                const isGondiListing = gondiListings[tokenId] && 
+                    (!nftListings[tokenId] || gondiListings[tokenId].price <= nftListings[tokenId]);
+                
+                return {
+                    tokenId: tokenId,
+                    price: price,
+                    badges: nftBadges,
+                    newBadges: newBadges,
+                    badgeCount: nftBadges.length,
+                    newBadgeCount: newBadges.length,
+                    isOwned: isOwned,
+                    isGondi: isGondiListing
+                };
+            });
+            
+            // Sort
+            if (sortMode === 'price') {
+                allItems.sort((a, b) => a.price - b.price);
+            } else if (sortMode === 'price_desc') {
+                allItems.sort((a, b) => b.price - a.price);
+            } else if (sortMode === 'badges') {
+                allItems.sort((a, b) => b.badgeCount - a.badgeCount || a.price - b.price);
+            } else if (sortMode === 'id') {
+                allItems.sort((a, b) => Number(a.tokenId) - Number(b.tokenId));
+            }
+            
+            if (allItems.length === 0) {
+                grid.innerHTML = '<div class="badge-hunt-empty">No listings found.</div>';
+                return;
+            }
+            
+            const isWalletLoaded = Object.keys(walletBadges).length > 0;
+            const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
+            
+            grid.innerHTML = allItems.slice(0, 100).map((item) => {
+                const imgUrl = imageData[item.tokenId] || imageData[String(item.tokenId)];
+                const isStrategy = isStrategyWalletNFT(item.tokenId);
+                const strTag = isStrategy ? '<span class="badge-hunt-str-tag" title="Strategy Wallet">STR</span>' : '';
+                const ownedTag = item.isOwned ? '<span class="badge-hunt-owned-tag">OWNED</span>' : '';
+                const gondiTag = item.isGondi ? '<span class="gondi-listing-indicator" title="Listed on Gondi">GONDI</span>' : '';
+                
+                // Show up to 4 badges, then "+X more"
+                const displayBadges = item.badges.slice(0, 4);
+                const moreBadges = item.badges.length > 4 ? '+' + (item.badges.length - 4) + ' more' : '';
+                
+                // Highlight new badges
+                const badgeTagsHtml = displayBadges.map(b => {
+                    const isNew = item.newBadges.includes(b);
+                    return `<span class="badge-hunt-badge-tag${isNew ? ' new-badge' : ''}">${isNew ? '✨ ' : ''}${formatBadgeName(b)}</span>`;
+                }).join('');
+                
+                // Value line
+                let valueHtml;
+                if (isWalletLoaded && item.newBadgeCount > 0) {
+                    valueHtml = `<div class="badge-hunt-value" style="color:var(--accent-green);">+${item.newBadgeCount} new badge${item.newBadgeCount > 1 ? 's' : ''}</div>`;
+                } else {
+                    valueHtml = `<div class="badge-hunt-value">${item.badgeCount} badge${item.badgeCount !== 1 ? 's' : ''}</div>`;
+                }
+                
+                return `
+                    <div class="badge-hunt-card${item.isOwned ? ' owned-nft' : ''}" onclick="openNFTDetail(${item.tokenId})" style="cursor: pointer;">
+                        ${imgUrl ? `<img class="badge-hunt-nft-img" src="${imgUrl}" alt="#${item.tokenId}">` : `<div class="badge-hunt-nft-img" style="background:var(--bg-hover);display:flex;align-items:center;justify-content:center;">#${item.tokenId}</div>`}
+                        <div class="badge-hunt-info">
+                            <div class="badge-hunt-nft-id">#${item.tokenId} ${strTag} ${gondiTag} ${ownedTag}</div>
+                            <div class="badge-hunt-price">${formatEthPrice(item.price)}</div>
+                            <div class="badge-hunt-badges">
+                                ${badgeTagsHtml}
+                                ${moreBadges ? `<span class="badge-hunt-badge-tag" style="background:var(--accent-purple);color:#fff;">${moreBadges}</span>` : ''}
+                            </div>
+                            ${valueHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('') + (allItems.length > 100 ? `<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--text-secondary);font-size:13px;">Showing 100 of ${allItems.length} listings • <a href="https://opensea.io/collection/good-vibes-club" target="_blank" style="color:var(--accent-cyan);">View all on OpenSea →</a></div>` : '');
         }
         
         // ========================================
