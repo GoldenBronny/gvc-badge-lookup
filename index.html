@@ -4655,35 +4655,65 @@
                 resolvedAddresses.push(address);
             }
             
-            // Try Reservoir API first
+            // Try Reservoir API first (with pagination)
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
             try {
-                const reservoirUrl = `https://api.reservoir.tools/users/${address}/tokens/v7?collection=${CONTRACT}&limit=200`;
-                console.log('Trying Reservoir:', reservoirUrl);
-                const response = await fetch(reservoirUrl);
-                const data = await response.json();
+                let allTokens = [];
+                let continuation = '';
+                let pageCount = 0;
+                const maxPages = 10; // Safety limit
                 
-                if (data.tokens && data.tokens.length > 0) {
-                    const tokens = data.tokens.map(t => t.token.tokenId);
-                    console.log(`Found ${tokens.length} NFTs via Reservoir`);
-                    return tokens;
+                do {
+                    const reservoirUrl = `https://api.reservoir.tools/users/${address}/tokens/v7?collection=${CONTRACT}&limit=200${continuation ? '&continuation=' + continuation : ''}`;
+                    console.log('Trying Reservoir page ' + (pageCount + 1) + ':', reservoirUrl);
+                    const response = await fetch(reservoirUrl);
+                    const data = await response.json();
+                    
+                    if (data.tokens && data.tokens.length > 0) {
+                        const tokens = data.tokens.map(t => t.token.tokenId);
+                        allTokens = allTokens.concat(tokens);
+                        console.log(`Reservoir page ${pageCount + 1}: Found ${tokens.length} NFTs (total: ${allTokens.length})`);
+                    }
+                    
+                    continuation = data.continuation || '';
+                    pageCount++;
+                } while (continuation && pageCount < maxPages);
+                
+                if (allTokens.length > 0) {
+                    console.log(`✅ Found ${allTokens.length} total NFTs via Reservoir`);
+                    return allTokens;
                 }
             } catch (e) {
                 console.log('Reservoir failed:', e);
             }
             
-            // Fallback to Alchemy
+            // Fallback to Alchemy (with pagination)
             try {
-                const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${address}&contractAddresses[]=${CONTRACT}&withMetadata=false`;
-                console.log('Trying Alchemy:', alchemyUrl);
-                const response = await fetch(alchemyUrl);
-                const data = await response.json();
+                let allTokens = [];
+                let pageKey = '';
+                let pageCount = 0;
+                const maxPages = 10; // Safety limit
                 
-                if (data.ownedNfts && data.ownedNfts.length > 0) {
-                    const tokens = data.ownedNfts.map(nft => nft.tokenId);
-                    console.log(`Found ${tokens.length} NFTs via Alchemy`);
-                    return tokens;
+                do {
+                    const alchemyUrl = `https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=${address}&contractAddresses[]=${CONTRACT}&withMetadata=false&pageSize=100${pageKey ? '&pageKey=' + pageKey : ''}`;
+                    console.log('Trying Alchemy page ' + (pageCount + 1) + ':', alchemyUrl);
+                    const response = await fetch(alchemyUrl);
+                    const data = await response.json();
+                    
+                    if (data.ownedNfts && data.ownedNfts.length > 0) {
+                        const tokens = data.ownedNfts.map(nft => nft.tokenId);
+                        allTokens = allTokens.concat(tokens);
+                        console.log(`Alchemy page ${pageCount + 1}: Found ${tokens.length} NFTs (total: ${allTokens.length})`);
+                    }
+                    
+                    pageKey = data.pageKey || '';
+                    pageCount++;
+                } while (pageKey && pageCount < maxPages);
+                
+                if (allTokens.length > 0) {
+                    console.log(`✅ Found ${allTokens.length} total NFTs via Alchemy`);
+                    return allTokens;
                 }
             } catch (e) {
                 console.log('Alchemy failed:', e);
@@ -6969,33 +6999,63 @@
             
             const CONTRACT = '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4';
             
-            // Try Reservoir API first
+            // Try Reservoir API first (with pagination)
             try {
-                const reservoirUrl = 'https://api.reservoir.tools/users/' + address + '/tokens/v7?collection=' + CONTRACT + '&limit=200';
-                console.log('Compare - Trying Reservoir:', reservoirUrl);
-                const response = await fetch(reservoirUrl);
-                const data = await response.json();
+                let allTokens = [];
+                let continuation = '';
+                let pageCount = 0;
+                const maxPages = 10;
                 
-                if (data.tokens && data.tokens.length > 0) {
-                    const tokens = data.tokens.map(t => t.token.tokenId);
-                    console.log('Compare - Found ' + tokens.length + ' NFTs via Reservoir');
-                    return { tokens, address };
+                do {
+                    const reservoirUrl = 'https://api.reservoir.tools/users/' + address + '/tokens/v7?collection=' + CONTRACT + '&limit=200' + (continuation ? '&continuation=' + continuation : '');
+                    console.log('Compare - Trying Reservoir page ' + (pageCount + 1) + ':', reservoirUrl);
+                    const response = await fetch(reservoirUrl);
+                    const data = await response.json();
+                    
+                    if (data.tokens && data.tokens.length > 0) {
+                        const tokens = data.tokens.map(t => t.token.tokenId);
+                        allTokens = allTokens.concat(tokens);
+                        console.log('Compare - Reservoir page ' + (pageCount + 1) + ': Found ' + tokens.length + ' NFTs (total: ' + allTokens.length + ')');
+                    }
+                    
+                    continuation = data.continuation || '';
+                    pageCount++;
+                } while (continuation && pageCount < maxPages);
+                
+                if (allTokens.length > 0) {
+                    console.log('Compare - ✅ Found ' + allTokens.length + ' total NFTs via Reservoir');
+                    return { tokens: allTokens, address };
                 }
             } catch (e) {
                 console.log('Compare - Reservoir failed:', e);
             }
             
-            // Fallback to Alchemy
+            // Fallback to Alchemy (with pagination)
             try {
-                const alchemyUrl = 'https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=' + address + '&contractAddresses[]=' + CONTRACT + '&withMetadata=false';
-                console.log('Compare - Trying Alchemy:', alchemyUrl);
-                const response = await fetch(alchemyUrl);
-                const data = await response.json();
+                let allTokens = [];
+                let pageKey = '';
+                let pageCount = 0;
+                const maxPages = 10;
                 
-                if (data.ownedNfts && data.ownedNfts.length > 0) {
-                    const tokens = data.ownedNfts.map(nft => nft.tokenId);
-                    console.log('Compare - Found ' + tokens.length + ' NFTs via Alchemy');
-                    return { tokens, address };
+                do {
+                    const alchemyUrl = 'https://eth-mainnet.g.alchemy.com/nft/v3/demo/getNFTsForOwner?owner=' + address + '&contractAddresses[]=' + CONTRACT + '&withMetadata=false&pageSize=100' + (pageKey ? '&pageKey=' + pageKey : '');
+                    console.log('Compare - Trying Alchemy page ' + (pageCount + 1) + ':', alchemyUrl);
+                    const response = await fetch(alchemyUrl);
+                    const data = await response.json();
+                    
+                    if (data.ownedNfts && data.ownedNfts.length > 0) {
+                        const tokens = data.ownedNfts.map(nft => nft.tokenId);
+                        allTokens = allTokens.concat(tokens);
+                        console.log('Compare - Alchemy page ' + (pageCount + 1) + ': Found ' + tokens.length + ' NFTs (total: ' + allTokens.length + ')');
+                    }
+                    
+                    pageKey = data.pageKey || '';
+                    pageCount++;
+                } while (pageKey && pageCount < maxPages);
+                
+                if (allTokens.length > 0) {
+                    console.log('Compare - ✅ Found ' + allTokens.length + ' total NFTs via Alchemy');
+                    return { tokens: allTokens, address };
                 }
             } catch (e) {
                 console.log('Compare - Alchemy failed:', e);
