@@ -2170,7 +2170,7 @@
 
         .meme-mode-row {
             display: flex;
-            gap: 16px;
+            gap: 20px;
             flex-wrap: wrap;
             align-items: flex-start;
         }
@@ -2189,21 +2189,11 @@
             letter-spacing: 0.5px;
         }
 
-        .meme-mode-field select {
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-primary);
-            padding: 6px 10px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
         .meme-color-swatches {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            max-width: 260px;
+            max-width: 300px;
         }
 
         .meme-color-swatch {
@@ -2213,6 +2203,7 @@
             cursor: pointer;
             border: 3px solid transparent;
             transition: transform 0.15s, border-color 0.15s;
+            position: relative;
         }
 
         .meme-color-swatch:hover { transform: scale(1.15); }
@@ -2222,6 +2213,35 @@
             transform: scale(1.15);
         }
 
+        /* GVC thumbnail picker */
+        .meme-gvc-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 400px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .meme-gvc-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            object-fit: cover;
+            transition: transform 0.15s, border-color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .meme-gvc-thumb:hover { transform: scale(1.08); }
+
+        .meme-gvc-thumb.selected {
+            border-color: #ff3333;
+            transform: scale(1.08);
+        }
+        
         /* NFT Lookup Section */
         .nft-lookup-section {
             background: var(--bg-card);
@@ -3595,26 +3615,20 @@
                     </div>
                 </div>
                 
-                <!-- Meme Mode Picker -->
+                <!-- Meme Mode Panel -->
                 <div class="meme-mode-section" id="memeModeSection" style="display:none;">
                     <div class="meme-mode-label">🎭 Meme Mode Settings</div>
                     <div class="meme-mode-row">
                         <div class="meme-mode-field">
                             <label>Center GVC:</label>
-                            <select id="memeCenterGvc" onchange="updateMemePreview()">
-                                <option value="">— pick your GVC —</option>
-                            </select>
+                            <div class="meme-gvc-picker" id="memeGvcPicker"></div>
                         </div>
                         <div class="meme-mode-field">
-                            <label>Skin color:</label>
+                            <label>Hand color:</label>
                             <div class="meme-color-swatches" id="memeSkinSwatches"></div>
                         </div>
-                        <div class="meme-mode-field">
-                            <label>Sleeve color:</label>
-                            <div class="meme-color-swatches" id="memeSleeveSwatches"></div>
-                        </div>
                     </div>
-                    <canvas id="memeModePreview" width="500" height="320" style="width:100%;border-radius:8px;margin-top:10px;"></canvas>
+                    <canvas id="memeModePreview" width="700" height="500" style="width:100%;border-radius:8px;margin-top:12px;"></canvas>
                 </div>
 
                 <!-- Actions -->
@@ -8676,6 +8690,8 @@
             
             // Update trade simulator
             updateTradeSimulator();
+            // Refresh meme preview if meme mode is active
+            if (memeState && memeState.active) updateMemePreview();
         }
         
         // ========================================
@@ -9194,8 +9210,8 @@
         // ========================================
 
         const MEME_COLORS = [
-            { name: 'Pink',      main: [235, 120, 180], dark: [160, 56, 120] },
-            { name: 'Teal',      main: [72,  210, 190], dark: [30,  140, 120] },
+            { name: 'Pink',      main: [235, 120, 180], dark: [160,  56, 120] },
+            { name: 'Teal',      main: [ 72, 210, 190], dark: [ 30, 140, 120] },
             { name: 'Yellow',    main: [245, 212,  74], dark: [185, 154,   0] },
             { name: 'Blue',      main: [ 91, 142, 240], dark: [ 45,  90, 185] },
             { name: 'Purple',    main: [155, 111, 212], dark: [ 90,  45, 145] },
@@ -9210,7 +9226,6 @@
         let memeState = {
             active: false,
             skinIdx: 0,
-            sleeveIdx: 1,
             centerGvc: null
         };
 
@@ -9224,8 +9239,8 @@
                 btn.textContent = '🎭 Meme Mode ON';
                 btn.style.background = '#cc0000';
                 dlBtn.style.display = 'inline-block';
-                populateMemeGvcSelect();
-                renderMemeSwatches();
+                populateMemeGvcPicker();
+                renderMemeSkinSwatches();
                 updateMemePreview();
             } else {
                 section.style.display = 'none';
@@ -9235,46 +9250,49 @@
             }
         }
 
-        function populateMemeGvcSelect() {
-            const sel = document.getElementById('memeCenterGvc');
+        function populateMemeGvcPicker() {
+            const picker = document.getElementById('memeGvcPicker');
+            picker.innerHTML = '';
             const allNfts = allOwnedNFTsGlobal.length > 0 ? allOwnedNFTsGlobal : walletNFTs;
-            sel.innerHTML = '<option value="">— pick your GVC —</option>';
-            allNfts.forEach(function(id) {
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = '#' + id;
-                sel.appendChild(opt);
-            });
-            // pre-select first
-            if (allNfts.length > 0) {
-                sel.value = allNfts[0];
+            if (allNfts.length > 0 && !memeState.centerGvc) {
                 memeState.centerGvc = String(allNfts[0]);
             }
+            allNfts.forEach(function(id) {
+                const imgUrl = imageData[id] || imageData[String(id)];
+                const img = document.createElement('img');
+                img.className = 'meme-gvc-thumb' + (String(id) === String(memeState.centerGvc) ? ' selected' : '');
+                img.src = imgUrl || '';
+                img.title = '#' + id;
+                img.alt = '#' + id;
+                img.onclick = function() {
+                    memeState.centerGvc = String(id);
+                    picker.querySelectorAll('.meme-gvc-thumb').forEach(function(el) { el.classList.remove('selected'); });
+                    img.classList.add('selected');
+                    updateMemePreview();
+                };
+                picker.appendChild(img);
+            });
         }
 
-        function renderMemeSwatches() {
-            ['memeSkinSwatches', 'memeSleeveSwatches'].forEach(function(id, isSleeveIdx) {
-                const container = document.getElementById(id);
-                container.innerHTML = '';
-                MEME_COLORS.forEach(function(c, i) {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'meme-color-swatch' + ((isSleeveIdx === 0 && i === memeState.skinIdx) || (isSleeveIdx === 1 && i === memeState.sleeveIdx) ? ' selected' : '');
-                    swatch.title = c.name;
-                    swatch.style.background = 'rgb(' + c.main.join(',') + ')';
-                    swatch.onclick = function() {
-                        if (isSleeveIdx === 0) memeState.skinIdx = i;
-                        else memeState.sleeveIdx = i;
-                        renderMemeSwatches();
-                        updateMemePreview();
-                    };
-                    container.appendChild(swatch);
-                });
+        function renderMemeSkinSwatches() {
+            const container = document.getElementById('memeSkinSwatches');
+            container.innerHTML = '';
+            MEME_COLORS.forEach(function(c, i) {
+                const swatch = document.createElement('div');
+                swatch.className = 'meme-color-swatch' + (i === memeState.skinIdx ? ' selected' : '');
+                swatch.title = c.name;
+                swatch.style.background = 'rgb(' + c.main.join(',') + ')';
+                swatch.onclick = function() {
+                    memeState.skinIdx = i;
+                    renderMemeSkinSwatches();
+                    updateMemePreview();
+                };
+                container.appendChild(swatch);
             });
         }
 
         function updateMemePreview() {
-            memeState.centerGvc = document.getElementById('memeCenterGvc').value;
-            if (!memeState.centerGvc) return;
+            if (!memeState.active) return;
             generateMemeModeCanvas(function(canvas) {
                 const preview = document.getElementById('memeModePreview');
                 const ctx = preview.getContext('2d');
@@ -9284,7 +9302,7 @@
             });
         }
 
-        function buildPrayerHands(skinColor, sleeveColor, handSize) {
+        function buildPrayerHands(skinColor, handSize) {
             const temp = document.createElement('canvas');
             temp.width = handSize; temp.height = handSize;
             const ctx = temp.getContext('2d');
@@ -9293,26 +9311,21 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('🙏', handSize / 2, handSize / 2);
 
-            const imageData = ctx.getImageData(0, 0, handSize, handSize);
-            const data = imageData.data;
-            const [sr, sg, sb] = skinColor;
-            const [lr, lg, lb] = sleeveColor;
+            const id = ctx.getImageData(0, 0, handSize, handSize);
+            const data = id.data;
+            const [sr, sg, sb] = skinColor.main;
+            const [dr, dg, db] = skinColor.dark;
 
             for (let i = 0; i < data.length; i += 4) {
                 if (data[i + 3] > 10) {
                     const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114) / 255;
-                    const y = Math.floor((i / 4) / handSize) / handSize;
-                    const t = Math.min(1, Math.max(0, (y - 0.45) / 0.3));
-                    const baseR = Math.round(sr + (lr - sr) * t);
-                    const baseG = Math.round(sg + (lg - sg) * t);
-                    const baseB = Math.round(sb + (lb - sb) * t);
-                    const shade = 0.55 + brightness * 0.45;
-                    data[i]   = Math.min(255, Math.round(baseR * shade));
-                    data[i+1] = Math.min(255, Math.round(baseG * shade));
-                    data[i+2] = Math.min(255, Math.round(baseB * shade));
+                    const shade = 0.5 + brightness * 0.5;
+                    data[i]   = Math.min(255, Math.round((dr + (sr - dr) * brightness) * shade));
+                    data[i+1] = Math.min(255, Math.round((dg + (sg - dg) * brightness) * shade));
+                    data[i+2] = Math.min(255, Math.round((db + (sb - db) * brightness) * shade));
                 }
             }
-            ctx.putImageData(imageData, 0, 0);
+            ctx.putImageData(id, 0, 0);
             return temp;
         }
 
@@ -9326,13 +9339,13 @@
             ctx.fillStyle = '#0d0d1a';
             ctx.fillRect(0, 0, W, H);
 
-            // Red header bar
+            // Red header
             ctx.fillStyle = '#ff3333';
-            ctx.fillRect(0, 0, W, 60);
+            ctx.fillRect(0, 0, W, 62);
             ctx.font = 'bold 30px Arial, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
-            ctx.fillText('⚠️  TRADE OFFER  ⚠️', W / 2, 42);
+            ctx.fillText('⚠️  TRADE OFFER  ⚠️', W / 2, 43);
 
             // Labels
             ctx.font = 'italic bold 18px Arial, sans-serif';
@@ -9348,97 +9361,96 @@
             ctx.textAlign = 'center';
             ctx.fillText('gvcbadges.com', W / 2, H - 12);
 
-            // NFT sizing
-            const yourItems = tradeOfferData.yourNfts.length + tradeOfferData.yourCustomImages.filter(i => i.selected).length;
-            const theirItems = tradeOfferData.theirNfts.length + tradeOfferData.theirCustomImages.filter(i => i.selected).length;
+            // Center GVC dimensions
+            const gvcSize = 300;
+            const gvcX = (W - gvcSize) / 2;
+            const gvcY = 68;
+
+            // Side NFT sizing
+            const yourItems = tradeOfferData.yourNfts.length + tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).length;
+            const theirItems = tradeOfferData.theirNfts.length + tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).length;
             const maxItems = Math.max(yourItems, theirItems, 1);
             const nftSize = maxItems <= 2 ? 100 : maxItems <= 4 ? 80 : 65;
             const nftGap = 10;
-            const sideW = 140; // width of each NFT column
-            const centerX = W / 2;
-            const gvcSize = 280;
-            const gvcX = centerX - gvcSize / 2;
-            const gvcY = 70;
+            const sideMargin = 14;
 
-            // Build prayer hands offscreen
-            const skin   = MEME_COLORS[memeState.skinIdx].main;
-            const sleeve = MEME_COLORS[memeState.sleeveIdx].main;
-            const handSize = 160;
-            const handCanvas = buildPrayerHands(skin, sleeve, handSize);
-            const handDisplayW = 130;
-            const handDisplayH = 130;
-            const handPeek = 38; // px of hand visible at bottom of GVC
+            // Prayer hands
+            const skinColor = MEME_COLORS[memeState.skinIdx];
+            const handSize = 180;
+            const handCanvas = buildPrayerHands(skinColor, handSize);
+            const handDisplayW = 140;
+            const handPeek = 44;
 
-            // Load all images then draw
-            const imagesToLoad = [];
+            // Collect images to load
+            const toLoad = [];
+            const gvcUrl = imageData[memeState.centerGvc] || imageData[String(memeState.centerGvc)];
+            if (gvcUrl) toLoad.push({ url: gvcUrl, role: 'gvc' });
 
-            // Center GVC
-            const gvcImgUrl = imageData[memeState.centerGvc] || imageData[String(memeState.centerGvc)];
-            if (gvcImgUrl) {
-                imagesToLoad.push({ url: gvcImgUrl, role: 'gvc' });
-            }
-
-            // Your NFTs (left side)
             tradeOfferData.yourNfts.forEach(function(id, i) {
                 const url = imageData[id] || imageData[String(id)];
-                if (url) imagesToLoad.push({ url, role: 'yours', index: i });
+                if (url) toLoad.push({ url: url, role: 'yours', index: i });
             });
-            tradeOfferData.yourCustomImages.filter(i => i.selected).forEach(function(img, i) {
-                imagesToLoad.push({ url: img.dataUrl, role: 'yours', index: tradeOfferData.yourNfts.length + i });
+            tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
+                toLoad.push({ url: img.dataUrl, role: 'yours', index: tradeOfferData.yourNfts.length + i });
             });
-
-            // Their NFTs (right side)
             tradeOfferData.theirNfts.forEach(function(id, i) {
                 const url = imageData[id] || imageData[String(id)];
-                if (url) imagesToLoad.push({ url, role: 'theirs', index: i });
+                if (url) toLoad.push({ url: url, role: 'theirs', index: i });
             });
-            tradeOfferData.theirCustomImages.filter(i => i.selected).forEach(function(img, i) {
-                imagesToLoad.push({ url: img.dataUrl, role: 'theirs', index: tradeOfferData.theirNfts.length + i });
+            tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
+                toLoad.push({ url: img.dataUrl, role: 'theirs', index: tradeOfferData.theirNfts.length + i });
             });
 
             let loaded = 0;
-            const total = imagesToLoad.length;
+            const total = toLoad.length;
 
-            function drawAllNfts(loadedImgs) {
-                // Draw your NFTs stacked on left
-                const yourImgs = loadedImgs.filter(i => i.role === 'yours').sort((a,b) => a.index - b.index);
-                const leftX = 15;
-                const nftStartY = 100;
+            function drawAll(imgs) {
+                // Your NFTs - left column
+                const yourImgs = imgs.filter(function(i){ return i.role === 'yours'; }).sort(function(a,b){ return a.index - b.index; });
                 yourImgs.forEach(function(item, i) {
-                    const y = nftStartY + i * (nftSize + nftGap);
+                    const x = sideMargin;
+                    const y = 100 + i * (nftSize + nftGap);
                     ctx.save();
                     ctx.beginPath();
-                    ctx.roundRect(leftX, y, nftSize, nftSize, 8);
+                    ctx.roundRect(x, y, nftSize, nftSize, 8);
                     ctx.clip();
-                    ctx.drawImage(item.img, leftX, y, nftSize, nftSize);
+                    ctx.drawImage(item.img, x, y, nftSize, nftSize);
                     ctx.restore();
                     ctx.strokeStyle = '#00d4ff';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.roundRect(leftX, y, nftSize, nftSize, 8);
+                    ctx.roundRect(x, y, nftSize, nftSize, 8);
                     ctx.stroke();
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('#' + tradeOfferData.yourNfts[i], x + nftSize / 2, y + nftSize + 16);
                 });
 
-                // Draw their NFTs stacked on right
-                const theirImgs = loadedImgs.filter(i => i.role === 'theirs').sort((a,b) => a.index - b.index);
-                const rightX = W - sideW + 15;
+                // Their NFTs - right column
+                const theirImgs = imgs.filter(function(i){ return i.role === 'theirs'; }).sort(function(a,b){ return a.index - b.index; });
                 theirImgs.forEach(function(item, i) {
-                    const y = nftStartY + i * (nftSize + nftGap);
+                    const x = W - sideMargin - nftSize;
+                    const y = 100 + i * (nftSize + nftGap);
                     ctx.save();
                     ctx.beginPath();
-                    ctx.roundRect(rightX, y, nftSize, nftSize, 8);
+                    ctx.roundRect(x, y, nftSize, nftSize, 8);
                     ctx.clip();
-                    ctx.drawImage(item.img, rightX, y, nftSize, nftSize);
+                    ctx.drawImage(item.img, x, y, nftSize, nftSize);
                     ctx.restore();
                     ctx.strokeStyle = '#ffd700';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.roundRect(rightX, y, nftSize, nftSize, 8);
+                    ctx.roundRect(x, y, nftSize, nftSize, 8);
                     ctx.stroke();
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillStyle = '#ffd700';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('#' + tradeOfferData.theirNfts[i], x + nftSize / 2, y + nftSize + 16);
                 });
 
-                // Draw GVC center
-                const gvcImg = loadedImgs.find(i => i.role === 'gvc');
+                // Center GVC
+                const gvcImg = imgs.find(function(i){ return i.role === 'gvc'; });
                 if (gvcImg) {
                     ctx.save();
                     ctx.beginPath();
@@ -9447,42 +9459,35 @@
                     ctx.drawImage(gvcImg.img, gvcX, gvcY, gvcSize, gvcSize);
                     ctx.restore();
 
-                    // Draw hands: only top handPeek px visible, clipped to GVC boundary
+                    // Hands clipped to GVC boundary
                     ctx.save();
                     ctx.beginPath();
                     ctx.roundRect(gvcX, gvcY, gvcSize, gvcSize, 10);
                     ctx.clip();
-                    // source crop: only top portion of hands canvas
-                    const srcH = Math.round(handSize * (handPeek / handDisplayH));
+                    const srcH = Math.round(handSize * (handPeek / handDisplayW));
                     const handDrawX = gvcX + (gvcSize - handDisplayW) / 2;
                     const handDrawY = gvcY + gvcSize - handPeek;
-                    ctx.drawImage(handCanvas,
-                        0, 0, handSize, srcH,
-                        handDrawX, handDrawY, handDisplayW, handPeek
-                    );
+                    ctx.drawImage(handCanvas, 0, 0, handSize, srcH, handDrawX, handDrawY, handDisplayW, handPeek);
                     ctx.restore();
                 }
 
                 callback(canvas);
             }
 
-            if (total === 0) {
-                drawAllNfts([]);
-                return;
-            }
+            if (total === 0) { drawAll([]); return; }
 
             const loadedImgs = [];
-            imagesToLoad.forEach(function(item) {
+            toLoad.forEach(function(item) {
                 const img = new Image();
                 if (!item.url.startsWith('data:')) img.crossOrigin = 'anonymous';
                 img.onload = function() {
-                    loadedImgs.push({ ...item, img });
+                    loadedImgs.push(Object.assign({}, item, { img: img }));
                     loaded++;
-                    if (loaded >= total) drawAllNfts(loadedImgs);
+                    if (loaded >= total) drawAll(loadedImgs);
                 };
                 img.onerror = function() {
                     loaded++;
-                    if (loaded >= total) drawAllNfts(loadedImgs);
+                    if (loaded >= total) drawAll(loadedImgs);
                 };
                 img.src = item.url;
             });
