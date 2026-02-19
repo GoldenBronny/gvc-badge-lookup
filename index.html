@@ -2203,7 +2203,6 @@
             cursor: pointer;
             border: 3px solid transparent;
             transition: transform 0.15s, border-color 0.15s;
-            position: relative;
         }
 
         .meme-color-swatch:hover { transform: scale(1.15); }
@@ -2213,12 +2212,11 @@
             transform: scale(1.15);
         }
 
-        /* GVC thumbnail picker */
         .meme-gvc-picker {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            max-width: 400px;
+            max-width: 420px;
             max-height: 160px;
             overflow-y: auto;
             padding: 4px;
@@ -2241,7 +2239,7 @@
             border-color: #ff3333;
             transform: scale(1.08);
         }
-        
+
         /* NFT Lookup Section */
         .nft-lookup-section {
             background: var(--bg-card);
@@ -8690,8 +8688,7 @@
             
             // Update trade simulator
             updateTradeSimulator();
-            // Refresh meme preview if meme mode is active
-            if (memeState && memeState.active) updateMemePreview();
+            if (typeof memeState !== 'undefined' && memeState.active) updateMemePreview();
         }
         
         // ========================================
@@ -9223,11 +9220,7 @@
             { name: 'White',     main: [235, 235, 235], dark: [175, 175, 175] },
         ];
 
-        let memeState = {
-            active: false,
-            skinIdx: 0,
-            centerGvc: null
-        };
+        let memeState = { active: false, skinIdx: 0, centerGvc: null };
 
         function toggleMemeMode() {
             memeState.active = !memeState.active;
@@ -9310,12 +9303,10 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('🙏', handSize / 2, handSize / 2);
-
             const id = ctx.getImageData(0, 0, handSize, handSize);
             const data = id.data;
             const [sr, sg, sb] = skinColor.main;
             const [dr, dg, db] = skinColor.dark;
-
             for (let i = 0; i < data.length; i += 4) {
                 if (data[i + 3] > 10) {
                     const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114) / 255;
@@ -9330,7 +9321,7 @@
         }
 
         function generateMemeModeCanvas(callback) {
-            const W = 700, H = 500;
+            const W = 700, H = 520;
             const canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;
             const ctx = canvas.getContext('2d');
@@ -9359,14 +9350,12 @@
             ctx.font = '13px Arial, sans-serif';
             ctx.fillStyle = '#444466';
             ctx.textAlign = 'center';
-            ctx.fillText('gvcbadges.com', W / 2, H - 12);
+            ctx.fillText('gvcbadges.com', W / 2, H - 10);
 
-            // Center GVC dimensions
+            // Dimensions
             const gvcSize = 300;
             const gvcX = (W - gvcSize) / 2;
             const gvcY = 68;
-
-            // Side NFT sizing
             const yourItems = tradeOfferData.yourNfts.length + tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).length;
             const theirItems = tradeOfferData.theirNfts.length + tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).length;
             const maxItems = Math.max(yourItems, theirItems, 1);
@@ -9381,31 +9370,31 @@
             const handDisplayW = 140;
             const handPeek = 44;
 
-            // Collect images to load
+            // Collect images
             const toLoad = [];
             const gvcUrl = imageData[memeState.centerGvc] || imageData[String(memeState.centerGvc)];
             if (gvcUrl) toLoad.push({ url: gvcUrl, role: 'gvc' });
 
             tradeOfferData.yourNfts.forEach(function(id, i) {
                 const url = imageData[id] || imageData[String(id)];
-                if (url) toLoad.push({ url: url, role: 'yours', index: i });
+                if (url) toLoad.push({ url: url, role: 'yours', index: i, tokenId: id });
             });
             tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
-                toLoad.push({ url: img.dataUrl, role: 'yours', index: tradeOfferData.yourNfts.length + i });
+                toLoad.push({ url: img.dataUrl, role: 'yours', index: tradeOfferData.yourNfts.length + i, tokenId: 'Custom' });
             });
             tradeOfferData.theirNfts.forEach(function(id, i) {
                 const url = imageData[id] || imageData[String(id)];
-                if (url) toLoad.push({ url: url, role: 'theirs', index: i });
+                if (url) toLoad.push({ url: url, role: 'theirs', index: i, tokenId: id });
             });
             tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
-                toLoad.push({ url: img.dataUrl, role: 'theirs', index: tradeOfferData.theirNfts.length + i });
+                toLoad.push({ url: img.dataUrl, role: 'theirs', index: tradeOfferData.theirNfts.length + i, tokenId: 'Custom' });
             });
 
             let loaded = 0;
             const total = toLoad.length;
 
             function drawAll(imgs) {
-                // Your NFTs - left column
+                // Your NFTs left column
                 const yourImgs = imgs.filter(function(i){ return i.role === 'yours'; }).sort(function(a,b){ return a.index - b.index; });
                 yourImgs.forEach(function(item, i) {
                     const x = sideMargin;
@@ -9424,10 +9413,29 @@
                     ctx.font = 'bold 11px monospace';
                     ctx.fillStyle = '#00d4ff';
                     ctx.textAlign = 'center';
-                    ctx.fillText('#' + tradeOfferData.yourNfts[i], x + nftSize / 2, y + nftSize + 16);
+                    ctx.fillText('#' + item.tokenId, x + nftSize / 2, y + nftSize + 16);
                 });
 
-                // Their NFTs - right column
+                // Your ETH
+                if (tradeOfferData.yourEth > 0) {
+                    const ethText = '+ ' + tradeOfferData.yourEth + ' Ξ ETH';
+                    const ethY = 100 + yourImgs.length * (nftSize + nftGap) + 30;
+                    ctx.font = 'bold 16px monospace';
+                    const tw = ctx.measureText(ethText).width;
+                    const ex = sideMargin + nftSize / 2 - tw / 2 - 10;
+                    ctx.fillStyle = 'rgba(0,212,255,0.15)';
+                    ctx.beginPath();
+                    ctx.roundRect(ex, ethY - 18, tw + 20, 28, 6);
+                    ctx.fill();
+                    ctx.strokeStyle = '#00d4ff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(ethText, sideMargin + nftSize / 2, ethY);
+                }
+
+                // Their NFTs right column
                 const theirImgs = imgs.filter(function(i){ return i.role === 'theirs'; }).sort(function(a,b){ return a.index - b.index; });
                 theirImgs.forEach(function(item, i) {
                     const x = W - sideMargin - nftSize;
@@ -9446,10 +9454,30 @@
                     ctx.font = 'bold 11px monospace';
                     ctx.fillStyle = '#ffd700';
                     ctx.textAlign = 'center';
-                    ctx.fillText('#' + tradeOfferData.theirNfts[i], x + nftSize / 2, y + nftSize + 16);
+                    ctx.fillText('#' + item.tokenId, x + nftSize / 2, y + nftSize + 16);
                 });
 
-                // Center GVC
+                // Their ETH
+                if (tradeOfferData.theirEth > 0) {
+                    const ethText = '+ ' + tradeOfferData.theirEth + ' Ξ ETH';
+                    const ethY = 100 + theirImgs.length * (nftSize + nftGap) + 30;
+                    const rx = W - sideMargin - nftSize;
+                    ctx.font = 'bold 16px monospace';
+                    const tw = ctx.measureText(ethText).width;
+                    const ex = rx + nftSize / 2 - tw / 2 - 10;
+                    ctx.fillStyle = 'rgba(255,215,0,0.15)';
+                    ctx.beginPath();
+                    ctx.roundRect(ex, ethY - 18, tw + 20, 28, 6);
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.fillStyle = '#ffd700';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(ethText, rx + nftSize / 2, ethY);
+                }
+
+                // Center GVC + hands
                 const gvcImg = imgs.find(function(i){ return i.role === 'gvc'; });
                 if (gvcImg) {
                     ctx.save();
@@ -9459,7 +9487,7 @@
                     ctx.drawImage(gvcImg.img, gvcX, gvcY, gvcSize, gvcSize);
                     ctx.restore();
 
-                    // Hands clipped to GVC boundary
+                    // Hands clipped inside GVC
                     ctx.save();
                     ctx.beginPath();
                     ctx.roundRect(gvcX, gvcY, gvcSize, gvcSize, 10);
