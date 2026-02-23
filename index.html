@@ -5247,17 +5247,25 @@
                     missingVibestrBadges.push('flow_state');
                 }
                 
-                // Add Trait Maxi badge (5 NFTs sharing same Body, Hair group, Face, AND Type)
-                const traitCombos = {};
+                // Add Trait Maxi badge (5 NFTs with identical body, hair, face, OR type trait)
+                const bodyCounts = {}, hairCounts = {}, faceCounts = {}, typeCounts = {};
                 tokenIds.forEach(tid => {
                     const t = traitData[tid] || traitData[String(tid)];
-                    if (t && t.b && t.h && t.f && t.t) {
-                        const key = t.b + '|' + t.h + '|' + t.f + '|' + t.t;
-                        traitCombos[key] = (traitCombos[key] || 0) + 1;
+                    if (t) {
+                        if (t.b) bodyCounts[t.b] = (bodyCounts[t.b] || 0) + 1;
+                        if (t.h) hairCounts[t.h] = (hairCounts[t.h] || 0) + 1;
+                        if (t.f) faceCounts[t.f] = (faceCounts[t.f] || 0) + 1;
+                        if (t.t) typeCounts[t.t] = (typeCounts[t.t] || 0) + 1;
                     }
                 });
-                const maxCombo = Math.max(0, ...Object.values(traitCombos));
-                if (maxCombo >= 5) {
+                const maxAny = Math.max(
+                    0,
+                    ...Object.values(bodyCounts),
+                    ...Object.values(hairCounts),
+                    ...Object.values(faceCounts),
+                    ...Object.values(typeCounts)
+                );
+                if (maxAny >= 5) {
                     walletBadges['trait_maxi'] = ['meta'];
                 } else {
                     missingVibestrBadges.push('trait_maxi');
