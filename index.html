@@ -3394,17 +3394,23 @@
     <!-- Trade Offer Builder Modal -->
     <!-- Trait Maxi Gang Modal -->
     <div class="modal-overlay" id="traitMaxiGangModal" onclick="closeTraitMaxiGangModal(event)">
-        <div class="modal" onclick="event.stopPropagation()" style="max-width: 600px; width: 95%;">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width: 620px; width: 95%;">
             <div class="modal-header">
                 <h2>✨ Trait Maxi Gang</h2>
                 <button class="modal-close" onclick="closeTraitMaxiGangModal()">&times;</button>
             </div>
             <div class="modal-body" style="text-align: center;">
-                <div id="gangModalInfo" style="margin-bottom: 16px; color: var(--text-secondary); font-size: 13px;"></div>
-                <canvas id="gangCanvas" style="max-width: 100%; border-radius: 12px; display: block; margin: 0 auto;"></canvas>
-                <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
-                    <button onclick="downloadGangImage()" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">⬇️ Download</button>
-                    <button onclick="closeTraitMaxiGangModal()" style="background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">Close</button>
+                <div id="gangModalInfo" style="margin-bottom: 12px; color: var(--text-secondary); font-size: 13px;"></div>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 10px; color: var(--text-secondary); opacity: 0.6; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Drag to rearrange</div>
+                    <div id="gangDragGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 360px; margin: 0 auto;"></div>
+                </div>
+                <canvas id="gangCanvas" style="max-width: 100%; border-radius: 12px; display: none; margin: 0 auto;"></canvas>
+                <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="generateAndShowGangImage()" id="gangGenerateBtn" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;">🎨 Generate Image</button>
+                    <button onclick="downloadGangImage()" id="gangDownloadBtn" style="display:none; background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;">⬇️ Download</button>
+                    <button onclick="copyGangImage()" id="gangCopyBtn" style="display:none; background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">📋 Copy</button>
+                    <button onclick="closeTraitMaxiGangModal()" style="background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">Close</button>
                 </div>
             </div>
         </div>
@@ -8470,14 +8476,17 @@
         }
         
         // Trait Maxi Gang functions
+        let currentGangTokenOrder = []; // tracks drag order
+        let gangDragSrcIndex = null;
+        
         function showTraitMaxiGang() {
             if (!window.traitMaxiGangs || !window.traitMaxiGangs.length) return;
             const gangs = window.traitMaxiGangs;
             
             let pickerHtml = '';
             if (gangs.length > 1) {
-                pickerHtml = '<div style="margin-bottom: 14px;">' +
-                    '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Choose your gang:</div>' +
+                pickerHtml = '<div style="margin-bottom: 12px;">' +
+                    '<div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Choose your gang:</div>' +
                     '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">' +
                     gangs.map((g, i) => 
                         '<button onclick="selectGang(' + i + ')" id="gangBtn' + i + '" style="' +
@@ -8496,15 +8505,20 @@
                 '<strong style="color: #ffd700;" id="gangActiveLabel">' + gangs[0].traitName + '</strong> ' +
                 '<span style="color: var(--text-secondary);">(' + gangs[0].traitType + ' trait) &mdash; ' + gangs[0].tokenIds.length + ' members</span>';
             
+            // Reset canvas visibility
+            document.getElementById('gangCanvas').style.display = 'none';
+            document.getElementById('gangGenerateBtn').style.display = 'inline-block';
+            document.getElementById('gangDownloadBtn').style.display = 'none';
+            document.getElementById('gangCopyBtn').style.display = 'none';
+            
             document.getElementById('traitMaxiGangModal').classList.add('active');
-            generateGangImage(gangs[0]);
+            loadGangDragGrid(gangs[0]);
         }
         
         function selectGang(index) {
             const gangs = window.traitMaxiGangs;
             const gang = gangs[index];
             
-            // Update button styles
             gangs.forEach((g, i) => {
                 const btn = document.getElementById('gangBtn' + i);
                 if (!btn) return;
@@ -8514,12 +8528,79 @@
                 btn.style.fontWeight = i === index ? '700' : '400';
             });
             
-            // Update label
             const label = document.getElementById('gangActiveLabel');
             if (label) label.textContent = gang.traitName;
             
-            // Regenerate image
-            generateGangImage(gang);
+            // Reset canvas
+            document.getElementById('gangCanvas').style.display = 'none';
+            document.getElementById('gangGenerateBtn').style.display = 'inline-block';
+            document.getElementById('gangDownloadBtn').style.display = 'none';
+            document.getElementById('gangCopyBtn').style.display = 'none';
+            
+            loadGangDragGrid(gang);
+        }
+        
+        function loadGangDragGrid(gang) {
+            // Use up to 6 tokens
+            currentGangTokenOrder = gang.tokenIds.slice(0, 6);
+            renderGangDragGrid();
+        }
+        
+        function renderGangDragGrid() {
+            const grid = document.getElementById('gangDragGrid');
+            grid.innerHTML = currentGangTokenOrder.map((tokenId, i) => {
+                const imgUrl = getNFTImageUrl(tokenId);
+                return '<div draggable="true" data-index="' + i + '" ' +
+                    'ondragstart="gangDragStart(event)" ' +
+                    'ondragover="gangDragOver(event)" ' +
+                    'ondrop="gangDrop(event)" ' +
+                    'ondragend="gangDragEnd(event)" ' +
+                    'style="position:relative; border-radius:10px; overflow:hidden; border:1px solid rgba(255,215,0,0.3); cursor:grab; aspect-ratio:1; background:#111;">' +
+                    (imgUrl ? '<img src="' + imgUrl + '" style="width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;">' : '') +
+                    '<div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#ffd700; font-size:10px; font-weight:700; text-align:center; padding:3px;">#' + tokenId + '</div>' +
+                    '</div>';
+            }).join('');
+        }
+        
+        function gangDragStart(e) {
+            gangDragSrcIndex = parseInt(e.currentTarget.dataset.index);
+            e.currentTarget.style.opacity = '0.4';
+        }
+        
+        function gangDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.style.border = '1px solid #ffd700';
+        }
+        
+        function gangDrop(e) {
+            e.preventDefault();
+            const targetIndex = parseInt(e.currentTarget.dataset.index);
+            if (gangDragSrcIndex !== null && gangDragSrcIndex !== targetIndex) {
+                // Swap
+                const tmp = currentGangTokenOrder[gangDragSrcIndex];
+                currentGangTokenOrder[gangDragSrcIndex] = currentGangTokenOrder[targetIndex];
+                currentGangTokenOrder[targetIndex] = tmp;
+                renderGangDragGrid();
+            }
+        }
+        
+        function gangDragEnd(e) {
+            gangDragSrcIndex = null;
+            renderGangDragGrid();
+        }
+        
+        function generateAndShowGangImage() {
+            // Build a pseudo-gang from current order
+            const gang = window.traitMaxiGangs.find(g => 
+                g.tokenIds.slice(0,6).some(id => currentGangTokenOrder.includes(id))
+            ) || window.traitMaxiGangs[0];
+            const orderedGang = { ...gang, tokenIds: currentGangTokenOrder };
+            generateGangImage(orderedGang).then(() => {
+                document.getElementById('gangCanvas').style.display = 'block';
+                document.getElementById('gangGenerateBtn').style.display = 'none';
+                document.getElementById('gangDownloadBtn').style.display = 'inline-block';
+                document.getElementById('gangCopyBtn').style.display = 'inline-block';
+            });
         }
         
         function closeTraitMaxiGangModal(event) {
@@ -8534,6 +8615,21 @@
             link.download = 'trait-maxi-gang.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
+        }
+        
+        async function copyGangImage() {
+            const canvas = document.getElementById('gangCanvas');
+            const btn = document.getElementById('gangCopyBtn');
+            try {
+                canvas.toBlob(async (blob) => {
+                    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+                });
+            } catch(e) {
+                btn.textContent = '❌ Failed';
+                setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+            }
         }
         
         async function generateGangImage(gang) {
