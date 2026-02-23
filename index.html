@@ -3789,8 +3789,8 @@
             'trait_maxi': 'Trait Maxi',
             'anchorman': 'Anchorman',
             'tatted_up': 'Tatted Up',
-            'highkeymoments_1': 'Highkey Collectooor',
-            'highkeymoments_2': 'Mega Highkey Collectooor'
+            'highkeymoments_1': 'Highkey Moments I',
+            'highkeymoments_2': 'Highkey Moments II'
         };
         
         // Badge colors for display
@@ -4860,8 +4860,9 @@
                     const balanceOfSelector = '0x00fdd58e';
                     const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
                     
-                    // We need to find how many token IDs exist - check 1, 2, 3
-                    const tokenIds = [1, 2, 3];
+                    // Only 1 OE has been dropped so far (token ID 1)
+                    // Owning token 1 = Highkey Moments I AND Highkey Moments II
+                    const tokenIds = [1];
                     const ownedTokenIds = [];
                     
                     for (const tokenId of tokenIds) {
@@ -4900,7 +4901,7 @@
                     }
                     
                     console.log('Highkey Moments owned token IDs for ' + address + ':', ownedTokenIds);
-                    if (ownedTokenIds.length === tokenIds.length) ownsAll = true;
+                    if (ownedTokenIds.length > 0) ownsAll = true; // Only 1 OE exists, owning it = owning all
                     
                 } catch (e) {
                     console.log('Highkey check failed:', e);
