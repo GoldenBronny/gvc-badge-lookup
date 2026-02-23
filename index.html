@@ -3742,7 +3742,7 @@
             'pothead': 'High Vibes',
             'rainbow_boombox': 'Bass In Your Face',
             'rainbow_bubble_goggles': 'Bubble Visionary',
-            'rainbow_citizen': 'Rainbow Maxi',
+            'rainbow_maxi': 'Rainbow Maxi',
             'rainbow_visor': 'Hue Got This',
             'ranger': 'Vibe Ranger',
             'robot_lover': 'Love at First Byte',
@@ -3796,7 +3796,7 @@
         // Badge colors for display
         const BADGE_COLORS = {
             // Rainbow/Special
-            'rainbow_citizen': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'rainbow_maxi': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'rainbow_visor': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'rainbow_bubble_goggles': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
             'science_goggles': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
@@ -3964,7 +3964,7 @@
             'pothead': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Pothead%22]}]',
             'rainbow_boombox': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Rainbow+Boombox%22]}]',
             'rainbow_bubble_goggles': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Bubble+Goggles%22]}]',
-            'rainbow_citizen': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Type%22,%22values%22:[%22Rainbow%22]}]',
+            'rainbow_maxi': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Type%22,%22values%22:[%22Rainbow%22]}]',
             'rainbow_visor': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Rainbow+Visor%22]}]',
             'robot_lover': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Type%22,%22values%22:[%22Robot+Lilac%22,%22Robot+Red+Candy+Apple%22,%22Robot+Ice%22,%22Robot+Cobalt%22,%22Robot+Pink%22]}]',
             'science_goggles': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Science+Goggles%22]}]',
@@ -4968,21 +4968,21 @@
             },
             { 
                 name: 'gradient_high_five', 
-                requirement: '5 different Gradient colors', 
-                check: (types) => countUniqueByPrefix(types, 'Gradient') >= 5,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Gradient'), needed: 5 })
+                requirement: '5 Gradient type GVCs', 
+                check: (types) => countByPrefix(types, 'Gradient') >= 5,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Gradient'), needed: 5 })
             },
             { 
                 name: 'plastic_high_five', 
-                requirement: '5 different Plastic colors', 
-                check: (types) => countUniqueByPrefix(types, 'Plastic') >= 5,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Plastic'), needed: 5 })
+                requirement: '5 Plastic type GVCs', 
+                check: (types) => countByPrefix(types, 'Plastic') >= 5,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Plastic'), needed: 5 })
             },
             { 
                 name: 'robot_high_five', 
-                requirement: '5 different Robot colors', 
-                check: (types) => countUniqueByPrefix(types, 'Robot') >= 5,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Robot'), needed: 5 })
+                requirement: '5 Robot type GVCs', 
+                check: (types) => countByPrefix(types, 'Robot') >= 5,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Robot'), needed: 5 })
             },
             { 
                 name: 'power_duo', 
@@ -7536,7 +7536,7 @@
         // Badge category mapping
         const BADGE_CATEGORIES = {
             // Type badges
-            'any_gvc': 'type', 'rainbow_citizen': 'type', 'gold_member': 'type', 
+            'any_gvc': 'type', 'rainbow_maxi': 'type', 'gold_member': 'type', 
             'grayscale_seeker': 'type', 'robot_lover': 'type', 'plastic_lover': 'type', 
             'gradient_lover': 'type',
             
