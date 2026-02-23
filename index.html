@@ -4070,6 +4070,18 @@
             }
         }
         
+        // Load trait data for Flow State and Trait Maxi badge calculations
+        let traitData = {};
+        async function loadTraitData() {
+            try {
+                const response = await fetch('gvc-traits.json');
+                traitData = await response.json();
+                console.log(`Loaded ${Object.keys(traitData).length} NFT traits`);
+            } catch (error) {
+                console.error('Failed to load trait data:', error);
+            }
+        }
+        
         // Load special traits data for Mountain GOAT badge
         let specialTraitsData = {};
         async function loadSpecialTraitsData() {
@@ -4556,6 +4568,7 @@
         loadImageData();
         loadTypeData();
         loadSpecialTraitsData();
+        loadTraitData();
         loadStrategyWalletNFTs();
         fetchFloorPrice();
         fetchListings();
@@ -5220,6 +5233,39 @@
                     missingVibestrBadges.push(tier.name);
                 }
             });
+            
+            // Add Flow State badge (5 different hair style groups)
+            if (Object.keys(traitData).length > 0) {
+                const hairGroups = new Set();
+                tokenIds.forEach(tid => {
+                    const t = traitData[tid] || traitData[String(tid)];
+                    if (t && t.h) hairGroups.add(t.h);
+                });
+                if (hairGroups.size >= 5) {
+                    walletBadges['flow_state'] = ['meta'];
+                } else {
+                    missingVibestrBadges.push('flow_state');
+                }
+                
+                // Add Trait Maxi badge (5 NFTs sharing same Body, Hair group, Face, AND Type)
+                const traitCombos = {};
+                tokenIds.forEach(tid => {
+                    const t = traitData[tid] || traitData[String(tid)];
+                    if (t && t.b && t.h && t.f && t.t) {
+                        const key = t.b + '|' + t.h + '|' + t.f + '|' + t.t;
+                        traitCombos[key] = (traitCombos[key] || 0) + 1;
+                    }
+                });
+                const maxCombo = Math.max(0, ...Object.values(traitCombos));
+                if (maxCombo >= 5) {
+                    walletBadges['trait_maxi'] = ['meta'];
+                } else {
+                    missingVibestrBadges.push('trait_maxi');
+                }
+            } else {
+                missingVibestrBadges.push('flow_state');
+                missingVibestrBadges.push('trait_maxi');
+            }
             
             // Add Highkey Moments badges
             if (highkeyOwnership.ownsAny) {
