@@ -3564,6 +3564,7 @@
         
         // VIBE Bounty Hunter self-report state
         let vibeBountyHunterCount = 0;
+        let highkeyOwnership = { ownsAny: false, ownsAll: false };
         
         // Gondi Loan state
         let gondiLoanedNFTs = []; // Token IDs currently on Gondi loan
@@ -3771,7 +3772,7 @@
             'plastic_high_five': 'Plastic High Five',
             'robot_high_five': 'Robot High Five',
             'power_duo': 'Power Duo',
-            'chris_favorite': "Chris' Favorite Badge",
+            'chris_favorite_badge': "Chris' Favorite Badge",
             'multi_type_master': 'Multi-Type Master',
             'yin_n_yang': "Yin N' Yang",
             'mountain_goat': 'Mountain GOAT',
@@ -3808,7 +3809,7 @@
             'showtime': '#ffa500',
             // Grayscale
             'grayscale_seeker': '#888888',
-            'chris_favorite': '#888888',
+            'chris_favorite_badge': '#888888',
             // Special/Rare
             'one_of_one': '#ff00ff',
             'super_rare': '#ff4500',
@@ -4632,6 +4633,10 @@
                         vibestrBalance = await fetchVibestrBalance(resolvedAddresses);
                         console.log('Total VIBESTR balance: ' + vibestrBalance);
                         
+                        // Fetch Highkey Moments ownership
+                        highkeyOwnership = await fetchHighkeyMomentsOwnership(resolvedAddresses);
+                        console.log('Highkey Moments ownership:', highkeyOwnership);
+                        
                         // Fetch Gondi loans for wallet addresses
                         gondiLoanedNFTs = await fetchGondiLoans(resolvedAddresses);
                     }
@@ -4832,6 +4837,79 @@
             return totalBalance;
         }
         
+        // Highkey Moments ERC-1155 check
+        async function fetchHighkeyMomentsOwnership(addresses) {
+            const HIGHKEY_CONTRACT = '0x74fcb6eb2a2d02207b36e804d800687ce78d210c';
+            // balanceOfBatch selector: 0x4e1273f4
+            // We need to check token IDs 1, 2, 3 (the open editions)
+            // Use Alchemy getNFTsForOwner to check ERC-1155 ownership
+            let ownsAny = false;
+            let ownsAll = false;
+            
+            const rpcUrls = [
+                'https://rpc.ankr.com/eth',
+                'https://eth.llamarpc.com',
+                'https://1rpc.io/eth',
+                'https://ethereum.publicnode.com'
+            ];
+            
+            for (const address of addresses) {
+                try {
+                    // Check token IDs 1, 2, 3 using balanceOf for each
+                    // ERC-1155 balanceOf selector: 0x00fdd58e (address, id)
+                    const balanceOfSelector = '0x00fdd58e';
+                    const paddedAddress = address.toLowerCase().replace('0x', '').padStart(64, '0');
+                    
+                    // We need to find how many token IDs exist - check 1, 2, 3
+                    const tokenIds = [1, 2, 3];
+                    const ownedTokenIds = [];
+                    
+                    for (const tokenId of tokenIds) {
+                        const paddedTokenId = tokenId.toString(16).padStart(64, '0');
+                        const callData = balanceOfSelector + paddedAddress + paddedTokenId;
+                        
+                        let balance = 0;
+                        for (const rpcUrl of rpcUrls) {
+                            try {
+                                const response = await fetch(rpcUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        jsonrpc: '2.0',
+                                        method: 'eth_call',
+                                        params: [{ to: HIGHKEY_CONTRACT, data: callData }, 'latest'],
+                                        id: 1
+                                    })
+                                });
+                                const data = await response.json();
+                                if (data.result && data.result !== '0x' && data.result !== '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                                    balance = parseInt(data.result, 16);
+                                    break;
+                                }
+                                // If result is all zeros, balance is 0 - still a valid response
+                                if (data.result) break;
+                            } catch (e) {
+                                // try next RPC
+                            }
+                        }
+                        
+                        if (balance > 0) {
+                            ownedTokenIds.push(tokenId);
+                            ownsAny = true;
+                        }
+                    }
+                    
+                    console.log(, ownedTokenIds);
+                    if (ownedTokenIds.length === tokenIds.length) ownsAll = true;
+                    
+                } catch (e) {
+                    console.log('Highkey check failed:', e);
+                }
+            }
+            
+            return { ownsAny, ownsAll };
+        }
+        
         // Meta badges configuration
         const COLLECTION_BADGE_THRESHOLDS = [5, 10, 15, 20, 30, 40, 50, 69];
         const VIBESTR_TIERS = [
@@ -4871,21 +4949,21 @@
         const COMBO_BADGES = [
             { 
                 name: 'gradient_hatrick', 
-                requirement: '3 different Gradient colors', 
-                check: (types) => countUniqueByPrefix(types, 'Gradient') >= 3,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Gradient'), needed: 3 })
+                requirement: '3 Gradient type GVCs', 
+                check: (types) => countByPrefix(types, 'Gradient') >= 3,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Gradient'), needed: 3 })
             },
             { 
                 name: 'plastic_hatrick', 
-                requirement: '3 different Plastic colors', 
-                check: (types) => countUniqueByPrefix(types, 'Plastic') >= 3,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Plastic'), needed: 3 })
+                requirement: '3 Plastic type GVCs', 
+                check: (types) => countByPrefix(types, 'Plastic') >= 3,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Plastic'), needed: 3 })
             },
             { 
                 name: 'robot_hatrick', 
-                requirement: '3 different Robot colors', 
-                check: (types) => countUniqueByPrefix(types, 'Robot') >= 3,
-                progress: (types, tokenIds) => ({ current: countUniqueByPrefix(types, 'Robot'), needed: 3 })
+                requirement: '3 Robot type GVCs', 
+                check: (types) => countByPrefix(types, 'Robot') >= 3,
+                progress: (types, tokenIds) => ({ current: countByPrefix(types, 'Robot'), needed: 3 })
             },
             { 
                 name: 'gradient_high_five', 
@@ -4912,7 +4990,7 @@
                 progress: (types, tokenIds) => ({ current: getMaxDuplicateCount(types), needed: 2 })
             },
             { 
-                name: 'chris_favorite', 
+                name: 'chris_favorite_badge', 
                 requirement: '2 Grayscale GVCs', 
                 check: (types) => countByType(types, 'Grayscale') >= 2,
                 progress: (types, tokenIds) => ({ current: countByType(types, 'Grayscale'), needed: 2 })
@@ -4958,6 +5036,11 @@
         function countUniqueByPrefix(types, prefix) {
             const unique = new Set(types.filter(t => t && t.startsWith(prefix)));
             return unique.size;
+        }
+        
+        function countByPrefix(types, prefix) {
+            // Count total NFTs of this type prefix (any color counts)
+            return types.filter(t => t && t.startsWith(prefix)).length;
         }
         
         function countByType(types, exactType) {
@@ -5136,6 +5219,18 @@
                     missingVibestrBadges.push(tier.name);
                 }
             });
+            
+            // Add Highkey Moments badges
+            if (highkeyOwnership.ownsAny) {
+                walletBadges['highkeymoments_1'] = ['meta'];
+            } else {
+                missingVibestrBadges.push('highkeymoments_1');
+            }
+            if (highkeyOwnership.ownsAll) {
+                walletBadges['highkeymoments_2'] = ['meta'];
+            } else {
+                missingVibestrBadges.push('highkeymoments_2');
+            }
             
             // Count total badges BEFORE collection badges (NFT + combo + VIBESTR)
             let badgeCountForCollection = Object.keys(walletBadges).length;
@@ -5413,7 +5508,7 @@
                         }
                         
                         // Show missing for Chris' Favorite (Grayscale)
-                        if (badge === 'chris_favorite' && progress.current === 1) {
+                        if (badge === 'chris_favorite_badge' && progress.current === 1) {
                             extraContent = `<div class="badge-note" style="color: var(--text-secondary);">Need 1 more: <a href="${getOpenSeaLink('Grayscale')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-size: 12px;">Grayscale</a></div>`;
                         }
                         
@@ -7982,10 +8077,10 @@
                 }
                 
                 // Check chris_favorite
-                if (!walletBadges['chris_favorite'] && nftType === 'Grayscale') {
+                if (!walletBadges['chris_favorite_badge'] && nftType === 'Grayscale') {
                     const grayscaleCount = yourTypes.filter(t => t === 'Grayscale').length;
                     if (grayscaleCount >= 1) {
-                        comboBadgesGained.push('chris_favorite');
+                        comboBadgesGained.push('chris_favorite_badge');
                     }
                 }
             }
@@ -8359,10 +8454,10 @@
                 }
                 
                 // Check chris_favorite (2 Grayscale)
-                if (!theirBadges['chris_favorite'] && nftType === 'Grayscale') {
+                if (!theirBadges['chris_favorite_badge'] && nftType === 'Grayscale') {
                     const grayscaleCount = theirTypes.filter(t => t === 'Grayscale').length;
                     if (grayscaleCount >= 1) {
-                        needed.push('chris_favorite');
+                        needed.push('chris_favorite_badge');
                     }
                 }
             }
