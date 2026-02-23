@@ -2141,31 +2141,7 @@
             background: var(--accent-green);
             color: #000;
         }
-
-        .trade-action-btn.meme-mode-btn { background: #ff3333; color: #fff; }
-        .trade-action-btn.meme-download { background: #ff8800; color: #fff; }
-        .trade-action-btn.meme-copy { background: #cc00cc; color: #fff; }
-
-        .meme-mode-section {
-            background: var(--bg-card);
-            border: 1px solid #ff3333;
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-top: 12px;
-        }
-        .meme-mode-label { font-size: 13px; font-weight: 700; color: #ff3333; margin-bottom: 12px; letter-spacing: 0.5px; }
-        .meme-mode-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
-        .meme-mode-field { display: flex; flex-direction: column; gap: 6px; }
-        .meme-mode-field label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .meme-color-swatches { display: flex; flex-wrap: wrap; gap: 6px; max-width: 300px; }
-        .meme-color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s, border-color 0.15s; }
-        .meme-color-swatch:hover { transform: scale(1.15); }
-        .meme-color-swatch.selected { border-color: #fff; transform: scale(1.15); }
-        .meme-gvc-picker { display: flex; flex-wrap: wrap; gap: 8px; max-width: 420px; max-height: 160px; overflow-y: auto; padding: 4px; }
-        .meme-gvc-thumb { width: 60px; height: 60px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; object-fit: cover; transition: transform 0.15s, border-color 0.15s; flex-shrink: 0; }
-        .meme-gvc-thumb:hover { transform: scale(1.08); }
-        .meme-gvc-thumb.selected { border-color: #ff3333; transform: scale(1.08); }
-
+        
         /* NFT Lookup Section */
         .nft-lookup-section {
             background: var(--bg-card);
@@ -3539,29 +3515,10 @@
                     </div>
                 </div>
                 
-                <!-- Meme Mode Panel -->
-                <div class="meme-mode-section" id="memeModeSection" style="display:none;">
-                    <div class="meme-mode-label">🎭 Meme Mode Settings</div>
-                    <div class="meme-mode-row">
-                        <div class="meme-mode-field">
-                            <label>Center GVC:</label>
-                            <div class="meme-gvc-picker" id="memeGvcPicker"></div>
-                        </div>
-                        <div class="meme-mode-field">
-                            <label>Hand color:</label>
-                            <div class="meme-color-swatches" id="memeSkinSwatches"></div>
-                        </div>
-                    </div>
-                    <canvas id="memeModePreview" width="700" height="520" style="width:100%;border-radius:8px;margin-top:12px;"></canvas>
-                </div>
-
                 <!-- Actions -->
                 <div class="trade-actions">
                     <button class="trade-action-btn copy-img" onclick="copyTradeOfferImage()">🖼️ Copy Image</button>
                     <button class="trade-action-btn download" onclick="downloadTradeOfferImage()">📥 Save Image</button>
-                    <button class="trade-action-btn meme-mode-btn" onclick="toggleMemeMode()" id="memeModeToggleBtn">🎭 Meme Mode</button>
-                    <button class="trade-action-btn meme-copy" onclick="copyMemeModeImage()" id="memeCopyBtn" style="display:none;">📋 Copy Meme</button>
-                    <button class="trade-action-btn meme-download" onclick="downloadMemeModeImage()" id="memeDownloadBtn" style="display:none;">📥 Save Meme</button>
                 </div>
             </div>
         </div>
@@ -3649,6 +3606,19 @@
             "vibestr_cosmic_tier": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_cosmic_tier_1764590448508.webp",
             "mountain_goat": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/mountain_goat_1759174026593.webp",
             "vibestr_bounty_hunter": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/vibestr_bounty_hunter_1759174044563.webp",
+            // New badges (Feb 2026)
+            "patch_powerhouse": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/patch_powerhouse_1771354988189.webp",
+            "the_completionist": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/the_completionist_1771355052089.webp",
+            "hue_too_fresh": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/hue_too_fresh_1771355000776.webp",
+            "unfathomable_vibes": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/unfathomable_vibes_1771355005301.webp",
+            "flow_state": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/flow_state_1771355010910.webp",
+            "shadow_funk_division": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/shadow_funk_division_1771355038766.webp",
+            "kinky": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/kinky_1771355046536.webp",
+            "trait_maxi": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/trait_maxi_1771355017585.webp",
+            "anchorman": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/anchorman_1771355025752.webp",
+            "tatted_up": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/tatted_up_1771355030286.webp",
+            "highkeymoments_1": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/highkeymoments_1_1771433768524.webp",
+            "highkeymoments_2": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/highkeymoments_2_1771433773068.webp",
             "one_of_one": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/one_of_one_1759173811608.webp",
             "stone": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/stone_1759173815165.webp",
             "cosmic": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/cosmic_1759173818340.webp",
@@ -3717,7 +3687,8 @@
             "collection_20": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/twenty_badges_1760372854419.webp",
             "collection_30": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/thirty_badges_1760378215065.webp",
             "collection_40": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/forty_badges_1760378218029.webp",
-            "collection_50": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifty_badges_1760378221304.webp"
+            "collection_50": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/fifty_badges_1760378221304.webp",
+            "collection_69": "https://sl1vlqqspml5zngx.public.blob.vercel-storage.com/badges/optimized/unfathomable_vibes_1771355005301.webp"
         };
         
         // Helper to get badge image URL
@@ -3805,7 +3776,20 @@
             'yin_n_yang': "Yin N' Yang",
             'mountain_goat': 'Mountain GOAT',
             // Special badges
-            'vibe_bounty_hunter': 'VIBE Bounty Hunter'
+            'vibe_bounty_hunter': 'VIBE Bounty Hunter',
+            // New badges (Feb 2026)
+            'patch_powerhouse': 'Patch Powerhouse',
+            'the_completionist': 'The Completionist',
+            'hue_too_fresh': 'Hue Too Fresh',
+            'unfathomable_vibes': 'Collector of Unfathomable Vibes',
+            'flow_state': 'Flow State',
+            'shadow_funk_division': 'Shadow Funk Division',
+            'kinky': 'Kinky',
+            'trait_maxi': 'Trait Maxi',
+            'anchorman': 'Anchorman',
+            'tatted_up': 'Tatted Up',
+            'highkeymoments_1': 'Highkey Collectooor',
+            'highkeymoments_2': 'Mega Highkey Collectooor'
         };
         
         // Badge colors for display
@@ -3888,6 +3872,7 @@
             'collection_30': '#ff4500',
             'collection_40': '#ff69b4',
             'collection_50': '#00d4ff',
+            'collection_69': '#a855f7',
             // VIBESTR tier badges
             'vibestr_blue': '#87CEEB',
             'vibestr_pink': '#FF69B4',
@@ -3909,7 +3894,20 @@
             'yin_n_yang': 'linear-gradient(90deg, #888888, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff)',
             'mountain_goat': '#87CEEB',
             // Special badges
-            'vibe_bounty_hunter': '#a855f7'
+            'vibe_bounty_hunter': '#a855f7',
+            // New badges (Feb 2026)
+            'patch_powerhouse': '#4a7fcb',
+            'the_completionist': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'hue_too_fresh': 'linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #0099ff, #6633ff)',
+            'unfathomable_vibes': '#a855f7',
+            'flow_state': '#00d4ff',
+            'shadow_funk_division': '#444444',
+            'kinky': '#222222',
+            'trait_maxi': '#ffd700',
+            'anchorman': '#8b6f47',
+            'tatted_up': '#ffd700',
+            'highkeymoments_1': '#ff6347',
+            'highkeymoments_2': '#ff4500'
         };
         
         // Collection badge display names
@@ -3920,7 +3918,8 @@
             'collection_20': 'Collector of Immaculate Vibes',
             'collection_30': 'Collector of Pristine Vibes',
             'collection_40': 'Collector of Transcendent Vibes',
-            'collection_50': 'Collector of Magnificent Vibes'
+            'collection_50': 'Collector of Magnificent Vibes',
+            'collection_69': 'Collector of Unfathomable Vibes'
         };
         
         // OpenSea links for badges
@@ -3983,7 +3982,16 @@
             'sir_vibes_a_lot': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Knight+Helm+Red%22,%22Knight+Helm+White%22,%22Knight+Helm+Black%22]}]',
             'tanks_a_lot': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Diver+Mask+Black+Chrome%22]}]',
             'varsity_vibes': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Letterman+Jacket+Light+Blue%22,%22Letterman+Jacket+Gold+Chrome%22,%22Letterman+Jacket+Dark+Blue%22,%22Letterman+Jacket+Cosmic%22,%22Letterman+Jacket+Lime%22,%22Letterman+Jacket+Yellow%22,%22Letterman+Jacket+Glass%22,%22Letterman+Jacket+Mint%22,%22Letterman+Jacket+Pink%22,%22Letterman+Jacket+Purple%22,%22Letterman+Jacket+Red%22,%22Letterman+Jacket+Black%22]}]',
-            'zoom_in_vibe_out': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Monocle%22]}]'
+            'zoom_in_vibe_out': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Face%22,%22values%22:[%22Monocle%22]}]',
+            // New badges (Feb 2026)
+            'patch_powerhouse': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Hooded+Jacket+BlueDenim%22]}]',
+            'kinky': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Tank+Top+Black%22]}]',
+            'tatted_up': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Gold+Chains+Tattoos%22]}]',
+            'hue_too_fresh': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Retro+Windbreaker+Rainbow%22,%22Suit+Rainbow%22,%22Hoodie+Rainbow%22,%22Driving+Jacket+Rainbow%22,%22Leather+Jacket+Rainbow%22,%22Puffy+Vest+Rainbow%22]}]',
+            'shadow_funk_division': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Hair%22,%22values%22:[%22Plastic+Helmet+Gold%22,%22Plastic+Helmet+Glass%22,%22Holographic+Helmet%22,%22Plastic+Helmet+Pink%22,%22Plastic+Helmet+Purple%22,%22Plastic+Helmet+Red%22,%22Plastic+Helmet+Blue%22,%22Plastic+Helmet+Light+Blue%22,%22Plastic+Helmet+Lime%22,%22Plastic+Helmet+Mint%22,%22Plastic+Helmet+Yellow%22,%22Plastic+Helmet+White%22,%22Plastic+Helmet+Black%22]}]',
+            'anchorman': 'https://opensea.io/collection/good-vibes-club?status=all&traits=[{%22traitType%22:%22Body%22,%22values%22:[%22Suit+Cosmic%22,%22Suit+Cream+Red%22,%22Suit+Lime%22,%22Suit+Yellow%22,%22Suit+Light+Blue%22,%22Suit+Gold%22,%22Suit+Dark+Blue%22,%22Suit+Purple%22,%22Suit+Rainbow%22,%22Suit+Pink%22,%22Suit+Glass%22,%22Suit+Mint%22,%22Suit+Red%22,%22Suit+Black%22,%22Suit+Light+Grey%22,%22Suit+White%22,%22Electro+Hero+Suit%22]}]',
+            'highkeymoments_1': 'https://opensea.io/collection/vibetown-highkey-moments',
+            'highkeymoments_2': 'https://opensea.io/collection/vibetown-highkey-moments'
         };
         
         function getBadgeOpenSeaLink(badge) {
@@ -4825,7 +4833,7 @@
         }
         
         // Meta badges configuration
-        const COLLECTION_BADGE_THRESHOLDS = [5, 10, 15, 20, 30, 40, 50];
+        const COLLECTION_BADGE_THRESHOLDS = [5, 10, 15, 20, 30, 40, 50, 69];
         const VIBESTR_TIERS = [
             { name: 'vibestr_blue', threshold: 69000, color: '#87CEEB' },
             { name: 'vibestr_pink', threshold: 250000, color: '#FF69B4' },
@@ -4943,7 +4951,7 @@
                 requirement: 'Rainbow Type + Plastic Armor/Helmet', 
                 check: (types, tokenIds) => hasRainbowWarrior(types, tokenIds),
                 progress: (types, tokenIds) => getRainbowWarriorProgress(types, tokenIds)
-            }
+            },
         ];
         
         // Helper functions for combo badge checks
@@ -5051,7 +5059,7 @@
         }
         
         // Total badge count constant (for completion calculation)
-        const TOTAL_BADGES = 89;
+        const TOTAL_BADGES = 101;
         
         // Store all owned NFTs (wallet + Gondi)
         let allOwnedNFTsGlobal = [];
@@ -5154,6 +5162,13 @@
             // Add missing meta badges to the list
             missingBadgesList = [...missingBadgesList, ...missingComboBadges, ...missingCollectionBadges, ...missingVibestrBadges];
             
+            // Add The Completionist (own ALL badges)
+            if (badgeCountForCollection >= TOTAL_BADGES) {
+                walletBadges['the_completionist'] = ['meta'];
+            } else {
+                missingBadgesList.push('the_completionist');
+            }
+            
             // Add VIBE Bounty Hunter to missing if not checked
             if (vibeBountyHunterCount < 1) {
                 missingBadgesList.push('vibe_bounty_hunter');
@@ -5165,8 +5180,9 @@
                 if (a === 'vibe_bounty_hunter') return 1;
                 if (b === 'vibe_bounty_hunter') return -1;
                 // Meta badges go after NFT badges but before special
-                const aIsMeta = a.startsWith('collection_') || a.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === a);
-                const bIsMeta = b.startsWith('collection_') || b.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === b);
+                const META_BADGES_SET = new Set(['the_completionist', 'highkeymoments_1', 'highkeymoments_2', 'flow_state', 'trait_maxi', 'anchorman', 'unfathomable_vibes']);
+                const aIsMeta = a.startsWith('collection_') || a.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === a) || META_BADGES_SET.has(a);
+                const bIsMeta = b.startsWith('collection_') || b.startsWith('vibestr_') || COMBO_BADGES.some(cb => cb.name === b) || META_BADGES_SET.has(b);
                 if (aIsMeta && !bIsMeta) return 1;
                 if (!aIsMeta && bIsMeta) return -1;
                 if (aIsMeta && bIsMeta) return 0;
@@ -7443,7 +7459,13 @@
             'vibestr_blue_tier': 'vibestr', 'vibestr_pink_tier': 'vibestr', 'vibestr_purple_tier': 'vibestr',
             'vibestr_bronze_tier': 'vibestr', 'vibestr_silver_tier': 'vibestr', 'vibestr_gold_tier': 'vibestr',
             'vibestr_diamond_tier': 'vibestr', 'vibestr_cosmic_tier': 'vibestr', 'vibestr_bounty_hunter': 'vibestr',
-            'mountain_goat': 'vibestr'
+            'mountain_goat': 'vibestr',
+            
+            // New badges (Feb 2026)
+            'patch_powerhouse': 'trait', 'hue_too_fresh': 'trait', 'shadow_funk_division': 'trait',
+            'kinky': 'trait', 'tatted_up': 'trait', 'anchorman': 'collection', 'flow_state': 'collection',
+            'trait_maxi': 'collection', 'the_completionist': 'collection', 'unfathomable_vibes': 'collection',
+            'collection_69': 'collection', 'highkeymoments_1': 'collection', 'highkeymoments_2': 'collection'
         };
         
         function getBadgeCategory(badge) {
@@ -7461,7 +7483,12 @@
             
             // Add collection badges
             ['collection_5', 'collection_10', 'collection_15', 'collection_20', 
-             'collection_30', 'collection_40', 'collection_50'].forEach(b => badges.add(b));
+             'collection_30', 'collection_40', 'collection_50', 'collection_69'].forEach(b => badges.add(b));
+            
+            // Add new badges (Feb 2026) that come from badge_token_map
+            ['flow_state', 'trait_maxi', 'anchorman', 'patch_powerhouse', 'hue_too_fresh', 
+             'shadow_funk_division', 'kinky', 'tatted_up', 'the_completionist', 
+             'highkeymoments_1', 'highkeymoments_2'].forEach(b => badges.add(b));
             
             return Array.from(badges);
         }
@@ -8615,7 +8642,6 @@
             
             // Update trade simulator
             updateTradeSimulator();
-            if (typeof memeState !== 'undefined' && memeState.active) updateMemePreview();
         }
         
         // ========================================
@@ -9129,330 +9155,6 @@
             });
         }
         
-        // ========================================
-        // MEME MODE
-        // ========================================
-
-        const MEME_COLORS = [
-            { name: 'Pink',      main: [235, 120, 180], dark: [160,  56, 120] },
-            { name: 'Teal',      main: [ 72, 210, 190], dark: [ 30, 140, 120] },
-            { name: 'Yellow',    main: [245, 212,  74], dark: [185, 154,   0] },
-            { name: 'Blue',      main: [ 91, 142, 240], dark: [ 45,  90, 185] },
-            { name: 'Purple',    main: [155, 111, 212], dark: [ 90,  45, 145] },
-            { name: 'Green',     main: [ 94, 203, 107], dark: [ 45, 122,  40] },
-            { name: 'Orange',    main: [240, 125,  58], dark: [160,  56,   0] },
-            { name: 'Grayscale', main: [160, 160, 160], dark: [ 80,  80,  80] },
-            { name: 'Gold',      main: [240, 192,  64], dark: [145, 112,   0] },
-            { name: 'Red',       main: [230,  80,  80], dark: [160,  30,  30] },
-            { name: 'White',     main: [235, 235, 235], dark: [175, 175, 175] },
-        ];
-
-        let memeState = { active: false, skinIdx: 0, centerGvc: null };
-
-        function toggleMemeMode() {
-            memeState.active = !memeState.active;
-            const section = document.getElementById('memeModeSection');
-            const btn = document.getElementById('memeModeToggleBtn');
-            const dlBtn = document.getElementById('memeDownloadBtn');
-            const cpBtn = document.getElementById('memeCopyBtn');
-            if (memeState.active) {
-                section.style.display = 'block';
-                btn.textContent = '🎭 Meme Mode ON';
-                btn.style.background = '#cc0000';
-                dlBtn.style.display = 'inline-block';
-                cpBtn.style.display = 'inline-block';
-                populateMemeGvcPicker();
-                renderMemeSkinSwatches();
-                updateMemePreview();
-            } else {
-                section.style.display = 'none';
-                btn.textContent = '🎭 Meme Mode';
-                btn.style.background = '#ff3333';
-                dlBtn.style.display = 'none';
-                cpBtn.style.display = 'none';
-            }
-        }
-
-        function populateMemeGvcPicker() {
-            const picker = document.getElementById('memeGvcPicker');
-            picker.innerHTML = '';
-            const allNfts = allOwnedNFTsGlobal.length > 0 ? allOwnedNFTsGlobal : walletNFTs;
-            if (allNfts.length > 0 && !memeState.centerGvc) {
-                memeState.centerGvc = String(allNfts[0]);
-            }
-            allNfts.forEach(function(id) {
-                const imgUrl = imageData[id] || imageData[String(id)];
-                const img = document.createElement('img');
-                img.className = 'meme-gvc-thumb' + (String(id) === String(memeState.centerGvc) ? ' selected' : '');
-                img.src = imgUrl || '';
-                img.title = '#' + id;
-                img.alt = '#' + id;
-                img.onclick = function() {
-                    memeState.centerGvc = String(id);
-                    picker.querySelectorAll('.meme-gvc-thumb').forEach(function(el) { el.classList.remove('selected'); });
-                    img.classList.add('selected');
-                    updateMemePreview();
-                };
-                picker.appendChild(img);
-            });
-        }
-
-        function renderMemeSkinSwatches() {
-            const container = document.getElementById('memeSkinSwatches');
-            container.innerHTML = '';
-            MEME_COLORS.forEach(function(c, i) {
-                const swatch = document.createElement('div');
-                swatch.className = 'meme-color-swatch' + (i === memeState.skinIdx ? ' selected' : '');
-                swatch.title = c.name;
-                swatch.style.background = 'rgb(' + c.main.join(',') + ')';
-                swatch.onclick = function() {
-                    memeState.skinIdx = i;
-                    renderMemeSkinSwatches();
-                    updateMemePreview();
-                };
-                container.appendChild(swatch);
-            });
-        }
-
-        function updateMemePreview() {
-            if (!memeState.active) return;
-            generateMemeModeCanvas(function(canvas) {
-                const preview = document.getElementById('memeModePreview');
-                const ctx = preview.getContext('2d');
-                preview.width = canvas.width;
-                preview.height = canvas.height;
-                ctx.drawImage(canvas, 0, 0);
-            });
-        }
-
-        function buildPrayerHands(skinColor, handSize) {
-            const temp = document.createElement('canvas');
-            temp.width = handSize; temp.height = handSize;
-            const ctx = temp.getContext('2d');
-            ctx.font = Math.round(handSize * 0.85) + 'px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🙏', handSize / 2, handSize / 2);
-            const id = ctx.getImageData(0, 0, handSize, handSize);
-            const data = id.data;
-            const [sr, sg, sb] = skinColor.main;
-            const [dr, dg, db] = skinColor.dark;
-            for (let i = 0; i < data.length; i += 4) {
-                if (data[i + 3] > 10) {
-                    const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114) / 255;
-                    const shade = 0.5 + brightness * 0.5;
-                    data[i]   = Math.min(255, Math.round((dr + (sr - dr) * brightness) * shade));
-                    data[i+1] = Math.min(255, Math.round((dg + (sg - dg) * brightness) * shade));
-                    data[i+2] = Math.min(255, Math.round((db + (sb - db) * brightness) * shade));
-                }
-            }
-            ctx.putImageData(id, 0, 0);
-            return temp;
-        }
-
-        function generateMemeModeCanvas(callback) {
-            const W = 700, H = 520;
-            const canvas = document.createElement('canvas');
-            canvas.width = W; canvas.height = H;
-            const ctx = canvas.getContext('2d');
-
-            ctx.fillStyle = '#0d0d1a';
-            ctx.fillRect(0, 0, W, H);
-
-            // Red header
-            ctx.fillStyle = '#ff3333';
-            ctx.fillRect(0, 0, W, 62);
-            ctx.font = 'bold 30px Arial, sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.fillText('⚠️  TRADE OFFER  ⚠️', W / 2, 43);
-
-            // Labels: "you receive" on LEFT (they get your NFTs), "i receive" on RIGHT (you get theirs)
-            ctx.font = 'italic bold 18px Arial, sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'left';
-            ctx.fillText('you receive:', 20, 90);
-            ctx.textAlign = 'right';
-            ctx.fillText('i receive:', W - 20, 90);
-
-            // Footer
-            ctx.font = '13px Arial, sans-serif';
-            ctx.fillStyle = '#444466';
-            ctx.textAlign = 'center';
-            ctx.fillText('gvcbadges.com', W / 2, H - 10);
-
-            const gvcSize = 300;
-            const gvcX = (W - gvcSize) / 2;
-            const gvcY = 68;
-            const yourItems = tradeOfferData.yourNfts.length + tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).length;
-            const theirItems = tradeOfferData.theirNfts.length + tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).length;
-            const maxItems = Math.max(yourItems, theirItems, 1);
-            const nftSize = maxItems <= 2 ? 100 : maxItems <= 4 ? 80 : 65;
-            const nftGap = 10;
-            const sideMargin = 14;
-
-            const skinColor = MEME_COLORS[memeState.skinIdx];
-            const handSize = 180;
-            const handCanvas = buildPrayerHands(skinColor, handSize);
-            const handDisplayW = 140;
-            const handPeek = 44;
-
-            const toLoad = [];
-            const gvcUrl = imageData[memeState.centerGvc] || imageData[String(memeState.centerGvc)];
-            if (gvcUrl) toLoad.push({ url: gvcUrl, role: 'gvc' });
-
-            // YOUR NFTs go on the LEFT ("you receive" = they get these)
-            tradeOfferData.yourNfts.forEach(function(id, i) {
-                const url = imageData[id] || imageData[String(id)];
-                if (url) toLoad.push({ url: url, role: 'yours', index: i, tokenId: id });
-            });
-            tradeOfferData.yourCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
-                toLoad.push({ url: img.dataUrl, role: 'yours', index: tradeOfferData.yourNfts.length + i, tokenId: 'Custom' });
-            });
-
-            // THEIR NFTs go on the RIGHT ("i receive" = you get these)
-            tradeOfferData.theirNfts.forEach(function(id, i) {
-                const url = imageData[id] || imageData[String(id)];
-                if (url) toLoad.push({ url: url, role: 'theirs', index: i, tokenId: id });
-            });
-            tradeOfferData.theirCustomImages.filter(function(i){ return i.selected; }).forEach(function(img, i) {
-                toLoad.push({ url: img.dataUrl, role: 'theirs', index: tradeOfferData.theirNfts.length + i, tokenId: 'Custom' });
-            });
-
-            let loaded = 0;
-            const total = toLoad.length;
-
-            function drawAll(imgs) {
-                // YOUR NFTs on LEFT (you're offering, they receive)
-                const yourImgs = imgs.filter(function(i){ return i.role === 'yours'; }).sort(function(a,b){ return a.index - b.index; });
-                yourImgs.forEach(function(item, i) {
-                    const x = sideMargin, y = 100 + i * (nftSize + nftGap);
-                    ctx.save();
-                    ctx.beginPath(); ctx.roundRect(x, y, nftSize, nftSize, 8); ctx.clip();
-                    ctx.drawImage(item.img, x, y, nftSize, nftSize);
-                    ctx.restore();
-                    ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.roundRect(x, y, nftSize, nftSize, 8); ctx.stroke();
-                    ctx.font = 'bold 11px monospace'; ctx.fillStyle = '#00d4ff'; ctx.textAlign = 'center';
-                    ctx.fillText('#' + item.tokenId, x + nftSize / 2, y + nftSize + 16);
-                });
-
-                if (tradeOfferData.yourEth > 0) {
-                    const ethText = '+ ' + tradeOfferData.yourEth + ' Ξ ETH';
-                    const ethY = 100 + yourImgs.length * (nftSize + nftGap) + 30;
-                    ctx.font = 'bold 16px monospace';
-                    const tw = ctx.measureText(ethText).width;
-                    ctx.fillStyle = 'rgba(0,212,255,0.15)';
-                    ctx.beginPath(); ctx.roundRect(sideMargin + nftSize/2 - tw/2 - 10, ethY - 18, tw + 20, 28, 6); ctx.fill();
-                    ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.fillStyle = '#00d4ff'; ctx.textAlign = 'center';
-                    ctx.fillText(ethText, sideMargin + nftSize / 2, ethY);
-                }
-
-                // THEIR NFTs on RIGHT (you're requesting, you receive)
-                const theirImgs = imgs.filter(function(i){ return i.role === 'theirs'; }).sort(function(a,b){ return a.index - b.index; });
-                theirImgs.forEach(function(item, i) {
-                    const x = W - sideMargin - nftSize, y = 100 + i * (nftSize + nftGap);
-                    ctx.save();
-                    ctx.beginPath(); ctx.roundRect(x, y, nftSize, nftSize, 8); ctx.clip();
-                    ctx.drawImage(item.img, x, y, nftSize, nftSize);
-                    ctx.restore();
-                    ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.roundRect(x, y, nftSize, nftSize, 8); ctx.stroke();
-                    ctx.font = 'bold 11px monospace'; ctx.fillStyle = '#ffd700'; ctx.textAlign = 'center';
-                    ctx.fillText('#' + item.tokenId, x + nftSize / 2, y + nftSize + 16);
-                });
-
-                if (tradeOfferData.theirEth > 0) {
-                    const ethText = '+ ' + tradeOfferData.theirEth + ' Ξ ETH';
-                    const ethY = 100 + theirImgs.length * (nftSize + nftGap) + 30;
-                    const rx = W - sideMargin - nftSize;
-                    ctx.font = 'bold 16px monospace';
-                    const tw = ctx.measureText(ethText).width;
-                    ctx.fillStyle = 'rgba(255,215,0,0.15)';
-                    ctx.beginPath(); ctx.roundRect(rx + nftSize/2 - tw/2 - 10, ethY - 18, tw + 20, 28, 6); ctx.fill();
-                    ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.fillStyle = '#ffd700'; ctx.textAlign = 'center';
-                    ctx.fillText(ethText, rx + nftSize / 2, ethY);
-                }
-
-                // Center GVC + hands
-                const gvcImg = imgs.find(function(i){ return i.role === 'gvc'; });
-                if (gvcImg) {
-                    ctx.save();
-                    ctx.beginPath(); ctx.roundRect(gvcX, gvcY, gvcSize, gvcSize, 10); ctx.clip();
-                    ctx.drawImage(gvcImg.img, gvcX, gvcY, gvcSize, gvcSize);
-                    ctx.restore();
-
-                    ctx.save();
-                    ctx.beginPath(); ctx.roundRect(gvcX, gvcY, gvcSize, gvcSize, 10); ctx.clip();
-                    const srcH = Math.round(handSize * (handPeek / handDisplayW));
-                    const handDrawX = gvcX + (gvcSize - handDisplayW) / 2;
-                    const handDrawY = gvcY + gvcSize - handPeek;
-                    ctx.drawImage(handCanvas, 0, 0, handSize, srcH, handDrawX, handDrawY, handDisplayW, handPeek);
-                    ctx.restore();
-                }
-
-                callback(canvas);
-            }
-
-            if (total === 0) { drawAll([]); return; }
-            const loadedImgs = [];
-            toLoad.forEach(function(item) {
-                const img = new Image();
-                if (!item.url.startsWith('data:')) img.crossOrigin = 'anonymous';
-                img.onload = function() {
-                    loadedImgs.push(Object.assign({}, item, { img: img }));
-                    loaded++;
-                    if (loaded >= total) drawAll(loadedImgs);
-                };
-                img.onerror = function() {
-                    loaded++;
-                    if (loaded >= total) drawAll(loadedImgs);
-                };
-                img.src = item.url;
-            });
-        }
-
-        function copyMemeModeImage() {
-            const btn = document.getElementById('memeCopyBtn');
-            const orig = btn.textContent;
-            btn.textContent = '⏳ Creating...';
-            generateMemeModeCanvas(function(canvas) {
-                canvas.toBlob(function(blob) {
-                    try {
-                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                        .then(function() {
-                            btn.textContent = '✓ Copied!';
-                            setTimeout(function() { btn.textContent = orig; }, 2000);
-                        }).catch(function() {
-                            btn.textContent = '❌ Failed';
-                            setTimeout(function() { btn.textContent = orig; }, 2000);
-                            alert('Could not copy. Try "Save Meme" instead.');
-                        });
-                    } catch(e) {
-                        btn.textContent = '❌ Not supported';
-                        setTimeout(function() { btn.textContent = orig; }, 2000);
-                        alert('Browser does not support copying images. Try "Save Meme" instead.');
-                    }
-                }, 'image/png');
-            });
-        }
-
-        function downloadMemeModeImage() {
-            const btn = document.getElementById('memeDownloadBtn');
-            const orig = btn.textContent;
-            btn.textContent = '⏳ Creating...';
-            generateMemeModeCanvas(function(canvas) {
-                const link = document.createElement('a');
-                link.download = 'gvc-trade-meme.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                btn.textContent = '✓ Saved!';
-                setTimeout(function() { btn.textContent = orig; }, 2000);
-            });
-        }
-
         function copyTradeOfferImage() {
             const btn = document.querySelector('.trade-action-btn.copy-img');
             const originalText = btn.textContent;
