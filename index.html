@@ -5257,7 +5257,7 @@
                 const hairGroups = new Set();
                 tokenIds.forEach(tid => {
                     const t = traitData[tid] || traitData[String(tid)];
-                    if (t && t.h) hairGroups.add(t.h);
+                    if (t && t.h) hairGroups.add(t.h.split(' ')[0]); // group by style, not color
                 });
                 if (hairGroups.size >= 5) {
                     walletBadges['flow_state'] = ['meta'];
@@ -5278,7 +5278,6 @@
                     }
                 });
                 // Find the best matching trait (highest count >= 5)
-                let bestTraitName = '', bestTraitTokens = [], bestTraitType = '';
                 const allCounts = [
                     ...Object.entries(bodyCounts).map(([k,v]) => ({name: k, count: v, tokens: bodyTokens[k], category: 'Body'})),
                     ...Object.entries(hairCounts).map(([k,v]) => ({name: k, count: v, tokens: hairTokens[k], category: 'Hair'})),
@@ -5286,15 +5285,17 @@
                     ...Object.entries(typeCounts).map(([k,v]) => ({name: k, count: v, tokens: typeTokens[k], category: 'Type'}))
                 ];
                 allCounts.sort((a, b) => b.count - a.count);
-                const best = allCounts.find(c => c.count >= 5);
-                if (best) {
-                    bestTraitName = best.name;
-                    bestTraitTokens = best.tokens;
-                    bestTraitType = best.category;
+                // Store ALL qualifying gangs (5+), not just the best
+                const allGangs = allCounts.filter(c => c.count >= 5).map(c => ({
+                    traitName: c.name, traitType: c.category, tokenIds: c.tokens, count: c.count
+                }));
+                if (allGangs.length > 0) {
                     walletBadges['trait_maxi'] = ['meta'];
-                    window.traitMaxiGang = { traitName: bestTraitName, traitType: bestTraitType, tokenIds: bestTraitTokens };
+                    window.traitMaxiGangs = allGangs;
+                    window.traitMaxiGang = allGangs[0]; // default to largest
                 } else {
                     missingVibestrBadges.push('trait_maxi');
+                    window.traitMaxiGangs = [];
                     window.traitMaxiGang = null;
                 }
             } else {
@@ -5494,6 +5495,7 @@
                 // Special Trait Maxi gang card
                 if (badge === 'trait_maxi' && window.traitMaxiGang) {
                     const gang = window.traitMaxiGang;
+                    const gangCount = window.traitMaxiGangs ? window.traitMaxiGangs.length : 1;
                     const badgeImgUrl = getBadgeImage('trait_maxi');
                     const imgHtml = badgeImgUrl ? `<img class="badge-item-img" src="${badgeImgUrl}" alt="">` : '';
                     return `
@@ -5502,8 +5504,8 @@
                             ${imgHtml}
                             <div class="badge-item-content">
                                 <span class="badge-name" style="color: #ffd700;">Trait Maxi ✨</span>
-                                <span class="badge-count" style="color: #ffd700; opacity: 0.8;">${gang.traitName} × ${gang.tokenIds.length}</span>
-                                <span style="font-size: 10px; color: #ffd700; margin-top: 2px; display: block; animation: pulse 2s infinite;">👆 See your gang picture</span>
+                                <span class="badge-count" style="color: #ffd700; opacity: 0.8;">${gangCount} gang${gangCount > 1 ? 's' : ''} found</span>
+                                <span style="font-size: 10px; color: #ffd700; margin-top: 2px; display: block; animation: pulse 2s infinite;">👆 See your gang picture${gangCount > 1 ? 's' : ''}</span>
                             </div>
                         </div>
                     `;
@@ -8469,12 +8471,54 @@
         
         // Trait Maxi Gang functions
         function showTraitMaxiGang() {
-            if (!window.traitMaxiGang) return;
-            const gang = window.traitMaxiGang;
-            document.getElementById('gangModalInfo').innerHTML = 
-                '<strong style="color: #ffd700;">' + gang.traitName + '</strong> ' +
-                '<span style="color: var(--text-secondary);">(' + gang.traitType + ' trait) &mdash; ' + gang.tokenIds.length + ' members</span>';
+            if (!window.traitMaxiGangs || !window.traitMaxiGangs.length) return;
+            const gangs = window.traitMaxiGangs;
+            
+            let pickerHtml = '';
+            if (gangs.length > 1) {
+                pickerHtml = '<div style="margin-bottom: 14px;">' +
+                    '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Choose your gang:</div>' +
+                    '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">' +
+                    gangs.map((g, i) => 
+                        '<button onclick="selectGang(' + i + ')" id="gangBtn' + i + '" style="' +
+                        'padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid ' +
+                        (i === 0 ? '#ffd700' : 'var(--border)') + '; background: ' +
+                        (i === 0 ? 'rgba(255,215,0,0.15)' : 'var(--card-bg)') + '; color: ' +
+                        (i === 0 ? '#ffd700' : 'var(--text-secondary)') + '; font-weight: ' +
+                        (i === 0 ? '700' : '400') + ';">' +
+                        g.traitName + ' <span style="opacity:0.6;">×' + g.tokenIds.length + '</span>' +
+                        '</button>'
+                    ).join('') +
+                    '</div></div>';
+            }
+            
+            document.getElementById('gangModalInfo').innerHTML = pickerHtml +
+                '<strong style="color: #ffd700;" id="gangActiveLabel">' + gangs[0].traitName + '</strong> ' +
+                '<span style="color: var(--text-secondary);">(' + gangs[0].traitType + ' trait) &mdash; ' + gangs[0].tokenIds.length + ' members</span>';
+            
             document.getElementById('traitMaxiGangModal').classList.add('active');
+            generateGangImage(gangs[0]);
+        }
+        
+        function selectGang(index) {
+            const gangs = window.traitMaxiGangs;
+            const gang = gangs[index];
+            
+            // Update button styles
+            gangs.forEach((g, i) => {
+                const btn = document.getElementById('gangBtn' + i);
+                if (!btn) return;
+                btn.style.border = i === index ? '1px solid #ffd700' : '1px solid var(--border)';
+                btn.style.background = i === index ? 'rgba(255,215,0,0.15)' : 'var(--card-bg)';
+                btn.style.color = i === index ? '#ffd700' : 'var(--text-secondary)';
+                btn.style.fontWeight = i === index ? '700' : '400';
+            });
+            
+            // Update label
+            const label = document.getElementById('gangActiveLabel');
+            if (label) label.textContent = gang.traitName;
+            
+            // Regenerate image
             generateGangImage(gang);
         }
         
