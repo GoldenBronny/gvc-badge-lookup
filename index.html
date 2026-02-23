@@ -3392,6 +3392,24 @@
     </div>
     
     <!-- Trade Offer Builder Modal -->
+    <!-- Trait Maxi Gang Modal -->
+    <div class="modal-overlay" id="traitMaxiGangModal" onclick="closeTraitMaxiGangModal(event)">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width: 600px; width: 95%;">
+            <div class="modal-header">
+                <h2>✨ Trait Maxi Gang</h2>
+                <button class="modal-close" onclick="closeTraitMaxiGangModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div id="gangModalInfo" style="margin-bottom: 16px; color: var(--text-secondary); font-size: 13px;"></div>
+                <canvas id="gangCanvas" style="max-width: 100%; border-radius: 12px; display: block; margin: 0 auto;"></canvas>
+                <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="downloadGangImage()" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">⬇️ Download</button>
+                    <button onclick="closeTraitMaxiGangModal()" style="background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border); padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="tradeOfferModal" onclick="closeTradeOfferModal(event)">
         <div class="modal trade-offer-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -5249,26 +5267,35 @@
                 
                 // Add Trait Maxi badge (5 NFTs with identical body, hair, face, OR type trait)
                 const bodyCounts = {}, hairCounts = {}, faceCounts = {}, typeCounts = {};
+                const bodyTokens = {}, hairTokens = {}, faceTokens = {}, typeTokens = {};
                 tokenIds.forEach(tid => {
                     const t = traitData[tid] || traitData[String(tid)];
                     if (t) {
-                        if (t.b) bodyCounts[t.b] = (bodyCounts[t.b] || 0) + 1;
-                        if (t.h) hairCounts[t.h] = (hairCounts[t.h] || 0) + 1;
-                        if (t.f) faceCounts[t.f] = (faceCounts[t.f] || 0) + 1;
-                        if (t.t) typeCounts[t.t] = (typeCounts[t.t] || 0) + 1;
+                        if (t.b) { bodyCounts[t.b] = (bodyCounts[t.b] || 0) + 1; if (!bodyTokens[t.b]) bodyTokens[t.b] = []; bodyTokens[t.b].push(tid); }
+                        if (t.h) { hairCounts[t.h] = (hairCounts[t.h] || 0) + 1; if (!hairTokens[t.h]) hairTokens[t.h] = []; hairTokens[t.h].push(tid); }
+                        if (t.f) { faceCounts[t.f] = (faceCounts[t.f] || 0) + 1; if (!faceTokens[t.f]) faceTokens[t.f] = []; faceTokens[t.f].push(tid); }
+                        if (t.t) { typeCounts[t.t] = (typeCounts[t.t] || 0) + 1; if (!typeTokens[t.t]) typeTokens[t.t] = []; typeTokens[t.t].push(tid); }
                     }
                 });
-                const maxAny = Math.max(
-                    0,
-                    ...Object.values(bodyCounts),
-                    ...Object.values(hairCounts),
-                    ...Object.values(faceCounts),
-                    ...Object.values(typeCounts)
-                );
-                if (maxAny >= 5) {
+                // Find the best matching trait (highest count >= 5)
+                let bestTraitName = '', bestTraitTokens = [], bestTraitType = '';
+                const allCounts = [
+                    ...Object.entries(bodyCounts).map(([k,v]) => ({name: k, count: v, tokens: bodyTokens[k], category: 'Body'})),
+                    ...Object.entries(hairCounts).map(([k,v]) => ({name: k, count: v, tokens: hairTokens[k], category: 'Hair'})),
+                    ...Object.entries(faceCounts).map(([k,v]) => ({name: k, count: v, tokens: faceTokens[k], category: 'Face'})),
+                    ...Object.entries(typeCounts).map(([k,v]) => ({name: k, count: v, tokens: typeTokens[k], category: 'Type'}))
+                ];
+                allCounts.sort((a, b) => b.count - a.count);
+                const best = allCounts.find(c => c.count >= 5);
+                if (best) {
+                    bestTraitName = best.name;
+                    bestTraitTokens = best.tokens;
+                    bestTraitType = best.category;
                     walletBadges['trait_maxi'] = ['meta'];
+                    window.traitMaxiGang = { traitName: bestTraitName, traitType: bestTraitType, tokenIds: bestTraitTokens };
                 } else {
                     missingVibestrBadges.push('trait_maxi');
+                    window.traitMaxiGang = null;
                 }
             } else {
                 missingVibestrBadges.push('flow_state');
@@ -5424,7 +5451,13 @@
             };
             
             // Apply sorting
-            const sorted = sortBadges(Object.entries(walletBadges), true);
+            let sorted = sortBadges(Object.entries(walletBadges), true);
+            
+            // Pin Trait Maxi to top if owned
+            if (walletBadges['trait_maxi']) {
+                sorted = sorted.filter(([b]) => b !== 'trait_maxi');
+                sorted.unshift(['trait_maxi', walletBadges['trait_maxi']]);
+            }
             
             let html = sorted.map(([badge, tokens]) => {
                 const color = getBadgeColor(badge);
@@ -5456,6 +5489,24 @@
                         : ' <span style="color: var(--text-secondary); opacity: 0.6;">(0 listed)</span>';
                     
                     countDisplay = `${totalCount} NFTs have this${listedText}`;
+                }
+                
+                // Special Trait Maxi gang card
+                if (badge === 'trait_maxi' && window.traitMaxiGang) {
+                    const gang = window.traitMaxiGang;
+                    const badgeImgUrl = getBadgeImage('trait_maxi');
+                    const imgHtml = badgeImgUrl ? `<img class="badge-item-img" src="${badgeImgUrl}" alt="">` : '';
+                    return `
+                        <div class="badge-item trait-maxi-gang-card" onclick="showTraitMaxiGang()" style="cursor: pointer; border: 1px solid #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.03)); position: relative; overflow: hidden;">
+                            <div style="position:absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.05), transparent); pointer-events:none;"></div>
+                            ${imgHtml}
+                            <div class="badge-item-content">
+                                <span class="badge-name" style="color: #ffd700;">Trait Maxi ✨</span>
+                                <span class="badge-count" style="color: #ffd700; opacity: 0.8;">${gang.traitName} × ${gang.tokenIds.length}</span>
+                                <span style="font-size: 10px; color: #ffd700; margin-top: 2px; display: block; animation: pulse 2s infinite;">👆 See your gang picture</span>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 const clickHandler = isMeta ? '' : `onclick="showBadgeNFTs('${badge}', true)"`;
@@ -8414,6 +8465,181 @@
             
             // Show modal
             document.getElementById('tradeOfferModal').classList.add('active');
+        }
+        
+        // Trait Maxi Gang functions
+        function showTraitMaxiGang() {
+            if (!window.traitMaxiGang) return;
+            const gang = window.traitMaxiGang;
+            document.getElementById('gangModalInfo').innerHTML = 
+                '<strong style="color: #ffd700;">' + gang.traitName + '</strong> ' +
+                '<span style="color: var(--text-secondary);">(' + gang.traitType + ' trait) &mdash; ' + gang.tokenIds.length + ' members</span>';
+            document.getElementById('traitMaxiGangModal').classList.add('active');
+            generateGangImage(gang);
+        }
+        
+        function closeTraitMaxiGangModal(event) {
+            if (!event || event.target === document.getElementById('traitMaxiGangModal')) {
+                document.getElementById('traitMaxiGangModal').classList.remove('active');
+            }
+        }
+        
+        function downloadGangImage() {
+            const canvas = document.getElementById('gangCanvas');
+            const link = document.createElement('a');
+            link.download = 'trait-maxi-gang.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        async function generateGangImage(gang) {
+            const canvas = document.getElementById('gangCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Use up to 6 tokens for 2x3 grid
+            const displayTokens = gang.tokenIds.slice(0, 6);
+            const cols = 3;
+            const rows = Math.ceil(displayTokens.length / cols);
+            
+            const NFT_SIZE = 160;
+            const PADDING = 16;
+            const HEADER_H = 80;
+            const FOOTER_H = 60;
+            const W = cols * NFT_SIZE + (cols + 1) * PADDING;
+            const H = HEADER_H + rows * NFT_SIZE + (rows + 1) * PADDING + FOOTER_H;
+            
+            canvas.width = W;
+            canvas.height = H;
+            
+            // Background gradient based on trait type
+            const gradients = {
+                'Type': ['#1a0533', '#2d1052', '#4a1a80'],
+                'Body': ['#0a1a2e', '#0d2b4a', '#1a4a6e'],
+                'Hair': ['#1a2e0a', '#2b4a0d', '#3a6e1a'],
+                'Face': ['#2e1a0a', '#4a2b0d', '#6e3a1a']
+            };
+            const [c1, c2, c3] = gradients[gang.traitType] || gradients['Type'];
+            
+            const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+            bgGrad.addColorStop(0, c1);
+            bgGrad.addColorStop(0.5, c2);
+            bgGrad.addColorStop(1, c3);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+            
+            // Subtle grid pattern overlay
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < W; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+            for (let y = 0; y < H; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+            
+            // Header: "TRAIT MAXI GANG"
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 22px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('TRAIT MAXI GANG', W / 2, 32);
+            
+            // Subheader: trait name
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '13px sans-serif';
+            const maxSubW = W - 32;
+            let subText = gang.traitName + ' (' + gang.traitType + ')';
+            ctx.fillText(subText, W / 2, 56);
+            
+            // Gold divider line
+            const divGrad = ctx.createLinearGradient(0, 0, W, 0);
+            divGrad.addColorStop(0, 'transparent');
+            divGrad.addColorStop(0.5, '#ffd700');
+            divGrad.addColorStop(1, 'transparent');
+            ctx.strokeStyle = divGrad;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(PADDING * 2, HEADER_H - 8);
+            ctx.lineTo(W - PADDING * 2, HEADER_H - 8);
+            ctx.stroke();
+            
+            // Load and draw NFT images
+            const imagePromises = displayTokens.map(async (tokenId, i) => {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const x = PADDING + col * (NFT_SIZE + PADDING);
+                const y = HEADER_H + PADDING + row * (NFT_SIZE + PADDING);
+                
+                // Rounded rect background
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                roundRect(ctx, x, y, NFT_SIZE, NFT_SIZE, 10);
+                ctx.fill();
+                
+                // Gold border
+                ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+                ctx.lineWidth = 1.5;
+                roundRect(ctx, x, y, NFT_SIZE, NFT_SIZE, 10);
+                ctx.stroke();
+                
+                // Try to load image
+                try {
+                    const imgUrl = getNFTImageUrl(tokenId);
+                    if (imgUrl) {
+                        await new Promise((resolve) => {
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.onload = () => {
+                                ctx.save();
+                                roundRect(ctx, x + 2, y + 2, NFT_SIZE - 4, NFT_SIZE - 4, 9);
+                                ctx.clip();
+                                ctx.drawImage(img, x + 2, y + 2, NFT_SIZE - 4, NFT_SIZE - 4);
+                                ctx.restore();
+                                resolve();
+                            };
+                            img.onerror = () => {
+                                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                                ctx.font = '12px sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.fillText('#' + tokenId, x + NFT_SIZE / 2, y + NFT_SIZE / 2);
+                                resolve();
+                            };
+                            img.src = imgUrl;
+                            setTimeout(resolve, 3000); // timeout
+                        });
+                    }
+                } catch(e) {}
+                
+                // Token ID label at bottom
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(x + 2, y + NFT_SIZE - 20, NFT_SIZE - 4, 18);
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('#' + tokenId, x + NFT_SIZE / 2, y + NFT_SIZE - 6);
+            });
+            
+            await Promise.all(imagePromises);
+            
+            // Footer
+            ctx.fillStyle = 'rgba(255,215,0,0.5)';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('gvcbadges.com', W / 2, H - 20);
+        }
+        
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+        
+        function getNFTImageUrl(tokenId) {
+            if (imageData && imageData[tokenId]) return imageData[tokenId];
+            if (imageData && imageData[String(tokenId)]) return imageData[String(tokenId)];
+            return null;
         }
         
         function closeTradeOfferModal(event) {
